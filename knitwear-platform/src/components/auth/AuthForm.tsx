@@ -1,0 +1,255 @@
+'use client';
+
+import React from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { createClient } from '@/utils/supabase/client';
+
+interface AuthFormProps {
+    type: 'login' | 'signup';
+    action: (formData: FormData) => Promise<void>;
+    message?: string;
+    error?: string;
+}
+
+export function AuthForm({ type, action, message, error }: AuthFormProps) {
+    const t = useTranslations('auth');
+    const locale = useLocale();
+
+    // Fallback translations if not loaded yet (for speed)
+    const title = type === 'login' ? '로그인 (Log In)' : '회원가입 (Sign Up)';
+    const btnText = type === 'login' ? '로그인' : '가입하기';
+    const altLinkText = type === 'login' ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인';
+    const altLinkHref = type === 'login' ? '/signup' : '/login';
+
+    const handleGoogleLogin = async () => {
+        const supabase = createClient();
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+    };
+
+    return (
+        <div className="max-w-md w-full mx-auto p-8 bg-white rounded-2xl shadow-xl border border-stone-100">
+            <h2 className="text-3xl font-bold mb-8 text-center text-stone-800">
+                {title}
+            </h2>
+
+            {message && (
+                <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-lg text-sm">
+                    {message}
+                </div>
+            )}
+
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg text-sm whitespace-nowrap text-center">
+                    {(() => {
+                        if (locale === 'ko') {
+                            if (error.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일을 확인해주세요.';
+                            if (error.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
+                            if (error.includes('User already registered')) return '이미 가입된 사용자입니다.';
+                        }
+                        return error;
+                    })()}
+                </div>
+            )}
+
+            <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full py-3 mb-6 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 font-bold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-3"
+            >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26-.19-.58z"
+                    />
+                    <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                </svg>
+                Sign in with Google
+            </button>
+
+            <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-stone-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-stone-500">or with email</span>
+                </div>
+            </div>
+
+            <form action={action} className="space-y-8">
+                <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Email</label>
+                    <input
+                        name="email"
+                        type="email"
+                        required
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                        placeholder="hello@example.com"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Password</label>
+                    <input
+                        name="password"
+                        type="password"
+                        required
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                        placeholder="••••••••"
+                        minLength={6}
+                    />
+                </div>
+
+                {type === 'login' && (
+                    <div className="flex justify-between items-center -mt-6 px-1">
+                        <a href="/find-id" className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                            {t('findIdLink')}
+                        </a>
+                        <a href="/forgot-password" className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                            {t('forgotPasswordLink')}
+                        </a>
+                    </div>
+                )}
+
+                {type === 'signup' && (
+                    <div className="space-y-8">
+                        <div>
+                            <label className="block text-sm font-bold text-stone-700 mb-2">프로필 이름 (Profile Name)</label>
+                            <input
+                                name="username"
+                                type="text"
+                                required
+                                 pattern="[A-Za-z0-9\._\-]+"
+                                title={locale === 'ko' ? "영문, 숫자, 특수문자(._-)만 사용 가능합니다." : "Only English letters, numbers, dots, dashes, and underscores are allowed."}
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                                placeholder=""
+                                minLength={2}
+                                maxLength={20}
+                                onInput={(e) => {
+                                    // Strictly enforce English only - remove any other characters immediately
+                                    const input = e.currentTarget;
+                                    const regex = /[^A-Za-z0-9._-]/g;
+                                    if (regex.test(input.value)) {
+                                        input.value = input.value.replace(regex, '');
+                                    }
+                                    e.currentTarget.setCustomValidity('');
+                                }}
+                            />
+                            <p className="mt-1 text-xs text-stone-500 whitespace-nowrap tracking-tight">
+                                {locale === 'ko'
+                                    ? "* 글로벌 서비스 연동을 위해 영문, 숫자, 특수문자(._-)만 사용 가능합니다."
+                                    : "* Only English, numbers, and special characters (._-) are allowed."}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-stone-700 mb-2">비밀번호 확인 (Confirm Password)</label>
+                            <input
+                                name="passwordConfirm"
+                                type="password"
+                                required
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                                placeholder="••••••••"
+                                minLength={6}
+                                onChange={(e) => {
+                                    const password = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+                                    if (password && e.target.value !== password) {
+                                        e.target.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                                    } else {
+                                        e.target.setCustomValidity('');
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {type === 'signup' && (
+                    <div className="space-y-4 pt-2">
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                                name="privacy_policy_agreed"
+                                type="checkbox"
+                                required
+                                className="mt-1 w-5 h-5 rounded border-stone-300 text-rose-500 focus:ring-rose-200 cursor-pointer"
+                            />
+                            <span className="text-sm text-stone-600 group-hover:text-stone-800 transition-colors">
+                                <span className="text-rose-500 font-bold">[필수]</span> 개인정보 처리방침 및 이용약관에 동의합니다.
+                                <br />
+                                <span className="text-xs text-stone-400">서비스 이용을 위해 필수적인 정보 수집에 동의합니다.</span>
+                            </span>
+                        </label>
+
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                                name="ad_agreement"
+                                type="checkbox"
+                                required
+                                className="mt-1 w-5 h-5 rounded border-stone-300 text-rose-500 focus:ring-rose-200 cursor-pointer"
+                            />
+                            <span className="text-sm text-stone-600 group-hover:text-stone-800 transition-colors">
+                                <span className="text-rose-500 font-bold">[필수]</span> 광고 시청 동의
+                                <br />
+                                <span className="text-xs text-stone-400">무료 서비스 운영을 위한 광고 노출에 동의합니다.</span>
+                            </span>
+                        </label>
+
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                                name="marketing_consent"
+                                type="checkbox"
+                                className="mt-1 w-5 h-5 rounded border-stone-300 text-rose-500 focus:ring-rose-200 cursor-pointer"
+                            />
+                            <span className="text-sm text-stone-600 group-hover:text-stone-800 transition-colors">
+                                <span className="text-stone-400 font-bold">[선택]</span> 마케팅 정보 수신 동의
+                                <br />
+                                <span className="text-xs text-stone-400">다양한 할인 혜택과 이벤트 소식을 받아보세요.</span>
+                            </span>
+                        </label>
+
+                        {/* Age Verification */}
+                        <label className="flex items-start gap-3 cursor-pointer group pt-2 border-t border-stone-100">
+                            <input
+                                name="age_verification"
+                                type="checkbox"
+                                required
+                                className="mt-1 w-5 h-5 rounded border-stone-300 text-rose-500 focus:ring-rose-200 cursor-pointer"
+                            />
+                            <span className="text-sm text-stone-600 group-hover:text-stone-800 transition-colors">
+                                <span className="text-rose-500 font-bold">[{locale === 'ko' ? '필수' : 'Required'}]</span> {t('ageVerification')}
+                            </span>
+                        </label>
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95"
+                >
+                    {btnText}
+                </button>
+            </form>
+
+            <div className="mt-6 text-center">
+                <a href={altLinkHref} className="text-stone-500 hover:text-rose-500 text-sm font-medium transition-colors">
+                    {altLinkText}
+                </a>
+            </div>
+        </div>
+    );
+}

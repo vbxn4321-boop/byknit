@@ -1,0 +1,324 @@
+@import "tailwindcss";
+
+:root {
+  /* Cozy Feminine Theme */
+  --background: #FDF8F3;
+  --foreground: #4A3F35;
+
+  /* Primary Colors */
+  --cream: #FDF8F3;
+  --cream-dark: #F5EBE0;
+  --rose: #E8B4B8;
+  --rose-dark: #D4979C;
+  --sage: #A7C4A0;
+  --sage-dark: #8FB085;
+  --peach: #F5D0C5;
+  --peach-dark: #EDBDAF;
+
+  /* Neutrals */
+  --brown: #4A3F35;
+  --brown-light: #6B5D52;
+  --tan: #E8DED5;
+  --tan-light: #F0E8E0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-nunito);
+
+  /* Custom Colors */
+  --color-cream-50: #FDF8F3;
+  --color-cream-100: #F5EBE0;
+  --color-rose-300: #E8B4B8;
+  --color-rose-400: #D4979C;
+  --color-sage-50: #F4F8F3;
+  --color-sage-300: #A7C4A0;
+  --color-sage-400: #8FB085;
+  --color-sage-500: #7DA374;
+  --color-sage-600: #6B8E63;
+  --color-sage-700: #5A7853;
+  --color-peach-200: #F5D0C5;
+  --color-peach-300: #EDBDAF;
+  --color-brown-700: #4A3F35;
+  --color-brown-600: #6B5D52;
+  --color-tan-200: #E8DED5;
+  --color-tan-100: #F0E8E0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar - Cozy style */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rose);
+  border-radius: 10px;
+  border: 2px solid var(--cream-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rose-dark);
+}
+
+/* Selection - Cozy */
+::selection {
+  background: rgba(232, 180, 184, 0.4);
+  color: var(--brown);
+}
+
+/* Focus styles - Soft */
+*:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse-soft {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+@keyframes toast-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.9);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  85% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.95);
+  }
+}
+
+.animate-toast {
+  animation: toast-lifecycle 2s ease-in-out forwards;
+}
+
+/* Soft shadows - Cozy */
+.shadow-soft {
+  box-shadow: 0 4px 20px rgba(74, 63, 53, 0.08), 0 2px 8px rgba(74, 63, 53, 0.04);
+}
+
+.shadow-soft-md {
+  box-shadow: 0 10px 15px -3px rgba(74, 63, 53, 0.08), 0 4px 6px -2px rgba(74, 63, 53, 0.04);
+}
+
+.shadow-soft-lg {
+  box-shadow: 0 8px 30px rgba(74, 63, 53, 0.1), 0 4px 12px rgba(74, 63, 53, 0.05);
+}
+
+.shadow-soft-hover:hover {
+  box-shadow: 0 12px 40px rgba(74, 63, 53, 0.12), 0 6px 16px rgba(74, 63, 53, 0.06);
+}
+
+/* Glass effect - Light mode */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(232, 222, 213, 0.6);
+}
+
+/* Gradient backgrounds */
+.gradient-cozy {
+  background: linear-gradient(135deg, var(--cream) 0%, var(--peach) 50%, var(--rose) 100%);
+}
+
+.gradient-sage {
+  background: linear-gradient(135deg, var(--cream) 0%, var(--sage) 100%);
+}
+
+/* Gradient text - Cozy */
+.gradient-text-cozy {
+  background: linear-gradient(135deg, var(--rose) 0%, var(--sage) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--rose) 0%, var(--peach) 100%);
+  color: var(--brown);
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(232, 180, 184, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--brown);
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--tan);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--cream-dark);
+  border-color: var(--rose);
+}
+
+/* Card styles */
+.card-cozy {
+  background: white;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(232, 210, 195, 0.6);
+  transition: all 0.3s ease;
+}
+
+.card-cozy:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(74, 63, 53, 0.1);
+  border-color: var(--rose);
+}
+
+/* Input styles */
+.input-cozy {
+  background: white;
+  border: 2px solid var(--tan);
+  border-radius: 1rem;
+  padding: 0.875rem 1rem;
+  color: var(--brown);
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.input-cozy:focus {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 4px rgba(232, 180, 184, 0.2);
+  outline: none;
+}
+
+.input-cozy::placeholder {
+  color: var(--brown-light);
+  opacity: 0.5;
+}
+
+/* Badge styles */
+.badge-rose {
+  background: var(--rose);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.badge-sage {
+  background: var(--sage);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.badge-peach {
+  background: var(--peach);
+  color: var(--brown);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+/* --- SAFETY OVERRIDES --- */
+
+/* 1. Prevent body from being black/empty */
+body {
+  background-color: #FDF8F3 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* 2. Modal backdrops need pointer-events for interaction */
+/* Note: Removed previous rule that set pointer-events: none on modal backdrops */
+
+/* 3. Ensure Error Boundary Logic is Visible */
+.error-boundary {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: #FDF8F3 !important;
+  pointer-events: auto !important;
+}

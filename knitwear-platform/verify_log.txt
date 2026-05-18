@@ -1,0 +1,8 @@
+Testing connection to: https://moctsfwrfjhluxqrydpk.supabase.co
+Result: Connection Failed or Query Error: Could not find the table 'public.patterns' in the schema cache (Code: PGRST205)
+Testing connection to: https://moctsfwrfjhluxqrydpk.supabase.co
+Result: Connection Successful, "patterns" table exists.
+Result: Schema seems up to date.
+Testing connection to: https://moctsfwrfjhluxqrydpk.supabase.co
+Result: Connection Successful, "patterns" table exists.
+Result: Schema seems up to date.

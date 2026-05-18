@@ -1,0 +1,991 @@
+{
+  "common": {
+    "appName": "byKnit",
+    "tagline": "Create, share, and discover knitting patterns",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "reset": "Reset",
+    "download": "Download",
+    "upload": "Upload",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "profile": "Profile",
+    "settings": "Settings",
+    "share": "Share",
+    "back": "Back",
+    "showMore": "Show More",
+    "showLess": "Show Less",
+    "on": "on",
+    "credits": "Credits",
+    "noOrders": "No order history found.",
+    "noComments": "No comments or reviews yet.",
+    "follow": "Follow",
+    "following": "Following",
+    "saved": "Saved",
+    "unSaved": "Save",
+    "errorTitle": "Error",
+    "errorMessage": "An error occurred",
+    "tryAgain": "Try Again"
+  },
+  "profile": {
+    "title": "My Profile",
+    "deleteAccount": "Delete Account",
+    "deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "tabs": {
+      "orders": "Order History",
+      "comments": "Comments & Reviews"
+    },
+    "info": "Personal Information",
+    "nickname": "Nickname",
+    "phone": "Phone Number",
+    "editInfo": "Update Information",
+    "updateSuccess": "Profile updated successfully!",
+    "credits": {
+      "title": "Credit History",
+      "history": "Transaction History",
+      "available": "Available Credits",
+      "noHistory": "No history found",
+      "noHistoryDesc": "You haven't earned or spent any credits yet.",
+      "signUpBonus": "Sign-up Bonus",
+      "aiImageConversion": "AI Image Conversion",
+      "aiEditorImport": "AI Editor Import",
+      "aiExport": "AI Export ({format})",
+      "patternUploadBonus": "Pattern Upload Bonus"
+    },
+    "security": {
+      "title": "Account Security",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "update": "Update Password",
+      "success": "Password updated successfully!",
+      "error": "Failed to update password. Please check your current password."
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "editor": "Pattern Editor",
+    "chartConverter": "Chart Converter",
+    "smartCalculator": "Smart Calculator",
+    "myPatterns": "Pattern Studio",
+    "myMarketplace": "My Marketplace",
+    "community": "Community",
+    "aiGenerator": "AI Generator",
+    "purchases": "Order History"
+  },
+  "home": {
+    "heroTitle": "Your Creative Knitting Journey Starts Here",
+    "heroSubtitle": "Discover thousands of patterns, create your own designs, and let AI inspire your next project",
+    "explorePatterns": "Explore Patterns",
+    "startCreating": "Start Creating",
+    "featuredPatterns": "Featured Patterns",
+    "categories": "Browse by Category",
+    "aiBadge": "AI-Powered Pattern Creation",
+    "stats": {
+      "patterns": "Patterns",
+      "creators": "Creators",
+      "countries": "Countries"
+    },
+    "features": {
+      "title": "Everything You Need to Create",
+      "subtitle": "From discovering inspiration to creating your own masterpiece, we've got you covered",
+      "marketplaceDesc": "Discover thousands of patterns from creators worldwide. From beginner-friendly to advanced designs.",
+      "editorDesc": "Create your own knitting charts with our intuitive grid editor. Touch-optimized for mobile.",
+      "aiDesc": "Transform images into colorwork charts or describe your dream pattern and let AI help create it."
+    },
+    "whyChoose": {
+      "title": "Why Creators Choose byKnit",
+      "ai": {
+        "title": "AI-Powered Creation",
+        "desc": "Transform any image into a knitting chart or describe your pattern in words."
+      },
+      "community": {
+        "title": "Global Community",
+        "desc": "Connect with knitters worldwide. Share, sell, and discover unique patterns."
+      },
+      "tools": {
+        "title": "Professional Tools",
+        "desc": "Industry-standard pattern editor with symbol libraries and export options."
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Journey?",
+      "subtitle": "Join thousands of creators who are already sharing their patterns and inspiring others."
+    }
+  },
+  "marketplace": {
+    "title": "Pattern Marketplace",
+    "searchPlaceholder": "Search patterns...",
+    "sort": {
+      "recommended": "Recommended",
+      "newest": "Newest",
+      "popular": "Popular"
+    },
+    "filter": "Filter",
+    "filters": {
+      "yarnWeight": "Yarn Weight",
+      "needleSize": "Needle Size",
+      "technique": "Technique",
+      "difficulty": "Difficulty",
+      "priceRange": "Price Range",
+      "freeOnly": "Free Only"
+    },
+    "yarnWeights": {
+      "lace": "Lace",
+      "fingering": "Fingering",
+      "sport": "Sport",
+      "dk": "DK",
+      "worsted": "Worsted",
+      "aran": "Aran",
+      "bulky": "Bulky",
+      "superBulky": "Super Bulky"
+    },
+    "techniques": {
+      "stockinette": "Stockinette",
+      "cable": "Cable",
+      "colorwork": "Colorwork",
+      "lace": "Lace",
+      "brioche": "Brioche",
+      "mosaic": "Mosaic",
+      "knitting": "Knitting",
+      "chart": "Chart"
+    },
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "watchAdToDownload": "Watch Ad for Free Download",
+    "watchingAd": "Watching ad...",
+    "downloadNow": "Download Now",
+    "purchased": "Purchased",
+    "purchase": "Purchase",
+    "downloadPdfKr": "Download PDF (KR)",
+    "downloadPdfEn": "Download PDF (EN)",
+    "reviews": "Reviews",
+    "writeReview": "Write a Review",
+    "reviewPlaceholder": "Write at least 10 characters...",
+    "firstReview": "Be the first to leave a review!",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply...",
+    "post": "Post",
+    "downloadPdf": "Download PDF",
+    "buyNow": "Buy Now",
+    "addToCart": "Add to Cart",
+    "free": "Free",
+    "sold": "Sold",
+    "downloads": "downloads",
+    "views": "views",
+    "backToMarketplace": "Back to Marketplace",
+    "patternInfo": {
+      "difficulty": "Difficulty",
+      "needleSize": "Needle Size",
+      "yarnWeight": "Yarn Weight",
+      "gauge": "Gauge",
+      "techniques": "Techniques"
+    },
+    "patternsFound": "patterns found"
+  },
+  "editor": {
+    "title": "Pattern Editor",
+    "newPattern": "New Pattern",
+    "gridSize": "Grid Size",
+    "width": "Width (stitches)",
+    "height": "Height (rows)",
+    "colorPalette": "Color Palette",
+    "addColor": "Add Color",
+    "symbols": "Knitting Symbols",
+    "tools": {
+      "brush": "Brush",
+      "fill": "Fill",
+      "eraser": "Eraser",
+      "picker": "Picker"
+    },
+    "export": {
+      "title": "Export",
+      "png": "Export as PNG",
+      "pdf": "Export as PDF",
+      "json": "Save Project"
+    },
+    "stitchSymbols": {
+      "knit": "Knit",
+      "purl": "Purl",
+      "yarnOver": "Yarn Over",
+      "k2tog": "K2tog",
+      "ssk": "SSK",
+      "cableLeft": "Cable Left",
+      "cableRight": "Cable Right",
+      "tbl": "Through Back Loop",
+      "cable": "Cable",
+      "noStitch": "No Stitch",
+      "addSymbol": {
+        "title": "Add Stitch Symbol",
+        "name": "Name",
+        "namePlaceholder": "e.g. My Twist",
+        "symbol": "Symbol (1-2 chars)",
+        "symbolPlaceholder": "e.g. M",
+        "add": "Add Symbol"
+      }
+    },
+    "legend": "Stitch Key",
+    "onboarding": {
+      "welcome": {
+        "title": "Welcome to Grid Editor!",
+        "desc": "Create beautiful knitting charts with our easy-to-use tools. Let's take a quick tour."
+      },
+      "tools": {
+        "title": "Drawing Tools",
+        "desc": "Use the Paint Bucket to fill cells, Symbol Tool to place stitches, and Eraser to clear errors."
+      },
+      "palette": {
+        "title": "Palette & Symbols",
+        "desc": "Pick colors or add custom stitch symbols. Right-click to delete them."
+      },
+      "shortcuts": {
+        "title": "Useful Shortcuts",
+        "desc": "Use Ctrl+Z to Undo and Ctrl+Shift+Z (or Ctrl+Y) to Redo your changes."
+      },
+      "export": {
+        "title": "Save & Share",
+        "desc": "Download your pattern as an image with a generated symbol legend."
+      },
+      "next": "Next",
+      "skip": "Skip",
+      "finish": "Start Creating"
+    }
+  },
+  "ai": {
+    "title": "AI Pattern Generator",
+    "imageToChart": {
+      "title": "Image to Chart",
+      "description": "Upload an image to convert it into a colorwork knitting chart",
+      "uploadImage": "Upload Image",
+      "dragDrop": "Drag and drop an image or click to select",
+      "settings": "Conversion Settings",
+      "targetWidth": "Chart Width (stitches)",
+      "targetHeight": "Chart Height (rows)",
+      "maxColors": "Maximum Colors",
+      "convert": "Convert to Chart",
+      "converting": "Converting...",
+      "maintainAspectRatio": "Maintain Aspect Ratio",
+      "conversionMode": "Conversion Mode",
+      "modePhoto": "Smooth Style",
+      "modePixel": "Sharp Style",
+      "palette": "Result Palette",
+      "exportOptions": "Export Options",
+      "format": "File Format",
+      "png": "PNG Image",
+      "jpg": "JPEG Image",
+      "pdf": "PDF Document",
+      "showGrid": "Show Grid lines",
+      "showNumbers": "Show Row/Col Numbers",
+      "available": "{count} Credits Available",
+      "paletteInfo": "Palette ({count} colors)",
+      "download": "Download Chart",
+      "editInEditor": "Edit in Pattern Editor",
+      "resultInfo": "Result: {width} x {height}",
+      "stitchCount": "{count} sts"
+    },
+    "chatToPattern": {
+      "title": "Chat to Pattern",
+      "description": "Describe the pattern you want and AI will help you create it",
+      "placeholder": "Describe the pattern you want to create...",
+      "examples": {
+        "title": "Try asking:",
+        "ex1": "A cozy cable knit scarf for beginners",
+        "ex2": "A Fair Isle hat with snowflake patterns",
+        "ex3": "Simple raglan sweater with worsted yarn"
+      },
+      "preview": "Generated Pattern Preview",
+      "editInEditor": "Edit in Editor"
+    },
+    "warning": {
+      "title": "Verification Required",
+      "message": "AI-generated patterns may contain structural errors. Please review the pattern before starting your project."
+    }
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "errorMessage": "An error occurred. Please try again.",
+    "createAccount": "Create Account",
+    "signIn": "Sign In",
+    "backToLogin": "Back to Login",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPasswordLink": "Forgot password?",
+    "findIdLink": "Find ID?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "orContinueWith": "Or continue with",
+    "forgotPassword": {
+      "title": "Reset Password",
+      "description": "Enter the email address associated with your account and we'll send you a link to reset your password.",
+      "submit": "Send Reset Link",
+      "successMessage": "We've sent a password reset link to:"
+    },
+    "sending": "Sending...",
+    "termsAgreement": "By signing up, you agree to our Terms of Service and Privacy Policy",
+    "ageVerification": "I am 16 years of age or older and agree to the Terms of Service.",
+    "findId": {
+      "title": "Find ID (Email)",
+      "description": "Enter your profile nickname to find your registered email address.",
+      "inputLabel": "Profile Name (Nickname)",
+      "submit": "Find Email",
+      "resultMessage": "Your registered email is:"
+    }
+  },
+  "knitting": {
+    "abbreviations": {
+      "k": "Knit",
+      "p": "Purl",
+      "CO": "Cast On",
+      "BO": "Bind Off",
+      "st": "Stitch",
+      "sts": "Stitches",
+      "rnd": "Round",
+      "rep": "Repeat",
+      "yo": "Yarn Over",
+      "ssk": "Slip, Slip, Knit",
+      "k2tog": "Knit 2 Together",
+      "inc": "Increase",
+      "dec": "Decrease",
+      "RS": "Right Side",
+      "WS": "Wrong Side",
+      "pm": "Place Marker",
+      "sm": "Slip Marker"
+    }
+  },
+  "Studio": {
+    "unsavedChangesWarning": "You have unsaved changes. Are you sure you want to leave?",
+    "gridSize": "Grid Size",
+    "width": "Width",
+    "height": "Height",
+    "symbols": "Symbols",
+    "palette": "Palette",
+    "knit": "Knit",
+    "purl": "Purl",
+    "yarnOver": "Yarn Over",
+    "k2tog": "K2tog",
+    "ssk": "SSK",
+    "tbl": "Through Back Loop",
+    "cable": "Cable",
+    "noStitch": "No Stitch",
+    "addSymbol": {
+      "title": "Add Symbol",
+      "name": "Name",
+      "namePlaceholder": "e.g. Cable",
+      "symbol": "Symbol",
+      "symbolPlaceholder": "e.g. C",
+      "add": "Add"
+    },
+    "shapeTool": "Shape Tool",
+    "shapeType": "Shape Type",
+    "drawMode": "Draw Mode",
+    "outline": "Outline",
+    "fill": "Fill",
+    "close": "Close",
+    "shapes": {
+      "circle": "Circle",
+      "square": "Square",
+      "triangle": "Triangle",
+      "star": "Star",
+      "heart": "Heart"
+    },
+    "shapeToolHint": "Drag to Move/Resize or Right Click to Edit",
+    "selectionHint": "Drag to move or Right-click blank space to deselect",
+    "copy": "Copy",
+    "paste": "Paste",
+    "cut": "Cut",
+    "flipH": "Flip Horizontal",
+    "flipV": "Flip Vertical",
+    "rotateMode": "Rotate Mode",
+    "erase": "Erase",
+    "dragToRotate": "Drag to Rotate",
+    "projectName": "Project Name",
+    "editProjectName": "Edit Project Name",
+    "pan": "Pan",
+    "paint": "Paint",
+    "symbol": "Symbol",
+    "selectArea": "Select Area",
+    "eraser": "Eraser",
+    "areaSelectMode": "Area Select Mode (Toggle)",
+    "exportFormat": {
+      "png": "PNG Image",
+      "jpg": "JPG Image",
+      "pdf": "PDF Document"
+    },
+    "gridStatus": "Grid Status",
+    "rows": "Rows",
+    "cols": "Cols",
+    "cells": "Cells",
+    "zoom": "Zoom",
+    "clickToDelete": "Click to Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "Editor": {
+    "legend": "Stitch Key",
+    "modeKnitting": "Knitting",
+    "modeCrochet": "Crochet",
+    "export": {
+      "title": "Export"
+    },
+    "stitchSymbols": {
+      "knit": "Knit",
+      "purl": "Purl",
+      "yarnOver": "Yarn Over",
+      "k2tog": "K2tog",
+      "ssk": "SSK",
+      "cableLeft": "Cable Left",
+      "cableRight": "Cable Right",
+      "chain": "Chain",
+      "slipStitch": "Slip Stitch",
+      "singleCrochet": "Single Crochet",
+      "halfDouble": "Half Double Crochet",
+      "doubleCrochet": "Double Crochet",
+      "trebleCrochet": "Treble Crochet",
+      "doubleTreble": "Double Treble Crochet",
+      "sc2tog": "SC2tog",
+      "dc2tog": "DC2tog",
+      "puff": "Puff Stitch",
+      "bobble": "Bobble",
+      "popcorn": "Popcorn",
+      "picot": "Picot",
+      "shell": "Shell"
+    },
+    "onboarding": {
+      "step1": {
+        "title": "Welcome to the Grid Editor",
+        "description": "Create beautiful knitting patterns with our intuitive grid editor."
+      },
+      "step2": {
+        "title": "Choose Your Tools",
+        "description": "Select from symbols, paint, eraser, or move tools to design your pattern."
+      },
+      "step3": {
+        "title": "Add Symbols & Colors",
+        "description": "Customize your pattern with different stitch symbols and colors."
+      },
+      "step4": {
+        "title": "Export Your Work",
+        "description": "Download your pattern as PNG, JPG, or PDF when you're done."
+      },
+      "step5": {
+        "title": "Publish & Sell",
+        "description": "Share your creativity! Publish your patterns to the marketplace."
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications yet",
+    "purchase": "purchased {title} for ${price}",
+    "review": "reviewed {title}: \"{content}\"",
+    "reviewWithPhoto": "reviewed {title} [Photo]: \"{content}\"",
+    "reply": "replied to your review: \"{content}\"",
+    "follow": "started following you"
+  },
+  "Publish": {
+    "title": "Publish to Marketplace",
+    "save": "Save",
+    "saving": "Saving...",
+    "publish": "Publish",
+    "publishing": "Publishing...",
+    "buttons": {
+      "submit": "Submit to Marketplace",
+      "submitting": "Submitting...",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "delete": "Delete",
+      "crop": "Crop / Edit",
+      "add": "Add"
+    },
+    "fields": {
+      "mainImage": "Main Image",
+      "mainImageHint": "Recommended: 1080x1080px (1:1)",
+      "uploadPlaceholder": "Click to upload main image",
+      "tip": "Tip: Using a photo of the finished work as the main image increases views and downloads by 3x!",
+      "subImages": "Additional Images (Optional, max 10)",
+      "patternTitle": "Pattern Title",
+      "patternTitlePlaceholder": "Enter pattern title",
+      "price": "Price",
+      "freeLabel": "Free",
+      "isFreeLabel": "Free",
+      "craftType": "Craft Type",
+      "category": "Category",
+      "subcategory": "Subcategory",
+      "yarnWeight": "Yarn Name and Color",
+      "yarnAmount": "Yarn Amount",
+      "needleSize": "Needle Size",
+      "gauge": "Gauge",
+      "usedColors": "Used Colors",
+      "briefDescription": "Brief Description",
+      "briefDescriptionHint": "Shown on product page",
+      "briefDescriptionPlaceholder": "Briefly introduce this pattern...",
+      "detailedDescription": "Detailed Pattern (Written)",
+      "detailedDescriptionTag": "Included in PDF only",
+      "detailedDescriptionHint": "Detailed written instructions included in the PDF...",
+      "detailedDescriptionPlaceholder": "Row 1: Cast on 60 sts...",
+      "hashtags": "Hashtags",
+      "hashtagsHint": "Enter 3-10 hashtags to help buyers find your pattern",
+      "hashtagPlaceholder": "Type tag and press Enter...",
+      "gaugePlaceholder": "e.g. 24 sts 37 rows (10*10 cm, 3.5mm needles, stockinette)",
+      "yarnAmountPlaceholder": "e.g. Merino Blend 703 Cranberry 5 balls (5) 6, 001 White 2 balls (2) 2",
+      "yarnAmountGuide": "Enter sample yarn name, color, and amount used",
+      "measurements": "Measurements (Optional)",
+      "measurementsPlaceholder": "e.g. Bust 90cm (Size S)",
+      "yarnParts": "Yarn Information",
+      "addPart": "+ Add Part",
+      "partName": "Part Name",
+      "yarnName": "Yarn Type",
+      "partTechnique": "Technique",
+      "partGauge": "Gauge",
+      "partAmount": "Amount",
+      "partNeedle": "Needle",
+      "removePart": "Remove",
+      "partNamePlaceholder": "e.g. Sleeves",
+      "yarnNamePlaceholder": "e.g. Wool",
+      "techniquePlaceholder": "e.g. Stockinette",
+      "gaugeStitchPlaceholder": "sts",
+      "gaugeRowPlaceholder": "rows",
+      "amountPlaceholder": "300",
+      "sizes": "Finished Sizes (Text)",
+      "sizesPlaceholder": "e.g. Chest 100cm, Length 60cm (Describe freely)"
+    },
+    "options": {
+      "knitting": "Knitting",
+      "crochet": "Crochet",
+      "mixed": "Mixed",
+      "other": "Other",
+      "select": "Select",
+      "none": "None"
+    },
+    "success": {
+      "saveTitle": "Saved!",
+      "saveDesc": "Project saved successfully.",
+      "publishTitle": "Published!",
+      "publishDesc": "Redirecting to marketplace..."
+    }
+  },
+  "footer": {
+    "platform": "Platform",
+    "marketplace": "Marketplace",
+    "patternEditor": "Pattern Editor",
+    "aiGenerator": "AI Generator",
+    "resources": "Resources",
+    "helpCenter": "Help Center",
+    "tutorials": "Tutorials",
+    "blog": "Blog",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© {year} byKnit. Made with 💗 for knitters worldwide.",
+    "businessInfo": {
+      "companyName": "84Company",
+      "representative": "Representative: Jina Jeong",
+      "address": "Address: 402-2, 693, Sinyong-dong, Buk-gu, Gwangju, Republic of Korea",
+      "cpo": "CPO: Jina Jeong (vbxn4321@gmail.com)",
+      "contact": "Contact: vbxn4321@gmail.com",
+      "hosting": "Hosting Provider: Vercel",
+      "businessLicense": "Business License: 754-12-00298",
+      "checkBusinessInfo": "Check Business Info",
+      "disclaimer": "84Company is a mail-order broker and not a party to the product transaction. Each seller is responsible for their product information and transactions."
+    }
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "How can we help you today?",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "How do I download my purchased patterns?",
+      "a1": "After purchase, you can find all your patterns in the 'My Profile > Order History' section. You can download the PDF files directly from there.",
+      "q2": "Can I sell the patterns I create?",
+      "a2": "Absolutely! You can register as a creator and list your patterns on our Marketplace. Go to the Editor and click 'Publish' to get started.",
+      "q3": "How does the AI Generator work?",
+      "a3": "Our AI analyzes your text description or uploaded image to generate a unique knitting chart. You can then edit it in our Pattern Editor.",
+      "q4": "What file formats can I export?",
+      "a4": "You can export your patterns as PDF (including instructions), PNG images, or JSON project files associated with your account."
+    },
+    "contact": {
+      "title": "Still need help?",
+      "desc": "If you couldn't find the answer you were looking for, feel free to contact us via email.",
+      "emailButton": "Send Email Inquiry"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated: {date}",
+    "labels": {
+      "collection": "Items Collected",
+      "collectionDesc": "Email, ID, SNS",
+      "retention": "Retention Period",
+      "retentionDesc": "Destroyed on withdrawal",
+      "outsourcingDesc": "Vercel, Supabase",
+      "contact": "CPO Contact"
+    },
+    "sections": {
+      "overview": "General Provisions",
+      "collectedItems": "Personal Information Collection and Method",
+      "purpose": "Purpose of Processing",
+      "retentionPeriod": "Retention and Use Period",
+      "destruction": "Destruction Procedure and Method",
+      "outsourcing": "Outsourcing of Processing",
+      "overseas": "International Transfer",
+      "rights": "Rights of Users and Legal Representatives",
+      "cookies": "Installation/Operation and Refusal of Cookies",
+      "safety": "Safety Measures for Personal Information",
+      "automatedDecision": "Automated Decisions",
+      "cpo": "Chief Privacy Officer (CPO)",
+      "remedies": "Remedies for Infringement of Rights"
+    },
+    "ui": {
+      "summaryTitle": "Privacy Summary",
+      "detailsTitle": "Detailed Information",
+      "showAll": "Show All Details",
+      "hideAll": "Collapse All",
+      "thirdParty": "3rd Party Sharing",
+      "noThirdParty": "None",
+      "required": "Required Items",
+      "optional": "Optional Items",
+      "auto": "Autocollected"
+    },
+    "content": {
+      "overview": "84Company (hereinafter 'Company') values your personal information and complies with Article 30 of the 'Personal Information Protection Act', related laws, and GDPR (EU General Data Protection Regulation) regulations. This policy discloses what information we collect and how we use it.",
+      "collectedItems": {
+        "required": "Required: Email, Password, Nickname, Purchase/Payment records",
+        "optional": "Optional: Profile image, knitting proficiency and preferences",
+        "auto": "Auto-collected: IP address, cookies, service usage records, device info"
+      },
+      "purpose": "The company processes personal information for service provision, identification, personalized recommendations, development of new services, dispute resolution, and civil complaint handling.",
+      "retentionPeriod": "In principle, we retain information while you use the service and destroy it immediately upon account withdrawal. However, records required by relevant laws (Commercial Act, Electronic Commerce Act, etc.) will be stored for the prescribed period.",
+      "destruction": "The company destroys information without delay upon achievement of purpose. Electronic files are destroyed using technical methods that prevent recovery (permanent deletion), and paper documents are shredded.",
+      "outsourcing": {
+        "title": "To improve service, we entrust processing to professional companies as follows:",
+        "vercel": "Vercel: Web hosting and infrastructure management",
+        "supabase": "Supabase (PostgreSQL): Data storage and management",
+        "google": "Google LLC: Platform analytics (GA4) and ad optimization"
+      },
+      "overseas": "We use cloud services (Supabase, Vercel) for efficiency and stability, and in this process, personal information may be stored or processed on overseas servers (e.g., AWS).",
+      "rights": "1. Data subjects may exercise the following personal information protection rights towards the Company at any time:\n   A. Right to request access to personal information\n   B. Right to request correction in case of errors, etc.\n   C. Right to request deletion\n   D. Right to request suspension of processing (Including Do Not Sell/Share My Personal Information)\n\n2. Right to Opt-out of Selling or Sharing Personal Information:\n   The Company does not sell (transfer for value) the user's personal information to third parties. If the Company sells or provides personal information to third parties for advertising purposes in the future, users can exercise their right to opt-out at any time.\n   * How to Opt-out: Contact the customer center (vbxn4321@gmail.com) via email or configure 'Withdraw consent for third-party provision' in the 'My Account' page.\n\n3. Rights may be exercised through writing, email, FAX, etc., and the Company will take measures without delay.",
+      "cookies": {
+        "title": "Users have the right to choose cookie installation.",
+        "chrome": "Chrome: Settings > Privacy and security > Clear browsing data or Cookie settings",
+        "safari": "Safari: Settings > Privacy > Block all cookies",
+        "edge": "Edge: Settings > Cookies and site permissions"
+      },
+      "safety": "In addition to technical measures such as SSL encryption and one-way password encryption, the company performs administrative measures such as 'establishment and implementation of internal management plans' and 'regular privacy training'. Connection records are also kept and inspected for at least one year as required by law.",
+      "automatedDecision": "While the company utilizes AI technology to provide services, it does not make 'automated decisions' that significantly affect the rights or obligations of users. If such a system is introduced in the future, data subjects will be notified in advance, and they will be able to exercise their right to refuse and request an explanation.",
+      "cpoInfo": {
+        "name": "Jina Jung",
+        "email": "vbxn4321@gmail.com",
+        "role": "Representative / CPO"
+      },
+      "remedies": {
+        "title": "For other infringement reports or consultations, please contact the following agencies:",
+        "kopico": "Personal Information Dispute Mediation Committee (www.kopico.go.kr / 1833-6972)",
+        "kisa": "Privacy Infringement Report Center (privacy.kisa.or.kr / 118)",
+        "spo": "Supreme Prosecutors' Office Cyber Investigation (spo.go.kr / 1301)",
+        "police": "National Police Agency Cyber Bureau (ecrm.cyber.go.kr / 182)"
+      }
+    }
+  },
+  "cookieBanner": {
+    "message": "We use cookies to improve your experience and for marketing purposes.",
+    "acceptAll": "Accept All",
+    "acceptSelection": "Accept Selection",
+    "deny": "Deny",
+    "privacyLink": "Privacy Policy"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated: {date}",
+    "sections": {
+      "ch1": "Chapter 1 General Provisions",
+      "ch2": "Chapter 2 Membership and Management",
+      "ch3": "Chapter 3 Use of Service",
+      "ch4": "Chapter 4 Termination and Restriction",
+      "ch5": "Chapter 5 Liability and Indemnity"
+    },
+    "articles": {
+      "art1": "Article 1 (Purpose)",
+      "art2": "Article 2 (Definitions)",
+      "art3": "Article 3 (Specification and Revision of Terms)",
+      "art6": "Article 6 (Privacy)",
+      "art10": "Article 10 (Transaction of Patterns, etc.)",
+      "art16": "Article 16 (Withdrawal of Subscription and Refund)",
+      "art20": "Article 20 (Copyright and Use of Postings)",
+      "art22": "Article 22 (Prohibited Acts and Sanctions)",
+      "art28": "Article 28 (Indemnity of the Company)",
+      "provision": "Addenda"
+    },
+    "ui": {
+      "summaryTitle": "Terms Summary",
+      "detailsTitle": "Detailed Terms",
+      "showAll": "Show All Details",
+      "hideAll": "Collapse All",
+      "labels": {
+        "broker": {
+          "title": "Broker Liability",
+          "desc": "Mail-order Broker"
+        },
+        "refund": {
+          "title": "Digital Refund",
+          "desc": "Non-refundable"
+        },
+        "ugc": {
+          "title": "UGC Copyright",
+          "desc": "Owned by Member"
+        },
+        "darkpattern": {
+          "title": "No Dark Patterns",
+          "desc": "30-day Notice"
+        },
+        "restriction": {
+          "title": "Usage Restriction",
+          "desc": "Sanctions for Misuse"
+        }
+      }
+    },
+    "content": {
+      "art1": "These terms and conditions aim to define the rights, obligations, and responsibilities of the Company and users in using electronic commerce-related services provided by the pattern and handmade platform \"ByKnit\" operated by 84Company.",
+      "art2": "1. \"ByKnit\" refers to a virtual place of business established by the Company to trade patterns and related products among members.\n2. \"Member\" refers to a person who has registered for membership by accessing ByKnit.\n3. \"Seller\" refers to a member who registers and sells digital content such as patterns or products.\n4. \"Buyer\" refers to a member who purchases products from a seller.\n5. \"Mail-order Brokerage\" refers to providing a platform where transactions among members occur. The Company, as a mail-order broker, is not a party to the transaction and is not responsible for information or transactions registered by the seller.",
+      "art3": "1. When the Company revises the terms, it shall announce the effective date and reasons for revision on the initial screen of the service from 7 days before the effective date to the day before.\n2. [Anti-Dark Pattern Policy]: For changes that significantly affect users' rights, such as price increases for paid services or automatic payment conversion, the Company must notify members individually at least 30 days in advance and obtain explicit consent.",
+      "art6": "The Company strives to protect members' personal information and follows a separate 'Privacy Policy' for collection and use.",
+      "art10": "1. Sellers are responsible for the quality and information of registered patterns and products.\n2. The Company may provide a payment protection system (escrow) for safe transactions.",
+      "art16": "1. [Specifics of Digital Content]: Digital content such as PDFs, in accordance with Article 17, Paragraph 2, Item 5 of the 'Electronic Commerce Act', cannot be withdrawn or refunded due to a simple change of mind once download has started or viewing is complete.\n2. However, refunds are possible if the provided file is significantly different from the description, contains serious errors, or in case of duplicate payments.\n3. Refund requests must be submitted within 7 days of purchase through the customer center.",
+      "art20": "1. Copyright for postings like reviews and pattern images posted by members belongs to the member.\n2. [Usage License]: The Company has a non-exclusive license to use (reproduce, distribute, transmit, create derivative works) member postings worldwide for free for purposes of service operation, promotion, exhibition, and sales promotion.",
+      "art22": "1. Members shall not unauthorizedly distribute, share, or resell paid patterns, infringe on others' copyrights, or write malicious comments.\n2. Upon detection, the Company may suspend service, delete postings, permanently terminate membership, and take legal action after prior notice (immediately in emergencies).",
+      "art28": "1. The Company only provides an intermediary platform and does not guarantee the truthfulness or quality of product information registered by sellers.\n2. The Company is not liable for inability to provide services due to force majeure.",
+      "provision": "These terms and conditions shall take effect from January 22, 2026."
+    }
+  },
+  "calculator": {
+    "title": "Knitting Math Lab",
+    "subtitle": "All the calculations you need for knitting in one place. Enter your gauge and all tabs will calculate automatically.",
+    "badge": "Smart Calculator",
+    "tabs": {
+      "basic": "Basic Converter",
+      "converter": "Gauge Converter",
+      "yarn": "Yarn Calculator",
+      "raglan": "Raglan",
+      "sock": "Sock",
+      "grading": "Grading"
+    },
+    "patternConverter": {
+      "title": "Convert Pattern to My Gauge",
+      "description": "Convert pattern stitches and rows to match your gauge when they differ.",
+      "patternGauge": "Pattern Gauge",
+      "myGauge": "My Gauge",
+      "fromTopBar": "From Top Bar",
+      "stitches": "Stitches",
+      "rows": "Rows",
+      "st": "st",
+      "row": "rows",
+      "patternStitches": "Pattern Stitches",
+      "patternRows": "Pattern Rows",
+      "myStitches": "My Stitches",
+      "myRows": "My Rows",
+      "convert": "Convert",
+      "stitchDiff": "Stitch Diff",
+      "rowDiff": "Row Diff",
+      "example22": "ex) 22",
+      "example30": "ex) 30",
+      "example20": "ex) 20",
+      "example28": "ex) 28",
+      "example100": "ex) 100"
+    },
+    "gaugeBar": {
+      "title": "Gauge Settings",
+      "subtitle": "per 10cm",
+      "stitches": "Stitches",
+      "rows": "Rows",
+      "needle": "Needle",
+      "unit": "Unit",
+      "apply": "Apply",
+      "applied": "Applied"
+    },
+    "emptyState": {
+      "title": "Please enter your gauge first",
+      "description": "Enter your stitch and row count per 10cm in the bar above for accurate calculations.",
+      "hint": "Enter gauge above"
+    },
+    "resultCard": {
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "sizeModal": {
+      "title": "Select Standard Size",
+      "women": "Women",
+      "men": "Men",
+      "chest": "Chest",
+      "neck": "Neck",
+      "disclaimer": "Based on CYC standard measurements. Individual variations may apply."
+    },
+    "basic": {
+      "description": "Convert length (cm) to stitches/rows, or stitches/rows to length (cm).",
+      "cmToStitches": "cm → Stitches",
+      "stitchesToCm": "Stitches → cm",
+      "inputCm": "Length (cm)",
+      "inputStitches": "Stitches or Rows",
+      "inputWidth": "Width (cm)",
+      "inputHeight": "Height (cm)",
+      "inputWidthSt": "Width (stitches)",
+      "inputHeightRow": "Height (rows)",
+      "stitches": "Stitches",
+      "rows": "Rows",
+      "widthCm": "Width",
+      "heightCm": "Height",
+      "result": "Result",
+      "st": "st",
+      "row": "rows"
+    },
+    "yarn": {
+      "description": "Calculate how many balls you need when substituting yarn from the original pattern.",
+      "mode": {
+        "substitute": "Yarn Substitution",
+        "requirement": "Yarn Requirement"
+      },
+      "original": {
+        "title": "Original Pattern Yarn",
+        "balls": "Number of Balls",
+        "metersPerBall": "Meters per Ball",
+        "weightPerBall": "Weight per Ball (g)"
+      },
+      "myYarn": {
+        "title": "My Substitute Yarn",
+        "metersPerBall": "Meters per Ball",
+        "weightPerBall": "Weight per Ball (g)"
+      },
+      "requirement": {
+        "totalLengthTitle": "Project Details",
+        "lengthInput": "Total Length Needed",
+        "totalLengthDesc": "Enter the total length required for your project.",
+        "myInfoTitle": "My Yarn Info",
+        "ballLength": "Length per Ball",
+        "strands": "Strands (Held Together)",
+        "strandsUnit": "strands",
+        "strandsNote": "Using {count} strands requires {count}x more yardage."
+      },
+      "reqMode": {
+        "length": "Enter Length Directly",
+        "swatch": "Estimate by Swatch"
+      },
+      "swatch": {
+        "title": "My Swatch (Sample) Info",
+        "width": "Width",
+        "height": "Height",
+        "weight": "Weight",
+        "projectTitle": "Project Size",
+        "desc": "Enter the full width/height of the project you want to make.",
+        "myInfoTitle": "My Yarn Info",
+        "ballWeight": "Weight per Ball",
+        "totalWeight": "Estimated Total Weight"
+      },
+      "result": "Yarn Requirement",
+      "totalMeters": "Total Meters Needed",
+      "ballsNeeded": "Balls Needed",
+      "balls": "balls"
+    },
+    "raglan": {
+      "description": "Calculate cast-on and increase plan for a top-down raglan sweater.",
+      "sizeHelper": "Don't know your size?",
+      "neckCirc": "Neck Circumference",
+      "chestCirc": "Chest Circumference",
+      "ease": "Ease",
+      "castOn": "Cast On",
+      "stitches": "stitches",
+      "st": "st",
+      "targetChest": "Target Chest Stitches",
+      "totalIncreases": "Total Increases",
+      "construction": "Construction",
+      "raglanDetails": "Raglan Details",
+      "increaseRounds": "Increase Rounds",
+      "totalRounds": "Total Rounds",
+      "frontBack": "Front/Back",
+      "eachSleeve": "Each Sleeve"
+    },
+    "sock": {
+      "description": "Enter foot circumference to calculate sock cast-on and heel flap stitches.",
+      "negativeEaseTitle": "Negative Ease (-10%)",
+      "negativeEaseDesc": "Socks need to be 10% smaller than foot circumference to prevent slipping.",
+      "footCircumference": "Foot Circumference",
+      "calculation": "Calculation",
+      "rawCalc": "Raw Calculation",
+      "roundedTo4": "Rounded to multiple of 4",
+      "result": "Sock Stitches",
+      "castOn": "Cast On",
+      "heelFlap": "Heel Flap",
+      "perNeedle": "Per Needle (4 DPN)",
+      "stitches": "stitches",
+      "tips": {
+        "title": "Sock Knitting Tips",
+        "tip1": "Multiple of 4 needed for 2x2 ribbing",
+        "tip2": "Heel flap uses half of total stitches",
+        "tip3": "Magic Loop allows multiples of 2"
+      },
+      "selectSize": "Select Standard Size",
+      "selectSizePlaceholder": "Select a size or enter custom dimensions",
+      "footLength": "Foot Length",
+      "total": "Total",
+      "castOnInfo": "Cast On Info",
+      "ribbing": "Recommended Ribbing",
+      "heelToe": "Heel & Toe",
+      "gussetPickup": "Gusset Pick Up",
+      "toeDecrease": "Start Toe Decrease",
+      "fromStart": "from start",
+      "toeLengthNote": "Est. Toe Length",
+      "constructionTips": "Construction Details",
+      "sockCircumference": "Sock Circumference",
+      "totalFootLength": "Total Foot Length",
+      "startToeAt": "Start Toe At",
+      "measuredFromHeel": "(from heel end)",
+      "appliedGauge": "Applied Gauge",
+      "rows": "rows",
+      "enterGaugeWarning": "Please enter gauge to see results.",
+      "sizes": {
+        "Baby (6-12 mo)": "Baby (6-12 mo)",
+        "Toddler (1-3 yr)": "Toddler (1-3 yr)",
+        "Child (4-6 yr)": "Child (4-6 yr)",
+        "Child (7-9 yr)": "Child (7-9 yr)",
+        "Woman S": "Woman S",
+        "Woman M": "Woman M",
+        "Woman L": "Woman L",
+        "Man M": "Man M",
+        "Man L": "Man L"
+      }
+    },
+    "grading": {
+      "modeBasic": "Basic Grading",
+      "modeAdvanced": "Advanced Grading",
+      "descBasic": "Scale pattern dimensions while maintaining original proportions.",
+      "descAdvanced": "Recalculate pattern based on your own gauge and target dimensions.",
+      "widthCalc": "Width (Stitch) Calc",
+      "heightCalc": "Height (Row) Calc",
+      "myGaugeTitle": "My Gauge",
+      "myGaugeSubtitle": "Recalculates pattern stitches based on your gauge input.",
+      "origWidth": "Orig Width",
+      "origHeight": "Orig Height",
+      "origStitchCount": "Orig Stitches",
+      "origRowCount": "Orig Rows",
+      "origGauge": "Calc. Gauge",
+      "targetWidth": "Target Width",
+      "targetHeight": "Target Height",
+      "newStitchCount": "New Stitch Count",
+      "newRowCount": "New Row Count",
+      "per10cm": "per 10cm",
+      "difference": "Difference"
+    }
+  }
+}
