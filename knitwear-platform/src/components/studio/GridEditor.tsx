@@ -196,6 +196,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         usedColors?: string[];         // Actual colors used in grid
         hashtags: string[];            // Required: min 3, max 10
         yarnParts?: YarnPart[];        // Dynamic yarn parts
+        sizeParts?: { id: string; name: string; detail: string; }[];
     }>({
         title: '',
         price: 0,
@@ -211,7 +212,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         gaugeRows: 30,
         usedColors: [],
         hashtags: [],
-        yarnParts: []
+        yarnParts: [],
+        sizeParts: []
     });
 
 

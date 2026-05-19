@@ -237,7 +237,7 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                                     <button
                                         key={yw.id}
                                         onClick={() => toggleFilter('yarnWeight', yw.id as any)}
-                                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${filters.yarnWeight?.includes(yw.id)
+                                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${filters.yarnWeight?.includes(yw.id as any)
                                             ? 'bg-brown-600 text-white'
                                             : 'bg-white border border-tan-200 text-brown-600 hover:border-brown-400'
                                             }`}

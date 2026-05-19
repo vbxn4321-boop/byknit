@@ -1,33 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { syncViewCounts } from '@/app/actions/pattern';
 
-export async function syncViewCounts() {
+async function handleSync() {
     'use server';
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    // Get all patterns for the user
-    const { data: patterns } = await supabase.from('patterns').select('id').eq('designer_id', user.id);
-
-    if (!patterns) return;
-
-    for (const p of patterns) {
-        // Get count from views table
-        const { count } = await supabase
-            .from('pattern_views')
-            .select('*', { count: 'exact', head: true })
-            .eq('pattern_id', p.id);
-
-        // Update pattern table
-        await supabase
-            .from('patterns')
-            .update({ view_count: count || 0 })
-            .eq('id', p.id);
-    }
-
-    revalidatePath('/[locale]/marketplace/dashboard', 'page');
+    await syncViewCounts();
 }
 
 export default async function DebugAnalyticsPage() {
@@ -49,7 +26,7 @@ export default async function DebugAnalyticsPage() {
         <div className="p-8 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Debug Analytics</h1>
 
-            <form action={syncViewCounts} className="mb-8">
+            <form action={handleSync} className="mb-8">
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">
                     Force Sync View Counts
                 </button>
