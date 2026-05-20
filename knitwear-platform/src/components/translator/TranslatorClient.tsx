@@ -563,7 +563,7 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                 <div className="pt-2">
                     <button
                         onClick={() => router.push(`/${locale}/login`)}
-                        className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-rose-400 to-peach-400 text-white font-bold hover:shadow-rose-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                        className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold hover:shadow-rose-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                     >
                         {locale === 'ko' ? '로그인 하러 가기' : 'Go to Login'}
                     </button>
