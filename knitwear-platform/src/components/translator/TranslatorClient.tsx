@@ -255,56 +255,56 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                     >
                         <X className="w-4 h-4" />
                     </button>
-                    <div className="flex items-center gap-2 text-brown-700 border-b border-tan-100 pb-2">
+                    <div className="flex items-center gap-2 text-brown-800 border-b border-tan-100 pb-2">
                         <HelpCircle className="w-5 h-5 text-rose-400" />
-                        <h3 className="font-bold text-sm">
+                        <h3 className="font-extrabold text-base">
                             {locale === 'ko' ? '🧶 뜨개인을 위한 3초 사용 설명서' : '🧶 Knitter\'s 3-Second Quick Guide'}
                         </h3>
                     </div>
 
                     <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 pr-6">
-                        <div className="space-y-1.5 p-3 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
-                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-[10px]">1</div>
-                            <h4 className="text-xs font-bold text-brown-700">
+                        <div className="space-y-2 p-4 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
+                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-xs">1</div>
+                            <h4 className="text-sm font-bold text-brown-800">
                                 {locale === 'ko' ? '원문 도안 복사' : 'Copy Original Pattern'}
                             </h4>
-                            <p className="text-[10px] text-brown-500 leading-normal">
+                            <p className="text-xs text-brown-600 leading-relaxed">
                                 {locale === 'ko' 
                                     ? 'Ravelry 등 영문 도안에서 복잡한 약어로 된 단(Row)을 드래그하여 복사하세요.' 
                                     : 'Drag and copy standard abbreviation lines (e.g. Row 1: k2, p2...) from Ravelry.'}
                             </p>
                         </div>
 
-                        <div className="space-y-1.5 p-3 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
-                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-[10px]">2</div>
-                            <h4 className="text-xs font-bold text-brown-700">
+                        <div className="space-y-2 p-4 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
+                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-xs">2</div>
+                            <h4 className="text-sm font-bold text-brown-800">
                                 {locale === 'ko' ? '방향 확인하기' : 'Verify Direction'}
                             </h4>
-                            <p className="text-[10px] text-brown-500 leading-normal">
+                            <p className="text-xs text-brown-600 leading-relaxed">
                                 {locale === 'ko' 
                                     ? '기본값은 영문 ➡️ 한글입니다. 국문을 영문으로 바꾸려면 중앙의 ⇆ 버튼을 누르세요.' 
                                     : 'Default is EN ➡️ KO. Click the central ⇆ button if you want to translate KO ➡️ EN.'}
                             </p>
                         </div>
 
-                        <div className="space-y-1.5 p-3 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
-                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-[10px]">3</div>
-                            <h4 className="text-xs font-bold text-brown-700">
+                        <div className="space-y-2 p-4 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
+                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-xs">3</div>
+                            <h4 className="text-sm font-bold text-brown-800">
                                 {locale === 'ko' ? '정밀 분석 시작' : 'AI Translate'}
                             </h4>
-                            <p className="text-[10px] text-brown-500 leading-normal">
+                            <p className="text-xs text-brown-600 leading-relaxed">
                                 {locale === 'ko' 
                                     ? '왼쪽 패널에 붙여넣고 번역기 버튼을 누르면 AI가 기호 약어들을 한글 전용 뜨개식 정형어로 해독합니다.' 
                                     : 'Paste and click Translate. Our custom engine parses craft abbreviations into clean terms.'}
                             </p>
                         </div>
 
-                        <div className="space-y-1.5 p-3 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
-                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-[10px]">4</div>
-                            <h4 className="text-xs font-bold text-brown-700">
+                        <div className="space-y-2 p-4 rounded-2xl bg-white/70 border border-tan-100/50 shadow-sm">
+                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center font-bold text-xs">4</div>
+                            <h4 className="text-sm font-bold text-brown-800">
                                 {locale === 'ko' ? '보관 및 인쇄' : 'Save & Print'}
                             </h4>
-                            <p className="text-[10px] text-brown-500 leading-normal">
+                            <p className="text-xs text-brown-600 leading-relaxed">
                                 {locale === 'ko' 
                                     ? '해석된 결과는 내 보관함에 영구 저장하거나 인쇄용 PDF로 다운받아 뜨개 곁에 두고 활용하세요!' 
                                     : 'Save translation to library for permanent sync, or download cleanly styled PDF for offline crafting.'}
