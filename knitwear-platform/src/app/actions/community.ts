@@ -20,7 +20,6 @@ export async function getPosts(locale: string = 'ko') {
             comments:post_comments(count),
             pattern:pattern_id (id, title, thumbnail_url, images, price_usd, difficulty)
         `)
-        .eq('locale', locale)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -563,7 +562,6 @@ export async function searchPosts(query: string, locale: string) {
             comments:post_comments(count),
             pattern:pattern_id (id, title, thumbnail_url, images, price_usd, difficulty)
         `)
-        .eq('locale', locale)
         .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
         .order('created_at', { ascending: false })
         .limit(50);

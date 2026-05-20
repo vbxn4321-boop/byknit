@@ -88,7 +88,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                 );
             }
 
-            let filtered = posts.filter(p => p.locale === activeTab);
+            let filtered = [...posts];
 
             if (listFilter === 'popular') {
                 // 🔒 좋아요가 1개 이상 달린 게시글만 노출
@@ -211,26 +211,6 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                         </div>
                         
                         <div className="flex items-center gap-3">
-                            {/* Language Tabs */}
-                            <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200">
-                                <button 
-                                    onClick={() => setActiveTab('ko')}
-                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs transition-all ${
-                                        activeTab === 'ko' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'
-                                    }`}
-                                >
-                                    <LayoutGrid className="w-3.5 h-3.5" /> 한국어
-                                </button>
-                                <button 
-                                    onClick={() => setActiveTab('en')}
-                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs transition-all ${
-                                        activeTab === 'en' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'
-                                    }`}
-                                >
-                                    <Globe className="w-3.5 h-3.5" /> EN
-                                </button>
-                            </div>
-                            
                             {/* Write Button */}
                             <Link 
                                 href="/community/write"

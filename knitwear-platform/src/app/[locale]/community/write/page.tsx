@@ -162,20 +162,6 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                     </button>
                     
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex bg-stone-100 p-1 rounded-xl border border-stone-200">
-                            <button 
-                                onClick={() => setLocale('ko')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${locale === 'ko' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'}`}
-                            >
-                                한국어
-                            </button>
-                            <button 
-                                onClick={() => setLocale('en')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${locale === 'en' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'}`}
-                            >
-                                English
-                            </button>
-                        </div>
                         
                         <button 
                             form="write-form"
