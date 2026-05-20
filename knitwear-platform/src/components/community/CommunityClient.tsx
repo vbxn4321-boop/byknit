@@ -232,15 +232,18 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             </div>
                             
                             {/* Write Button */}
-                            {user && (
-                                <Link 
-                                    href="/community/write"
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white font-bold text-sm rounded-xl hover:bg-rose-500 transition-all shadow-lg active:scale-95"
-                                >
-                                    <PenTool className="w-4 h-4" />
-                                    <span>{t('writePost')}</span>
-                                </Link>
-                            )}
+                            <Link 
+                                href="/community/write"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white font-bold text-sm rounded-xl hover:bg-rose-500 transition-all shadow-lg active:scale-95"
+                            >
+                                <PenTool className="w-4 h-4" />
+                                <span>{t('writePost')}</span>
+                                {!user && (
+                                    <span className="text-rose-400 font-black text-xs -translate-y-1" title={locale === 'ko' ? '로그인 필요' : 'Requires Login'}>
+                                        *
+                                    </span>
+                                )}
+                            </Link>
                         </div>
                     </div>
                 </div>

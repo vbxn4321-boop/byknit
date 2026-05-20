@@ -544,6 +544,56 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
         </div>
     );
 
+    if (!user) {
+        const lockBlock = (
+            <div className="max-w-md mx-auto my-12 p-8 rounded-3xl bg-white border border-tan-200 shadow-soft text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto shadow-rose-sm">
+                    <Lock className="w-8 h-8 text-rose-400 animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                    <h2 className="text-xl font-extrabold text-brown-800">
+                        {locale === 'ko' ? '🔒 로그인이 필요한 장치입니다' : '🔒 Login Required'}
+                    </h2>
+                    <p className="text-sm text-brown-600 leading-relaxed">
+                        {locale === 'ko' 
+                            ? '이 도구(AI 도안 번역기)를 사용하시려면 먼저 로그인을 완료해 주세요.' 
+                            : 'Please log in to your account to unlock and use the AI Pattern Translator.'}
+                    </p>
+                </div>
+                <div className="pt-2">
+                    <button
+                        onClick={() => router.push(`/${locale}/login`)}
+                        className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-rose-400 to-peach-400 text-white font-bold hover:shadow-rose-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    >
+                        {locale === 'ko' ? '로그인 하러 가기' : 'Go to Login'}
+                    </button>
+                </div>
+            </div>
+        );
+
+        if (isTabMode) {
+            return lockBlock;
+        }
+
+        return (
+            <div className="min-h-screen bg-cream-50 pb-20 relative">
+                {/* Decorative Top Arch */}
+                <div className="bg-gradient-to-b from-cream-100 to-cream-50 py-12 border-b border-tan-100">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-sage-300 shadow-soft mb-2">
+                            <Sparkles className="w-4 h-4 text-sage-400" />
+                            <span className="text-xs text-brown-600 font-semibold uppercase tracking-wider">AI Translation Laboratory</span>
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-brown-700 tracking-tight">
+                            {locale === 'ko' ? 'AI 뜨개 도안 번역기' : 'AI Knitwear Pattern Translator'}
+                        </h1>
+                    </div>
+                </div>
+                {lockBlock}
+            </div>
+        );
+    }
+
     if (isTabMode) {
         return content;
     }

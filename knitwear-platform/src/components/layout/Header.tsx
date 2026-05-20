@@ -23,9 +23,9 @@ export function Header({ locale, user }: HeaderProps) {
 
     const navItems = [
         { href: '/marketplace', label: t('marketplace'), icon: ShoppingBag },
-        { href: '/editor', label: t('editor'), icon: PenTool },
+        { href: '/editor', label: t('editor'), icon: PenTool, requiresLogin: true },
         { href: '/community', label: t('community'), icon: Users },
-        { href: '/ai', label: t('chartConverter'), icon: ImageIcon },
+        { href: '/ai', label: t('chartConverter'), icon: ImageIcon, requiresLogin: true },
         { href: '/calculator', label: t('smartCalculator'), icon: Calculator },
     ];
 
@@ -52,10 +52,15 @@ export function Header({ locale, user }: HeaderProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-brown-600 font-medium hover:text-rose-500 hover:bg-rose-50/50 transition-all whitespace-nowrap"
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-brown-600 font-medium hover:text-rose-500 hover:bg-rose-50/50 transition-all whitespace-nowrap relative group"
                             >
                                 <item.icon className="w-4 h-4" />
-                                {item.label}
+                                <span>{item.label}</span>
+                                {item.requiresLogin && (
+                                    <span className="text-rose-500 font-black text-sm -translate-y-1 ml-0.5" title={locale === 'ko' ? '로그인 필요' : 'Requires Login'}>
+                                        *
+                                    </span>
+                                )}
                             </Link>
                         ))}
                     </nav>
@@ -85,11 +90,18 @@ export function Header({ locale, user }: HeaderProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-brown-600 hover:text-brown-700 hover:bg-cream-100 transition-all"
+                                className="flex items-center justify-between px-4 py-3 rounded-2xl text-brown-600 hover:text-brown-700 hover:bg-cream-100 transition-all"
                                 onClick={() => setIsMenuOpen(false)}
                             >
-                                <item.icon className="w-5 h-5" />
-                                {item.label}
+                                <div className="flex items-center gap-3">
+                                    <item.icon className="w-5 h-5" />
+                                    <span className="font-medium text-sm">{item.label}</span>
+                                </div>
+                                {item.requiresLogin && (
+                                    <span className="text-[10px] font-extrabold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 uppercase tracking-wider">
+                                        {locale === 'ko' ? '* 로그인' : '* Login'}
+                                    </span>
+                                )}
                             </Link>
                         ))}
                         <div className="pt-4 border-t border-tan-200 space-y-2">

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { User } from '@supabase/supabase-js';
 import {
     Upload, Image as ImageIcon, MessageSquare, Sparkles,
-    AlertTriangle, Send, Loader2, Download, Settings2, PenTool, Coins
+    AlertTriangle, Send, Loader2, Download, Settings2, PenTool, Coins, Lock
 } from 'lucide-react';
 import { useEditorPersistence } from '@/hooks/useEditorPersistence';
 import { jsPDF } from 'jspdf';
@@ -58,23 +58,8 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
         return () => { supabase.removeChannel(channel); };
     }, [user]);
 
-    const handleAuthCheck = (e: React.MouseEvent) => {
-        if (!user) {
-            e.preventDefault();
-            e.stopPropagation();
-            alert(locale === 'ko' ? '로그인이 필요한 서비스입니다.' : 'Login is required.');
-            router.push(`/${locale}/login`);
-        }
-    };
-
     return (
         <div className="min-h-screen bg-cream-50 pb-20 relative">
-            {!user && (
-                <div
-                    className="absolute inset-0 z-[100] cursor-pointer bg-transparent"
-                    onClick={handleAuthCheck}
-                />
-            )}
             {/* Header */}
             <div className="bg-gradient-to-b from-cream-100 to-cream-50 py-12">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -84,25 +69,51 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
                     </div>
                     <h1 className="text-3xl sm:text-4xl font-bold text-brown-700 mb-6">{t('title')}</h1>
                     <p className="text-brown-600 text-lg mb-8">{t('imageToChart.description')}</p>
-
-                    {/* Tab Switcher removed - only Chart Converter active for now */}
                 </div>
             </div>
 
             {/* AI Warning */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-soft">
-                    <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                        <h3 className="font-medium text-amber-700">{t('warning.title')}</h3>
-                        <p className="text-sm text-amber-600 mt-1">{t('warning.message')}</p>
+            {user && (
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 animate-in fade-in duration-300">
+                    <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-soft">
+                        <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                            <h3 className="font-medium text-amber-700">{t('warning.title')}</h3>
+                            <p className="text-sm text-amber-600 mt-1">{t('warning.message')}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <ImageToChartTab locale={locale} credits={credits} user={user} />
+                {!user ? (
+                    <div className="max-w-md mx-auto my-8 p-8 rounded-3xl bg-white border border-tan-200 shadow-soft text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto shadow-rose-sm">
+                            <Lock className="w-8 h-8 text-rose-400 animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                            <h2 className="text-xl font-extrabold text-brown-800">
+                                {locale === 'ko' ? '🔒 로그인이 필요한 장치입니다' : '🔒 Login Required'}
+                            </h2>
+                            <p className="text-sm text-brown-600 leading-relaxed">
+                                {locale === 'ko' 
+                                    ? '이 도구(차트 변환기)를 사용하시려면 먼저 로그인을 완료해 주세요.' 
+                                    : 'Please log in to your account to unlock and use the AI Chart Converter.'}
+                            </p>
+                        </div>
+                        <div className="pt-2">
+                            <button
+                                onClick={() => router.push(`/${locale}/login`)}
+                                className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-rose-400 to-peach-400 text-white font-bold hover:shadow-rose-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                            >
+                                {locale === 'ko' ? '로그인 하러 가기' : 'Go to Login'}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <ImageToChartTab locale={locale} credits={credits} user={user} />
+                )}
             </div>
         </div>
     );
