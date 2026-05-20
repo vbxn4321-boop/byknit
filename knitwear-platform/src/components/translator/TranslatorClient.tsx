@@ -8,6 +8,7 @@ import {
     History, Trash2, FolderHeart, Calendar, HelpCircle, X
 } from 'lucide-react';
 import { translateText } from '@/app/actions/translate';
+import { deductCredits } from '@/app/actions/credits';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { jsPDF } from 'jspdf';
@@ -146,6 +147,26 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
         if (!sourceText.trim()) return;
         setIsTranslating(true);
         try {
+            // Deduct exactly 1 coin for logged-in users before translating
+            if (user) {
+                try {
+                    await deductCredits(
+                        user.id, 
+                        1, 
+                        locale === 'ko' ? 'AI 도안 번역' : 'AI Pattern Translation'
+                    );
+                } catch (creditError: any) {
+                    if (creditError.message === 'Insufficient credits') {
+                        alert(locale === 'ko' 
+                            ? '코인(크레딧)이 부족합니다! 😢\n커뮤니티 활동(글쓰기 +50 코인) 등을 통해 코인을 충전해 주세요.' 
+                            : 'Insufficient coins! 😢\nPlease earn coins by writing posts (+50 coins) or through other community activities.'
+                        );
+                        return;
+                    }
+                    throw creditError;
+                }
+            }
+
             const result = await translateText(sourceText, targetLang);
             setTranslatedText(result);
             // Show registration nudge to non-logged in users after successful translation
