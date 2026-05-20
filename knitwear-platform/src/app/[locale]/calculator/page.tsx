@@ -11,6 +11,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     };
 }
 
-export default async function CalculatorPage() {
-    return <CalculatorClient />;
+import { createClient } from '@/utils/supabase/server';
+
+export default async function CalculatorPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    
+    // Auth Check
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    return <CalculatorClient locale={locale} user={user} />;
 }

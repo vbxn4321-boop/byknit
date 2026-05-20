@@ -5,6 +5,7 @@ import { Heart, Instagram, Twitter } from 'lucide-react';
 export function Footer() {
     const t = useTranslations('common');
     const tFooter = useTranslations('footer');
+    const tCommunity = useTranslations('community');
 
     return (
         <footer className="border-t border-tan-200 bg-cream-100">
@@ -37,11 +38,11 @@ export function Footer() {
 
                     {/* 커뮤니티 */}
                     <div className="text-center">
-                        <h3 className="font-semibold text-brown-700 mb-4">커뮤니티</h3>
+                        <h3 className="font-semibold text-brown-700 mb-4">{tCommunity('title')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">최신 게시물</Link></li>
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">인기 게시물</Link></li>
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">내 활동 내역</Link></li>
+                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.latest')}</Link></li>
+                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.popular')}</Link></li>
+                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.myActivity')}</Link></li>
                         </ul>
                     </div>
 

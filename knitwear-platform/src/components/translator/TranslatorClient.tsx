@@ -23,9 +23,10 @@ interface SavedTranslation {
 interface TranslatorClientProps {
     locale: string;
     user: User | null;
+    isTabMode?: boolean;
 }
 
-export function TranslatorClient({ locale, user }: TranslatorClientProps) {
+export function TranslatorClient({ locale, user, isTabMode = false }: TranslatorClientProps) {
     const router = useRouter();
     const [sourceText, setSourceText] = useState('');
     const [translatedText, setTranslatedText] = useState('');
@@ -211,6 +212,252 @@ export function TranslatorClient({ locale, user }: TranslatorClientProps) {
         setShowNudge(false);
     };
 
+    const content = (
+        <div className={isTabMode ? "space-y-6 relative" : "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10"}>
+            {/* Translator Controller Bar */}
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-tan-200 shadow-soft mb-6 gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
+                        {locale === 'ko' 
+                            ? (targetLang === 'ko' ? 'English (영문 도안)' : '한국어 (국문 도안)') 
+                            : (targetLang === 'ko' ? 'English Pattern' : 'Korean Pattern')}
+                    </div>
+                    <button 
+                        onClick={toggleLanguage}
+                        className="p-2 rounded-full hover:bg-cream-100 text-brown-500 transition-colors border border-tan-200 bg-white"
+                        title="Toggle translation direction"
+                    >
+                        <ArrowRightLeft className="w-4 h-4" />
+                    </button>
+                    <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
+                        {locale === 'ko' 
+                            ? (targetLang === 'ko' ? '한국어 (국문 해설)' : 'English (US/UK Pattern)') 
+                            : (targetLang === 'ko' ? 'Korean Translation' : 'English Translation')}
+                    </div>
+                </div>
+
+                <button 
+                    onClick={loadSample}
+                    className="text-xs font-semibold text-rose-400 hover:text-rose-500 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-rose-50/50 border border-rose-100"
+                >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {locale === 'ko' ? '샘플 도안 채우기' : 'Load Sample Pattern'}
+                </button>
+            </div>
+
+            {/* Main Double Panel */}
+            <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+                {/* Left: Input Panel */}
+                <div className="flex flex-col rounded-3xl bg-white border border-tan-200 shadow-soft overflow-hidden min-h-[480px]">
+                    <div className="bg-cream-50/60 px-6 py-4 border-b border-tan-100 flex items-center justify-between">
+                        <span className="text-sm font-bold text-brown-700">
+                            {locale === 'ko' 
+                                ? (targetLang === 'ko' ? '영어 원문 도안 입력' : '한국어 원문 도안 입력') 
+                                : (targetLang === 'ko' ? 'English Original Pattern' : 'Korean Original Pattern')}
+                        </span>
+                        <span className="text-xs text-brown-500 font-medium">
+                            {sourceText.length} {locale === 'ko' ? '자' : 'chars'}
+                        </span>
+                    </div>
+                    <div className="flex-1 flex flex-col p-6">
+                        <textarea
+                            value={sourceText}
+                            onChange={(e) => setSourceText(e.target.value)}
+                            placeholder={targetLang === 'ko' 
+                                ? (locale === 'ko' ? "여기에 영문 도안을 붙여넣으세요...\n\n예: Row 1 (RS): K2, p2, yo, k2tog..." : "Paste English pattern here...\n\nExample: Row 1 (RS): Sl 1, k 2, * yo, k2tog, k 3 *...") 
+                                : (locale === 'ko' ? "여기에 한국어 도안을 붙여넣으세요...\n\n예: 1단 (겉면): 겉뜨기 2코, 안뜨기 2코..." : "Paste Korean pattern here...\n\nExample: 1단 (겉면): 걸러뜨기 1코, 겉뜨기 2코...")}
+                            className="w-full flex-1 min-h-[300px] outline-none resize-none text-brown-700 placeholder-brown-400/50 text-sm leading-relaxed"
+                        />
+                        
+                        <button
+                            onClick={handleTranslate}
+                            disabled={isTranslating || !sourceText.trim()}
+                            className="w-full btn-primary py-3.5 mt-4 flex items-center justify-center gap-2 font-bold shadow-rose-sm disabled:opacity-50 disabled:cursor-not-allowed group"
+                        >
+                            {isTranslating ? (
+                                <>
+                                    <RefreshCw className="w-5 h-5 animate-spin" />
+                                    <span>{locale === 'ko' ? '뜨개 도안 정밀 분석 중...' : 'Analyzing pattern...'}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span>{locale === 'ko' ? 'AI 뜨개 도안 번역하기' : 'AI Translate Pattern'}</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Right: Output Panel */}
+                <div className="flex flex-col rounded-3xl bg-white border border-tan-200 shadow-soft overflow-hidden min-h-[480px] relative">
+                    <div className="bg-cream-50/60 px-6 py-4 border-b border-tan-100 flex items-center justify-between">
+                        <span className="text-sm font-bold text-brown-700">
+                            {locale === 'ko' ? 'AI 실시간 번역 결과' : 'AI Translation Result'}
+                        </span>
+                        {translatedText && (
+                            <button 
+                                onClick={handleCopy}
+                                className="p-1.5 rounded-lg hover:bg-cream-100 text-brown-500 hover:text-brown-700 transition-all flex items-center gap-1.5 text-xs font-semibold"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check className="w-3.5 h-3.5 text-green-500 animate-in zoom-in-50" />
+                                        <span className="text-green-600">{locale === 'ko' ? '복사 완료' : 'Copied'}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-3.5 h-3.5" />
+                                        <span>{locale === 'ko' ? '결과 복사' : 'Copy Result'}</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 flex flex-col p-6">
+                        {translatedText ? (
+                            <div className="flex-1 flex flex-col justify-between">
+                                <div className="whitespace-pre-wrap text-sm text-brown-700 leading-relaxed font-sans min-h-[250px] select-text">
+                                    {translatedText}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="grid grid-cols-2 gap-3 mt-6 border-t border-tan-100 pt-4">
+                                    <button
+                                        onClick={() => saveToLibraryLocal(sourceText, translatedText, targetLang)}
+                                        className="btn-secondary py-3 flex items-center justify-center gap-2 text-xs font-bold shadow-sm"
+                                    >
+                                        <Bookmark className="w-4 h-4" />
+                                        <span>{locale === 'ko' ? '내 보관함에 저장' : 'Save to Library'}</span>
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadPDF}
+                                        className="btn-secondary py-3 flex items-center justify-center gap-2 text-xs font-bold shadow-sm"
+                                    >
+                                        <FileDown className="w-4 h-4" />
+                                        <span>{locale === 'ko' ? '인쇄용 PDF 다운' : 'Export to PDF'}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                                <div className="w-16 h-16 rounded-2xl bg-cream-50 flex items-center justify-center border border-tan-100 text-tan-300 mb-4">
+                                    <Sparkles className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-sm font-bold text-brown-600 mb-1">
+                                    {locale === 'ko' ? '번역 대기 중' : 'Waiting for Translation'}
+                                </h3>
+                                <p className="text-xs text-brown-500 max-w-xs leading-normal">
+                                    {locale === 'ko' 
+                                        ? '왼쪽 창에 영문 도안을 붙여넣고 AI 번역하기 버튼을 누르면 정밀 해석이 여기에 표시됩니다.' 
+                                        : 'Paste a pattern into the left panel and click Translate to see the specialized result here.'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Conversion Nudge Overlay (Slide Up Card) */}
+                    {showNudge && !user && (
+                        <div className="absolute inset-x-4 bottom-4 p-5 rounded-2xl bg-gradient-to-r from-brown-600 to-brown-700 text-white shadow-xl border border-brown-500 animate-in slide-in-from-bottom-5 duration-500 z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="space-y-1 text-center sm:text-left">
+                                <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                                    <Lock className="w-4 h-4 text-rose-300 animate-bounce" />
+                                    <h4 className="font-bold text-sm text-rose-100">
+                                        {locale === 'ko' ? '평생 잃어버리지 마세요! 🧶' : 'Never Lose Your Work! 🧶'}
+                                    </h4>
+                                </div>
+                                <p className="text-xs text-cream-100 max-w-md leading-relaxed">
+                                    {locale === 'ko'
+                                        ? '3초 간편가입만 하시면 이 정밀 번역본을 개인 보관함에 평생 소장하고 깔끔한 인쇄용 PDF로 다운받을 수 있습니다.'
+                                        : 'Sign up in 3 seconds to keep this custom translation in your personal Library forever and download as PDF.'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleNudgeAction}
+                                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-300 to-peach-200 hover:from-rose-400 hover:to-peach-300 text-brown-800 font-extrabold text-xs shadow-md transition-all active:scale-[0.97] whitespace-nowrap"
+                            >
+                                {locale === 'ko' ? '3초 만에 무료 가입하기' : 'Free 3-Second Sign Up'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* 3. My Saved Translations Library (History) */}
+            {user && savedTranslations.length > 0 && (
+                <div className="mt-12 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                    <div className="flex items-center gap-2 text-brown-700 border-b border-tan-200 pb-2">
+                        <FolderHeart className="w-5 h-5 text-rose-400" />
+                        <h3 className="font-bold text-base">
+                            {locale === 'ko' ? '나의 저장된 뜨개 번역 서재' : 'My Saved Translation Library'}
+                        </h3>
+                        <span className="text-xs bg-rose-50 text-rose-500 px-2 py-0.5 rounded-full font-black">
+                            {savedTranslations.length}
+                        </span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {savedTranslations.map((item) => (
+                            <div 
+                                key={item.id}
+                                onClick={() => handleLoadTranslation(item)}
+                                className="bg-white p-5 rounded-2xl border border-tan-200 shadow-sm hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[140px]"
+                            >
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between text-[10px] text-brown-400 font-medium">
+                                        <span className="flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5" />
+                                            {new Date(item.createdAt).toLocaleDateString()}
+                                        </span>
+                                        <span className="px-1.5 py-0.5 rounded bg-cream-100 text-brown-600 font-bold border border-tan-100">
+                                            {item.lang === 'ko' ? 'EN ➡️ KO' : 'KO ➡️ EN'}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-brown-700 font-bold line-clamp-2 leading-relaxed">
+                                        {item.source}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between border-t border-tan-100 pt-3 mt-3">
+                                    <span className="text-[10px] text-rose-400 font-bold group-hover:underline">
+                                        {locale === 'ko' ? '보관함에서 불러오기' : 'Restore Pattern'}
+                                    </span>
+                                    <button
+                                        onClick={(e) => handleDeleteTranslation(item.id, e)}
+                                        className="p-1 rounded-lg hover:bg-red-50 text-brown-400 hover:text-red-500 transition-colors"
+                                        title="Delete translation"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* AI Warning Context */}
+            <div className="mt-8 flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200/60 shadow-soft">
+                <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                    <h4 className="text-xs font-bold text-amber-700">
+                        {locale === 'ko' ? 'AI 번역 참고 유의사항' : 'AI Translation Information'}
+                    </h4>
+                    <p className="text-[11px] text-amber-600 leading-normal">
+                        {locale === 'ko'
+                            ? '본 AI 번역기는 대바늘/코바늘 전문 약어 및 서술형 패턴 해설에 완벽하게 맞춤 설계되었으나, 원문 도안 자체의 오타나 기형적 표현으로 인해 일부 미세한 오류가 존재할 수 있습니다. 뜨개질 시작 전에 항상 치수와 게이지를 확인해 주세요.'
+                            : 'Our translator is highly optimized for standard craft terminology. However, please review sizing and gauge details before knitting as original formatting errors may occasionally carry over.'}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+
+    if (isTabMode) {
+        return content;
+    }
+
     return (
         <div className="min-h-screen bg-cream-50 pb-20 relative">
             {/* Decorative Top Arch */}
@@ -230,240 +477,7 @@ export function TranslatorClient({ locale, user }: TranslatorClientProps) {
                     </p>
                 </div>
             </div>
-
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-                {/* Translator Controller Bar */}
-                <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-tan-200 shadow-soft mb-6 gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
-                            {targetLang === 'ko' ? 'English (영문 도안)' : '한국어 (국문 도안)'}
-                        </div>
-                        <button 
-                            onClick={toggleLanguage}
-                            className="p-2 rounded-full hover:bg-cream-100 text-brown-500 transition-colors border border-tan-200 bg-white"
-                            title="Toggle translation direction"
-                        >
-                            <ArrowRightLeft className="w-4 h-4" />
-                        </button>
-                        <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
-                            {targetLang === 'ko' ? '한국어 (국문 해설)' : 'English (US/UK Pattern)'}
-                        </div>
-                    </div>
-
-                    <button 
-                        onClick={loadSample}
-                        className="text-xs font-semibold text-rose-400 hover:text-rose-500 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-rose-50/50 border border-rose-100"
-                    >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {locale === 'ko' ? '샘플 도안 채우기' : 'Load Sample Pattern'}
-                    </button>
-                </div>
-
-                {/* Main Double Panel */}
-                <div className="grid lg:grid-cols-2 gap-6 items-stretch">
-                    {/* Left: Input Panel */}
-                    <div className="flex flex-col rounded-3xl bg-white border border-tan-200 shadow-soft overflow-hidden min-h-[480px]">
-                        <div className="bg-cream-50/60 px-6 py-4 border-b border-tan-100 flex items-center justify-between">
-                            <span className="text-sm font-bold text-brown-700">
-                                {targetLang === 'ko' ? '영어 원문 도안 입력' : '한국어 원문 도안 입력'}
-                            </span>
-                            <span className="text-xs text-brown-500 font-medium">
-                                {sourceText.length} 자
-                            </span>
-                        </div>
-                        <div className="flex-1 flex flex-col p-6">
-                            <textarea
-                                value={sourceText}
-                                onChange={(e) => setSourceText(e.target.value)}
-                                placeholder={targetLang === 'ko' 
-                                    ? "여기에 영문 도안을 붙여넣으세요...\n\n예: Row 1 (RS): K2, p2, yo, k2tog..." 
-                                    : "여기에 한국어 도안을 붙여넣으세요...\n\n예: 1단 (겉면): 겉뜨기 2코, 안뜨기 2코..."}
-                                className="w-full flex-1 min-h-[300px] outline-none resize-none text-brown-700 placeholder-brown-400/50 text-sm leading-relaxed"
-                            />
-                            
-                            <button
-                                onClick={handleTranslate}
-                                disabled={isTranslating || !sourceText.trim()}
-                                className="w-full btn-primary py-3.5 mt-4 flex items-center justify-center gap-2 font-bold shadow-rose-sm disabled:opacity-50 disabled:cursor-not-allowed group"
-                            >
-                                {isTranslating ? (
-                                    <>
-                                        <RefreshCw className="w-5 h-5 animate-spin" />
-                                        <span>{locale === 'ko' ? '뜨개 도안 정밀 분석 중...' : 'Analyzing pattern...'}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                        <span>{locale === 'ko' ? 'AI 뜨개 도안 번역하기' : 'AI Translate Pattern'}</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Right: Output Panel */}
-                    <div className="flex flex-col rounded-3xl bg-white border border-tan-200 shadow-soft overflow-hidden min-h-[480px] relative">
-                        <div className="bg-cream-50/60 px-6 py-4 border-b border-tan-100 flex items-center justify-between">
-                            <span className="text-sm font-bold text-brown-700">
-                                {locale === 'ko' ? 'AI 실시간 번역 결과' : 'AI Translation Result'}
-                            </span>
-                            {translatedText && (
-                                <button 
-                                    onClick={handleCopy}
-                                    className="p-1.5 rounded-lg hover:bg-cream-100 text-brown-500 hover:text-brown-700 transition-all flex items-center gap-1.5 text-xs font-semibold"
-                                >
-                                    {copied ? (
-                                        <>
-                                            <Check className="w-3.5 h-3.5 text-green-500 animate-in zoom-in-50" />
-                                            <span className="text-green-600">{locale === 'ko' ? '복사 완료' : 'Copied'}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Copy className="w-3.5 h-3.5" />
-                                            <span>{locale === 'ko' ? '결과 복사' : 'Copy Result'}</span>
-                                        </>
-                                    )}
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="flex-1 flex flex-col p-6">
-                            {translatedText ? (
-                                <div className="flex-1 flex flex-col justify-between">
-                                    <div className="whitespace-pre-wrap text-sm text-brown-700 leading-relaxed font-sans min-h-[250px] select-text">
-                                        {translatedText}
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="grid grid-cols-2 gap-3 mt-6 border-t border-tan-100 pt-4">
-                                        <button
-                                            onClick={() => saveToLibraryLocal(sourceText, translatedText, targetLang)}
-                                            className="btn-secondary py-3 flex items-center justify-center gap-2 text-xs font-bold shadow-sm"
-                                        >
-                                            <Bookmark className="w-4 h-4" />
-                                            <span>{locale === 'ko' ? '내 보관함에 저장' : 'Save to Library'}</span>
-                                        </button>
-                                        <button
-                                            onClick={handleDownloadPDF}
-                                            className="btn-secondary py-3 flex items-center justify-center gap-2 text-xs font-bold shadow-sm"
-                                        >
-                                            <FileDown className="w-4 h-4" />
-                                            <span>{locale === 'ko' ? '인쇄용 PDF 다운' : 'Export to PDF'}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                                    <div className="w-16 h-16 rounded-2xl bg-cream-50 flex items-center justify-center border border-tan-100 text-tan-300 mb-4">
-                                        <Sparkles className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-sm font-bold text-brown-600 mb-1">
-                                        {locale === 'ko' ? '번역 대기 중' : 'Waiting for Translation'}
-                                    </h3>
-                                    <p className="text-xs text-brown-500 max-w-xs leading-normal">
-                                        {locale === 'ko' 
-                                            ? '왼쪽 창에 영문 도안을 붙여넣고 AI 번역하기 버튼을 누르면 정밀 해석이 여기에 표시됩니다.' 
-                                            : 'Paste a pattern into the left panel and click Translate to see the specialized result here.'}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Conversion Nudge Overlay (Slide Up Card) */}
-                        {showNudge && !user && (
-                            <div className="absolute inset-x-4 bottom-4 p-5 rounded-2xl bg-gradient-to-r from-brown-600 to-brown-700 text-white shadow-xl border border-brown-500 animate-in slide-in-from-bottom-5 duration-500 z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div className="space-y-1 text-center sm:text-left">
-                                    <div className="flex items-center justify-center sm:justify-start gap-1.5">
-                                        <Lock className="w-4 h-4 text-rose-300 animate-bounce" />
-                                        <h4 className="font-bold text-sm text-rose-100">
-                                            {locale === 'ko' ? '평생 잃어버리지 마세요! 🧶' : 'Never Lose Your Work! 🧶'}
-                                        </h4>
-                                    </div>
-                                    <p className="text-xs text-cream-100 max-w-md leading-relaxed">
-                                        {locale === 'ko'
-                                            ? '3초 간편가입만 하시면 이 정밀 번역본을 개인 보관함에 평생 소장하고 깔끔한 인쇄용 PDF로 다운받을 수 있습니다.'
-                                            : 'Sign up in 3 seconds to keep this custom translation in your personal Library forever and download as PDF.'}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={handleNudgeAction}
-                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-300 to-peach-200 hover:from-rose-400 hover:to-peach-300 text-brown-800 font-extrabold text-xs shadow-md transition-all active:scale-[0.97] whitespace-nowrap"
-                                >
-                                    {locale === 'ko' ? '3초 만에 무료 가입하기' : 'Free 3-Second Sign Up'}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 3. My Saved Translations Library (History) */}
-                {user && savedTranslations.length > 0 && (
-                    <div className="mt-12 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
-                        <div className="flex items-center gap-2 text-brown-700 border-b border-tan-200 pb-2">
-                            <FolderHeart className="w-5 h-5 text-rose-400" />
-                            <h3 className="font-bold text-base">
-                                {locale === 'ko' ? '나의 저장된 뜨개 번역 서재' : 'My Saved Translation Library'}
-                            </h3>
-                            <span className="text-xs bg-rose-50 text-rose-500 px-2 py-0.5 rounded-full font-black">
-                                {savedTranslations.length}
-                            </span>
-                        </div>
-
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {savedTranslations.map((item) => (
-                                <div 
-                                    key={item.id}
-                                    onClick={() => handleLoadTranslation(item)}
-                                    className="bg-white p-5 rounded-2xl border border-tan-200 shadow-sm hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[140px]"
-                                >
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-[10px] text-brown-400 font-medium">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {new Date(item.createdAt).toLocaleDateString()}
-                                            </span>
-                                            <span className="px-1.5 py-0.5 rounded bg-cream-100 text-brown-600 font-bold border border-tan-100">
-                                                {item.lang === 'ko' ? 'EN ➡️ KO' : 'KO ➡️ EN'}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-brown-700 font-bold line-clamp-2 leading-relaxed">
-                                            {item.source}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-center justify-between border-t border-tan-100 pt-3 mt-3">
-                                        <span className="text-[10px] text-rose-400 font-bold group-hover:underline">
-                                            {locale === 'ko' ? '보관함에서 불러오기' : 'Restore Pattern'}
-                                        </span>
-                                        <button
-                                            onClick={(e) => handleDeleteTranslation(item.id, e)}
-                                            className="p-1 rounded-lg hover:bg-red-50 text-brown-400 hover:text-red-500 transition-colors"
-                                            title="Delete translation"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* AI Warning Context */}
-                <div className="mt-8 flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200/60 shadow-soft">
-                    <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                    <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-amber-700">
-                            {locale === 'ko' ? 'AI 번역 참고 유의사항' : 'AI Translation Information'}
-                        </h4>
-                        <p className="text-[11px] text-amber-600 leading-normal">
-                            {locale === 'ko'
-                                ? '본 AI 번역기는 대바늘/코바늘 전문 약어 및 서술형 패턴 해설에 완벽하게 맞춤 설계되었으나, 원문 도안 자체의 오타나 기형적 표현으로 인해 일부 미세한 오류가 존재할 수 있습니다. 뜨개질 시작 전에 항상 치수와 게이지를 확인해 주세요.'
-                                : 'Our translator is highly optimized for standard craft terminology. However, please review sizing and gauge details before knitting as original formatting errors may occasionally carry over.'}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            {content}
         </div>
     );
 }

@@ -11,6 +11,7 @@ import {
 import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, updatePost, toggleBookmark } from '@/app/actions/community';
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 interface Comment {
     id: string;
@@ -53,6 +54,8 @@ interface Props {
 }
 
 export function PostDetailClient({ post, comments: initialComments, user, locale }: Props) {
+    const t = useTranslations('community');
+    const tCommon = useTranslations('common');
     const router = useRouter();
     const [comments, setComments] = useState(initialComments);
     const [newComment, setNewComment] = useState('');
@@ -88,7 +91,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
             setTranslatedPost({ title: tTitle, content: tContent });
         } catch (error) {
             console.error('Post translation failed:', error);
-            alert('번역에 실패했습니다.');
+            alert(t('detail.translationFailed'));
         } finally {
             setIsTranslatingPost(false);
         }
@@ -146,16 +149,15 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const mins = Math.floor(diff / 60000);
-        if (mins < 1) return '방금';
-        if (mins < 60) return `${mins}분 전`;
+        if (mins < 1) return t('time.justNow');
+        if (mins < 60) return t('time.minutesAgo', { count: mins });
         const hours = Math.floor(mins / 60);
-        if (hours < 24) return `${hours}시간 전`;
+        if (hours < 24) return t('time.hoursAgo', { count: hours });
         return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
     };
 
     const getCategoryLabel = (cat: string) => {
-        const map: Record<string, string> = { general: '자유', showcase: '자랑', qna: '질문', tip: '팁' };
-        return map[cat] || cat;
+        return t(`categories.${cat}`, { defaultValue: cat });
     };
 
     const handleFollow = async (targetUserId: string) => {
@@ -203,22 +205,22 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
     };
 
     const handleDeleteComment = async (commentId: string) => {
-        if (!confirm('댓글을 삭제하시겠습니까?')) return;
+        if (!confirm(t('detail.deleteCommentConfirm'))) return;
         try {
             await deleteComment(commentId);
             router.refresh();
         } catch (error) {
-            alert('삭제에 실패했습니다.');
+            alert(t('detail.deleteFailed'));
         }
     };
 
     const handleDeletePost = async () => {
-        if (!confirm('게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+        if (!confirm(t('detail.deleteConfirm'))) return;
         try {
             await deletePost(post.id);
             router.push(`/${locale}/community`);
         } catch (error) {
-            alert('삭제에 실패했습니다.');
+            alert(t('detail.deleteFailed'));
         }
     };
 
@@ -234,7 +236,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
             setIsEditing(false);
             router.refresh();
         } catch (error) {
-            alert('수정에 실패했습니다.');
+            alert(locale === 'ko' ? '수정에 실패했습니다.' : 'Failed to edit post.');
         } finally {
             setIsSubmitting(false);
         }
@@ -258,7 +260,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                         className="flex items-center gap-2 text-stone-500 hover:text-stone-800 font-bold transition-colors"
                     >
                         <ChevronLeft className="w-5 h-5" />
-                        목록으로
+                        {t('detail.backToList')}
                     </button>
                 </div>
             </div>
@@ -279,7 +281,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                             editCategory === cat ? 'bg-stone-800 text-white border-stone-800' : 'border-stone-200 text-stone-500'
                                         }`}
                                     >
-                                        #{cat === 'general' ? '자유' : cat === 'qna' ? '질문' : cat === 'showcase' ? '자랑' : '팁'}
+                                        #{t(`categories.${cat}`, { defaultValue: cat })}
                                     </button>
                                 ))}
                             </div>
@@ -319,9 +321,9 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                 }`}
                                             >
                                                 {followingSet.has(post.profiles.id) ? (
-                                                    <><UserCheck className="w-3 h-3" /> 팔로잉</>
+                                                    <><UserCheck className="w-3 h-3" /> {t('detail.following')}</>
                                                 ) : (
-                                                    <><UserPlus className="w-3 h-3" /> 팔로우</>
+                                                    <><UserPlus className="w-3 h-3" /> {t('detail.follow')}</>
                                                 )}
                                             </button>
                                         )}
@@ -329,7 +331,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                     <div className="flex items-center gap-2 mt-0.5">
                                         <span className="text-xs text-stone-400">{formatDate(post.created_at)}</span>
                                         <span className="text-stone-300 text-xs">·</span>
-                                        <span className="text-xs text-stone-400">조회 {post.views || 0}</span>
+                                        <span className="text-xs text-stone-400">{t('detail.views', { count: post.views || 0 })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -347,7 +349,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                     }`}
                                 >
                                     <span className="text-sm">🌐</span>
-                                    <span>{isTranslatingPost ? '번역 중...' : (translatedPost ? '원문 보기' : '번역 보기')}</span>
+                                    <span>{isTranslatingPost ? t('detail.translating') : (translatedPost ? t('detail.originalView') : t('detail.translateView'))}</span>
                                 </button>
 
                                 {/* Bookmark */}
@@ -397,13 +399,13 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                             disabled={isSubmitting}
                                             className="flex items-center gap-1.5 px-4 py-2 bg-stone-800 text-white text-sm font-bold rounded-xl hover:bg-emerald-500 transition-all disabled:opacity-40"
                                         >
-                                            <Save className="w-4 h-4" /> {isSubmitting ? '저장 중...' : '저장'}
+                                            <Save className="w-4 h-4" /> {isSubmitting ? t('detail.saving') : t('detail.save')}
                                         </button>
                                         <button
                                             onClick={() => { setIsEditing(false); setEditTitle(post.title); setEditContent(post.content); setEditCategory(post.category); }}
                                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 text-stone-400 hover:text-stone-600 transition-all"
                                         >
-                                            <X className="w-4 h-4" /> 취소
+                                            <X className="w-4 h-4" /> {t('detail.cancel')}
                                         </button>
                                     </>
                                 )}
@@ -427,7 +429,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                         {/* Attachments & Patterns Section */}
                         {(post.pattern || (post.images && post.images.length > 0)) && (
                             <div className="pt-6 border-t border-stone-100 space-y-3">
-                                <h3 className="text-xs font-black text-stone-400 uppercase tracking-widest">첨부파일 및 도안</h3>
+                                <h3 className="text-xs font-black text-stone-400 uppercase tracking-widest">{t('detail.attachments')}</h3>
                                 <div className="grid sm:grid-cols-2 gap-3">
                                     {/* Attached Pattern */}
                                     {post.pattern && (
@@ -445,7 +447,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                             )}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                                    <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">공유 도안</span>
+                                                    <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">{t('detail.sharedPattern')}</span>
                                                     <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-amber-50 border border-amber-200 text-amber-600 text-[8px] font-black">
                                                         <Coins className="w-2 h-2" /> +50
                                                     </span>
@@ -456,7 +458,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                 href={`/marketplace/${post.pattern.id}`}
                                                 className="px-3.5 py-2 bg-stone-800 text-white text-xs font-bold rounded-lg hover:bg-rose-500 transition-all flex-shrink-0"
                                             >
-                                                보기
+                                                {t('detail.view')}
                                             </Link>
                                         </div>
                                     )}
@@ -470,7 +472,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                 className="w-12 h-12 rounded-xl object-cover border border-stone-100 flex-shrink-0"
                                             />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-0.5">첨부 사진</p>
+                                                <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-0.5">{t('detail.attachedPhoto')}</p>
                                                 <p className="font-bold text-stone-800 text-xs truncate">photo_attachment_{i+1}.png</p>
                                             </div>
                                             <a
@@ -481,7 +483,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                 className="px-3.5 py-2 bg-stone-800 text-white text-xs font-bold rounded-lg hover:bg-rose-500 transition-all flex-shrink-0 flex items-center gap-1 cursor-pointer"
                                             >
                                                 <Save className="w-3.5 h-3.5" />
-                                                <span>저장</span>
+                                                <span>{t('detail.saveFile')}</span>
                                             </a>
                                         </div>
                                     ))}
@@ -495,7 +497,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                 <div className="mt-8">
                     <h2 className="text-lg font-black text-stone-800 mb-5 flex items-center gap-2">
                         <MessageSquare className="w-5 h-5 text-rose-400" />
-                        댓글 {comments.length > 0 && <span className="text-rose-400">{comments.length}</span>}
+                        {t('detail.commentsCount', { count: comments.length })}
                     </h2>
 
                     {/* Comment Input */}
@@ -504,7 +506,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="댓글을 입력하세요..."
+                                placeholder={t('detail.commentPlaceholder')}
                                 className="w-full h-[26px] text-sm text-stone-800 placeholder:text-stone-400 outline-none resize-none bg-transparent overflow-y-auto leading-normal py-0.5"
                             />
                             <div className="flex justify-end mt-3 pt-3 border-t border-stone-50">
@@ -514,13 +516,13 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                     className="flex items-center gap-2 px-5 py-2 bg-stone-800 text-white text-sm font-bold rounded-xl hover:bg-rose-500 transition-all disabled:opacity-40"
                                 >
                                     <Send className="w-4 h-4" />
-                                    {isSubmitting ? '등록 중...' : '댓글 등록'}
+                                    {isSubmitting ? t('detail.submitCommentLoading') : t('detail.submitComment')}
                                 </button>
                             </div>
                         </div>
                     ) : (
                         <div className="bg-white rounded-2xl border border-tan-200 p-6 mb-6 text-center">
-                            <p className="text-sm text-stone-400">댓글을 작성하려면 로그인이 필요합니다.</p>
+                            <p className="text-sm text-stone-400">{t('detail.commentLoginPrompt')}</p>
                         </div>
                     )}
 
@@ -549,7 +551,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                             onClick={() => setReplyTo({ id: comment.id, name: comment.profiles?.display_name || 'Anonymous' })}
                                                             className="text-[11px] font-bold text-stone-400 hover:text-rose-500 transition-colors"
                                                         >
-                                                            답글
+                                                            {t('detail.reply')}
                                                         </button>
                                                     )}
 
@@ -560,7 +562,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                         className="text-[11px] font-black text-stone-400 hover:text-rose-500 transition-colors inline-flex items-center gap-0.5"
                                                     >
                                                         <span>🌐</span>
-                                                        <span>{translatingCommentIds.has(comment.id) ? '번역 중...' : (translatedComments[comment.id] ? '원문 보기' : '번역 보기')}</span>
+                                                        <span>{translatingCommentIds.has(comment.id) ? t('detail.translating') : (translatedComments[comment.id] ? t('detail.originalView') : t('detail.translateView'))}</span>
                                                     </button>
 
                                                     {user && user.id === comment.user_id && (
@@ -568,7 +570,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                             onClick={() => handleDeleteComment(comment.id)}
                                                             className="text-[11px] font-bold text-stone-300 hover:text-rose-500 transition-colors flex items-center gap-1"
                                                         >
-                                                            <Trash2 className="w-3 h-3" /> 삭제
+                                                            <Trash2 className="w-3 h-3" /> {t('detail.delete')}
                                                         </button>
                                                     )}
                                                 </div>
@@ -581,12 +583,12 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                         <div className="ml-10 mt-2 bg-stone-50 rounded-xl border border-stone-200 p-3">
                                             <p className="text-[11px] text-stone-400 mb-1.5 font-bold">
                                                 <CornerDownRight className="w-3 h-3 inline mr-1" />
-                                                {replyTo.name}님에게 답글
+                                                {t('detail.replyTo', { name: replyTo.name })}
                                             </p>
                                             <textarea
                                                 value={replyContent}
                                                 onChange={(e) => setReplyContent(e.target.value)}
-                                                placeholder="답글을 입력하세요..."
+                                                placeholder={t('detail.replyPlaceholder')}
                                                 className="w-full h-[26px] text-sm text-stone-800 placeholder:text-stone-400 outline-none resize-none bg-transparent overflow-y-auto leading-normal py-0.5"
                                                 autoFocus
                                             />
@@ -595,14 +597,14 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                     onClick={() => { setReplyTo(null); setReplyContent(''); }}
                                                     className="px-3 py-1.5 text-xs font-bold text-stone-400 hover:text-stone-600"
                                                 >
-                                                    취소
+                                                    {t('detail.cancel')}
                                                 </button>
                                                 <button
                                                     onClick={handleSubmitReply}
                                                     disabled={!replyContent.trim() || isSubmitting}
                                                     className="px-4 py-1.5 bg-stone-800 text-white text-xs font-bold rounded-lg hover:bg-rose-500 transition-all disabled:opacity-40"
                                                 >
-                                                    {isSubmitting ? '등록 중...' : '답글 등록'}
+                                                    {isSubmitting ? t('detail.submitReplyLoading') : t('detail.submitReply')}
                                                 </button>
                                             </div>
                                         </div>
@@ -631,7 +633,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                                     className="text-[11px] font-black text-stone-400 hover:text-rose-500 transition-colors inline-flex items-center gap-0.5"
                                                                 >
                                                                     <span>🌐</span>
-                                                                    <span>{translatingCommentIds.has(reply.id) ? '번역 중...' : (translatedComments[reply.id] ? '원문 보기' : '번역 보기')}</span>
+                                                                    <span>{translatingCommentIds.has(reply.id) ? t('detail.translating') : (translatedComments[reply.id] ? t('detail.originalView') : t('detail.translateView'))}</span>
                                                                 </button>
 
                                                                 {user && user.id === reply.user_id && (
@@ -639,7 +641,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                                         onClick={() => handleDeleteComment(reply.id)}
                                                                         className="text-[11px] font-bold text-stone-300 hover:text-rose-500 transition-colors flex items-center gap-1"
                                                                     >
-                                                                        <Trash2 className="w-3 h-3" /> 삭제
+                                                                        <Trash2 className="w-3 h-3" /> {t('detail.delete')}
                                                                     </button>
                                                                 )}
                                                             </div>
@@ -654,8 +656,8 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                         ) : (
                             <div className="text-center py-12">
                                 <MessageSquare className="w-10 h-10 text-stone-200 mx-auto mb-3" />
-                                <p className="text-sm text-stone-400 font-bold">아직 댓글이 없습니다</p>
-                                <p className="text-xs text-stone-300 mt-1">첫 번째 댓글을 남겨보세요!</p>
+                                <p className="text-sm text-stone-400 font-bold">{t('detail.noCommentsTitle')}</p>
+                                <p className="text-xs text-stone-300 mt-1">{t('detail.noCommentsDesc')}</p>
                             </div>
                         )}
                     </div>

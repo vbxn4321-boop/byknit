@@ -81,6 +81,7 @@
     "myMarketplace": "My Marketplace",
     "community": "Community",
     "aiGenerator": "AI Generator",
+    "aiTranslator": "AI Translator",
     "purchases": "Order History"
   },
   "home": {
@@ -781,7 +782,8 @@
       "yarn": "Yarn Calculator",
       "raglan": "Raglan",
       "sock": "Sock",
-      "grading": "Grading"
+      "grading": "Grading",
+      "translator": "AI Translator"
     },
     "patternConverter": {
       "title": "Convert Pattern to My Gauge",
@@ -986,6 +988,112 @@
       "newRowCount": "New Row Count",
       "per10cm": "per 10cm",
       "difference": "Difference"
+    }
+  },
+  "community": {
+    "title": "Community",
+    "postsCount": "{count} Posts",
+    "searchPlaceholder": "Search posts...",
+    "writePost": "Write Post",
+    "categories": {
+      "all": "All",
+      "general": "Free Talk",
+      "showcase": "Showcase",
+      "qna": "Q&A",
+      "tip": "Tip"
+    },
+    "filters": {
+      "latest": "Latest Posts",
+      "popular": "Popular Posts",
+      "myActivity": "My Activity"
+    },
+    "table": {
+      "category": "Category",
+      "title": "Title",
+      "author": "Author",
+      "date": "Date",
+      "views": "Views"
+    },
+    "sidebar": {
+      "myStats": "My Activity Stats",
+      "posts": "Posts Written",
+      "likes": "Likes Received",
+      "followers": "Followers",
+      "loginPrompt": "Sign in to start participating in the community!",
+      "popularTags": "Popular Tags",
+      "recommendedDesigners": "Recommended Designers",
+      "emptyDesigners": "Popular designers will be\ndisplayed here when active!",
+      "coinRewardInfo": "Coin Reward Info",
+      "rewards": {
+        "patternShare": "Post with Pattern Share",
+        "signUpBonus": "Welcome Bonus",
+        "patternUploadBonus": "Pattern Upload Bonus",
+        "aiAnalysis": "AI Pattern Analysis",
+        "aiEditor": "AI Editor Import",
+        "aiImage": "AI Image Conversion",
+        "aiExport": "AI Export (PNG/JPG/PDF)"
+      }
+    },
+    "detail": {
+      "backToList": "Back to List",
+      "author": "Author",
+      "following": "Following",
+      "follow": "Follow",
+      "views": "{count} Views",
+      "translateView": "Translate",
+      "originalView": "Show Original",
+      "translating": "Translating...",
+      "translationFailed": "Translation failed.",
+      "deleteConfirm": "Are you sure you want to delete this post? This action cannot be undone.",
+      "deleteCommentConfirm": "Are you sure you want to delete this comment?",
+      "deleteFailed": "Failed to delete.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "attachments": "Attachments & Patterns",
+      "sharedPattern": "Shared Pattern",
+      "attachedPhoto": "Attached Photo",
+      "view": "View",
+      "saveFile": "Save",
+      "comments": "Comments",
+      "commentsCount": "Comments {count}",
+      "replyTo": "Reply to {name}",
+      "replyPlaceholder": "Enter your reply...",
+      "commentPlaceholder": "Enter your comment...",
+      "commentLoginPrompt": "Please sign in to write a comment.",
+      "submitComment": "Submit",
+      "submitReply": "Submit Reply",
+      "submitCommentLoading": "Submitting...",
+      "submitReplyLoading": "Submitting...",
+      "noCommentsTitle": "No comments yet",
+      "noCommentsDesc": "Be the first to leave a comment!",
+      "reply": "Reply"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago"
+    },
+    "writeModal": {
+      "title": "Create New Post",
+      "editTitle": "Edit Post",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter title",
+      "categoryLabel": "Category",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write your content here. Feel free to share knitting tips, show off your projects, or ask questions!",
+      "attachPattern": "Attach Pattern (Optional)",
+      "attachPatternDesc": "Earn 50 coins by attaching and sharing one of your patterns!",
+      "selectPatternPlaceholder": "Select a pattern to attach",
+      "noPattern": "No patterns available to attach",
+      "uploadImages": "Attach Photos (Max 4)",
+      "uploadImagesDesc": "Upload photos of your finished projects or gauge swatches.",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "cancel": "Cancel"
     }
   }
 }

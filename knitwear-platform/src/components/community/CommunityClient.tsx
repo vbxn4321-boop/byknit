@@ -14,6 +14,7 @@ import {
 } from '@/app/actions/community';
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 interface Post {
     id: string;
@@ -45,6 +46,9 @@ interface CommunityClientProps {
 }
 
 export function CommunityClient({ initialPosts, popularPosts, user, locale }: CommunityClientProps) {
+    const t = useTranslations('community');
+    const tCommon = useTranslations('common');
+
     const [posts, setPosts] = useState(initialPosts);
     const [activeTab, setActiveTab] = useState(locale);
     const [listFilter, setListFilter] = useState<'latest' | 'popular' | 'my_activity'>('latest');
@@ -55,6 +59,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const [bookmarkSet, setBookmarkSet] = useState<Set<string>>(new Set());
     const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
     const [myStats, setMyStats] = useState({ postCount: 0, likeCount: 0, followerCount: 0 });
+    const [isCoinsExpanded, setIsCoinsExpanded] = useState(false);
 
     // Sync initialPosts to state when it changes
     useEffect(() => {
@@ -163,8 +168,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     };
 
     const getCategoryLabel = (cat: string) => {
-        const map: Record<string, string> = { general: '자유', showcase: '자랑', qna: '질문', tip: '팁' };
-        return map[cat] || cat;
+        return t(`categories.${cat}`, { defaultValue: cat });
     };
 
     const getCategoryColor = (cat: string) => {
@@ -182,12 +186,12 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const mins = Math.floor(diff / 60000);
-        if (mins < 1) return '방금';
-        if (mins < 60) return `${mins}분 전`;
+        if (mins < 1) return t('time.justNow');
+        if (mins < 60) return t('time.minutesAgo', { count: mins });
         const hours = Math.floor(mins / 60);
-        if (hours < 24) return `${hours}시간 전`;
+        if (hours < 24) return t('time.hoursAgo', { count: hours });
         const days = Math.floor(hours / 24);
-        if (days < 7) return `${days}일 전`;
+        if (days < 7) return t('time.daysAgo', { count: days });
         return `${date.getMonth() + 1}.${date.getDate()}`;
     };
 
@@ -199,10 +203,10 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <h1 className="text-2xl font-black text-stone-800">
-                                {activeTab === 'ko' ? '커뮤니티' : 'Community'}
+                                {t('title')}
                             </h1>
                             <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-500 text-[10px] font-black uppercase tracking-wider border border-rose-100">
-                                {displayPosts.length} posts
+                                {t('postsCount', { count: displayPosts.length })}
                             </span>
                         </div>
                         
@@ -234,7 +238,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                     className="flex items-center gap-2 px-5 py-2.5 bg-stone-800 text-white font-bold text-sm rounded-xl hover:bg-rose-500 transition-all shadow-lg active:scale-95"
                                 >
                                     <PenTool className="w-4 h-4" />
-                                    <span>글쓰기</span>
+                                    <span>{t('writePost')}</span>
                                 </Link>
                             )}
                         </div>
@@ -263,7 +267,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             setIsSearching(false);
                                         }
                                     }}
-                                    placeholder="게시글 검색..."
+                                    placeholder={t('searchPlaceholder')}
                                     className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-tan-200 rounded-xl focus:outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-all text-stone-800 placeholder:text-stone-400"
                                 />
                             </div>
@@ -272,7 +276,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                     onClick={() => { setSearchResults(null); setSearchQuery(''); }}
                                     className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-100 text-stone-600 font-bold text-xs rounded-xl hover:bg-stone-200 transition-all"
                                 >
-                                    <X className="w-3.5 h-3.5" /> 초기화
+                                    <X className="w-3.5 h-3.5" /> {tCommon('reset')}
                                 </button>
                             )}
                         </div>
@@ -288,7 +292,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                 }`}
                             >
                                 <MessageSquare className="w-3.5 h-3.5" />
-                                <span>최신 게시물</span>
+                                <span>{t('filters.latest')}</span>
                             </button>
                             <button
                                 onClick={() => setListFilter('popular')}
@@ -299,7 +303,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                 }`}
                             >
                                 <TrendingUp className="w-3.5 h-3.5 text-rose-400" />
-                                <span>인기 게시물</span>
+                                <span>{t('filters.popular')}</span>
                             </button>
                             {user && (
                                 <button
@@ -311,7 +315,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                     }`}
                                 >
                                     <UserIcon className="w-3.5 h-3.5 text-sky-400" />
-                                    <span>내 활동 내역</span>
+                                    <span>{t('filters.myActivity')}</span>
                                 </button>
                             )}
                         </div>
@@ -320,10 +324,10 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft overflow-hidden">
                             {/* Table Header */}
                             <div className="grid grid-cols-[70px_1fr_90px_70px_50px_50px_50px_40px] items-center px-4 py-3 bg-stone-50 border-b border-stone-100 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                                <span className="text-center">분류</span>
-                                <span>제목</span>
-                                <span>글쓴이</span>
-                                <span className="text-center">날짜</span>
+                                <span className="text-center">{t('table.category')}</span>
+                                <span>{t('table.title')}</span>
+                                <span>{t('table.author')}</span>
+                                <span className="text-center">{t('table.date')}</span>
                                 <span className="text-center flex items-center justify-center gap-1"><Heart className="w-3.5 h-3.5" /></span>
                                 <span className="text-center flex items-center justify-center gap-1"><MessageSquare className="w-3.5 h-3.5" /></span>
                                 <span className="text-center flex items-center justify-center gap-1"><Eye className="w-3.5 h-3.5" /></span>
@@ -470,16 +474,16 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                     </div>
                                     <p className="font-bold text-stone-700 mb-1">
                                         {listFilter === 'my_activity' 
-                                            ? '아직 활동 내역이 없습니다' 
+                                            ? (activeTab === 'ko' ? '아직 활동 내역이 없습니다' : 'No activity history yet') 
                                             : listFilter === 'popular' 
-                                            ? '인기 게시글이 없습니다' 
-                                            : '아직 게시글이 없습니다'
+                                            ? (activeTab === 'ko' ? '인기 게시글이 없습니다' : 'No popular posts found') 
+                                            : (activeTab === 'ko' ? '아직 게시글이 없습니다' : 'No posts found')
                                         }
                                     </p>
                                     <p className="text-sm text-stone-400 mb-6">
                                         {listFilter === 'my_activity'
-                                            ? '커뮤니티 글을 작성하거나, 좋아요/북마크를 남겨보세요!'
-                                            : activeTab === 'ko' ? '첫 번째 이야기를 들려주세요!' : 'Be the first to share a story!'}
+                                            ? (activeTab === 'ko' ? '커뮤니티 글을 작성하거나, 좋아요/북마크를 남겨보세요!' : 'Write community posts or leave likes/bookmarks!')
+                                            : (activeTab === 'ko' ? '첫 번째 이야기를 들려주세요!' : 'Be the first to share a story!')}
                                     </p>
                                 </div>
                             )}
@@ -493,7 +497,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
                                 <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 text-rose-400" />
-                                    인기 게시글
+                                    {t('filters.popular')}
                                     <span className="ml-auto text-[9px] font-black text-stone-300 uppercase tracking-widest">All Languages</span>
                                 </h3>
                                 <div className="space-y-3">
@@ -526,7 +530,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
                                 <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
                                     <UserIcon className="w-4 h-4 text-stone-400" />
-                                    내 활동
+                                    {t('sidebar.myStats')}
                                 </h3>
                                 <div className="grid grid-cols-3 gap-2">
                                     <div 
@@ -534,18 +538,18 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                         className="text-center p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl cursor-pointer transition-colors"
                                     >
                                         <p className="text-lg font-black text-stone-800">{myStats.postCount}</p>
-                                        <p className="text-[10px] text-stone-400 font-bold">게시글</p>
+                                        <p className="text-[10px] text-stone-400 font-bold">{t('sidebar.posts')}</p>
                                     </div>
                                     <div 
                                         onClick={() => setListFilter('my_activity')}
                                         className="text-center p-3 bg-stone-50 hover:bg-rose-50/50 rounded-xl cursor-pointer transition-colors"
                                     >
                                         <p className="text-lg font-black text-stone-800">{myStats.likeCount}</p>
-                                        <p className="text-[10px] text-stone-400 font-bold">좋아요</p>
+                                        <p className="text-[10px] text-stone-400 font-bold">{t('sidebar.likes')}</p>
                                     </div>
                                     <div className="text-center p-3 bg-stone-50 rounded-xl">
                                         <p className="text-lg font-black text-stone-800">{myStats.followerCount}</p>
-                                        <p className="text-[10px] text-stone-400 font-bold">팔로워</p>
+                                        <p className="text-[10px] text-stone-400 font-bold">{t('sidebar.followers')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -555,7 +559,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
                             <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-amber-400" />
-                                인기 태그
+                                {t('sidebar.popularTags')}
                             </h3>
                             <div className="flex flex-wrap gap-1.5">
                                 {['#여름니트', '#대바늘뜨기', '#입문자환영', '#니팅도안', '#KnitWithLove', '#byKnit'].map(tag => (
@@ -570,38 +574,79 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
                             <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
                                 <Crown className="w-4 h-4 text-rose-400" />
-                                추천 도아너
+                                {t('sidebar.recommendedDesigners')}
                             </h3>
                             <div className="py-6 text-center">
                                 <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
                                     <UserIcon className="w-5 h-5 text-rose-300" />
                                 </div>
-                                <p className="text-xs text-stone-400 font-bold">커뮤니티가 활성화되면<br/>인기 도아너가 여기에 표시됩니다!</p>
+                                <p className="text-xs text-stone-400 font-bold whitespace-pre-line">{t('sidebar.emptyDesigners')}</p>
                             </div>
                         </div>
 
                         {/* 코인 보상 안내 */}
-                        <div className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden transition-all duration-300 shadow-soft">
                             <div className="relative z-10">
-                                <h3 className="font-black text-sm mb-3 flex items-center gap-2">
-                                    <Coins className="w-4 h-4 text-amber-400" /> 코인 보상 안내
-                                </h3>
+                                <div 
+                                    onClick={() => setIsCoinsExpanded(!isCoinsExpanded)}
+                                    className="flex items-center justify-between mb-3 cursor-pointer group/title select-none"
+                                >
+                                    <h3 className="font-black text-sm flex items-center gap-2 group-hover/title:text-amber-300 transition-colors">
+                                        <Coins className="w-4 h-4 text-amber-400 animate-pulse" /> {t('sidebar.coinRewardInfo')}
+                                    </h3>
+                                    <button 
+                                        type="button"
+                                        className="text-stone-400 group-hover/title:text-white transition-all p-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-90"
+                                        aria-label={isCoinsExpanded ? "접기" : "펼치기"}
+                                    >
+                                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCoinsExpanded ? 'rotate-90 text-amber-300' : ''}`} />
+                                    </button>
+                                </div>
                                 <div className="space-y-2 text-xs text-stone-300">
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5">
-                                        <span>도안 첨부 글 작성</span>
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{t('sidebar.rewards.patternShare')}</span>
                                         <span className="font-black text-amber-400">+50</span>
                                     </div>
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5">
-                                        <span>도안 업로드</span>
+                                    
+                                    {isCoinsExpanded && (
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <span>{t('sidebar.rewards.signUpBonus')}</span>
+                                            <span className="font-black text-amber-400">+5</span>
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{t('sidebar.rewards.patternUploadBonus')}</span>
                                         <span className="font-black text-amber-400">+3</span>
                                     </div>
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5">
-                                        <span>AI 이미지 변환</span>
+
+                                    {isCoinsExpanded && (
+                                        <>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{t('sidebar.rewards.aiAnalysis')}</span>
+                                                <span className="font-black text-rose-400">-1</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{t('sidebar.rewards.aiEditor')}</span>
+                                                <span className="font-black text-rose-400">-10</span>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{t('sidebar.rewards.aiImage')}</span>
                                         <span className="font-black text-rose-400">-100</span>
                                     </div>
+
+                                    {isCoinsExpanded && (
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <span>{t('sidebar.rewards.aiExport')}</span>
+                                            <span className="font-black text-rose-400">-10</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5" />
+                            <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Menu, X, ShoppingBag, PenTool, Calculator, Heart, Image as ImageIcon, Users } from 'lucide-react';
+import { Menu, X, ShoppingBag, PenTool, Calculator, Heart, Image as ImageIcon, Users, Sparkles } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import type { Locale } from '@/i18n/request';
 

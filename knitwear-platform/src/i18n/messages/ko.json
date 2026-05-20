@@ -81,6 +81,7 @@
         "myMarketplace": "내 마켓플레이스",
         "community": "커뮤니티",
         "aiGenerator": "AI 생성기",
+        "aiTranslator": "AI 도안 번역기",
         "purchases": "주문 내역"
     },
     "home": {
@@ -782,7 +783,8 @@
             "yarn": "실 계산",
             "raglan": "래글런",
             "sock": "양말",
-            "grading": "그레이딩"
+            "grading": "그레이딩",
+            "translator": "AI 도안 번역"
         },
         "patternConverter": {
             "title": "내 게이지로 콧수/단수 바꾸기",
@@ -988,6 +990,112 @@
             "newRowCount": "변환된 단수",
             "per10cm": "10cm 기준",
             "difference": "증감"
+        }
+    },
+    "community": {
+        "title": "커뮤니티",
+        "postsCount": "{count}개의 게시글",
+        "searchPlaceholder": "게시글 검색...",
+        "writePost": "글쓰기",
+        "categories": {
+            "all": "전체",
+            "general": "자유",
+            "showcase": "자랑",
+            "qna": "질문",
+            "tip": "팁"
+        },
+        "filters": {
+            "latest": "최신 게시물",
+            "popular": "인기 게시물",
+            "myActivity": "내 활동"
+        },
+        "table": {
+            "category": "분류",
+            "title": "제목",
+            "author": "글쓴이",
+            "date": "날짜",
+            "views": "조회"
+        },
+        "sidebar": {
+            "myStats": "내 활동 통계",
+            "posts": "작성한 글",
+            "likes": "받은 좋아요",
+            "followers": "팔로워",
+            "loginPrompt": "로그인하고 커뮤니티 활동을 시작해보세요!",
+            "popularTags": "인기 태그",
+            "recommendedDesigners": "추천 도아너",
+            "emptyDesigners": "커뮤니티가 활성화되면\n인기 도아너가 여기에 표시됩니다!",
+            "coinRewardInfo": "코인 보상 안내",
+            "rewards": {
+                "patternShare": "도안 첨부 글 작성",
+                "signUpBonus": "가입 축하 적립",
+                "patternUploadBonus": "도안 업로드 보너스",
+                "aiAnalysis": "AI 패턴 분석",
+                "aiEditor": "AI 에디터 편집",
+                "aiImage": "AI 이미지 변환",
+                "aiExport": "AI 도안 내보내기 (PNG/JPG/PDF)"
+            }
+        },
+        "detail": {
+            "backToList": "목록으로",
+            "author": "작성자",
+            "following": "팔로잉",
+            "follow": "팔로우",
+            "views": "조회 {count}",
+            "translateView": "번역 보기",
+            "originalView": "원문 보기",
+            "translating": "번역 중...",
+            "translationFailed": "번역에 실패했습니다.",
+            "deleteConfirm": "게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+            "deleteCommentConfirm": "댓글을 삭제하시겠습니까?",
+            "deleteFailed": "삭제에 실패했습니다.",
+            "edit": "수정",
+            "delete": "삭제",
+            "save": "저장",
+            "saving": "저장 중...",
+            "cancel": "취소",
+            "attachments": "첨부파일 및 도안",
+            "sharedPattern": "공유 도안",
+            "attachedPhoto": "첨부 사진",
+            "view": "보기",
+            "saveFile": "저장",
+            "comments": "댓글",
+            "commentsCount": "댓글 {count}",
+            "replyTo": "{name}님에게 답글",
+            "replyPlaceholder": "답글을 입력하세요...",
+            "commentPlaceholder": "댓글을 입력하세요...",
+            "commentLoginPrompt": "댓글을 작성하려면 로그인이 필요합니다.",
+            "submitComment": "댓글 등록",
+            "submitReply": "답글 등록",
+            "submitCommentLoading": "등록 중...",
+            "submitReplyLoading": "등록 중...",
+            "noCommentsTitle": "아직 댓글이 없습니다",
+            "noCommentsDesc": "첫 번째 댓글을 남겨보세요!",
+            "reply": "답글"
+        },
+        "time": {
+            "justNow": "방금",
+            "minutesAgo": "{count}분 전",
+            "hoursAgo": "{count}시간 전",
+            "daysAgo": "{count}일 전"
+        },
+        "writeModal": {
+            "title": "새 게시글 작성",
+            "editTitle": "게시글 수정",
+            "titleLabel": "제목",
+            "titlePlaceholder": "제목을 입력하세요",
+            "categoryLabel": "카테고리",
+            "contentLabel": "내용",
+            "contentPlaceholder": "내용을 입력하세요. 뜨개질 팁, 자랑거리, 질문 등을 자유롭게 공유해보세요!",
+            "attachPattern": "도안 첨부하기 (선택)",
+            "attachPatternDesc": "내 도안 중 하나를 첨부하여 공유하면 50코인을 획득합니다!",
+            "selectPatternPlaceholder": "첨부할 도안을 선택하세요",
+            "noPattern": "첨부 가능한 도안이 없습니다",
+            "uploadImages": "사진 첨부 (최대 4장)",
+            "uploadImagesDesc": "작품이나 게이지 스와치 사진을 업로드해보세요.",
+            "submit": "등록하기",
+            "submitting": "등록 중...",
+            "cancel": "취소"
         }
     }
 }
