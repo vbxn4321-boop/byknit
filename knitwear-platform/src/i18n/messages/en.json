@@ -1158,5 +1158,18 @@
       "step3Title": "Step 3: Payments & Earnings",
       "step3Desc": "Receive secure and fast payouts from pattern sales through our integrated payment systems (Stripe, KakaoPay, etc)."
     }
+  },
+  "blog": {
+    "title": "byKnit Blog",
+    "subtitle": "Inspiration and latest news for knitters",
+    "categories": {
+      "all": "All",
+      "news": "News",
+      "tip": "Tips",
+      "tutorial": "Tutorials"
+    },
+    "readMore": "Read More",
+    "backToList": "Back to List",
+    "notFound": "Post not found."
   }
 }

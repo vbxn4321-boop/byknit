@@ -1160,5 +1160,18 @@
       "step3Title": "Step 3: 결제 및 수익 관리",
       "step3Desc": "안전한 결제 시스템(카카오페이, Stripe 등)이 연동되어 있어, 도안 판매 시 수익을 빠르고 안전하게 정산받을 수 있습니다."
     }
+  },
+  "blog": {
+    "title": "byKnit 블로그",
+    "subtitle": "니터들을 위한 영감과 플랫폼 최신 소식",
+    "categories": {
+      "all": "전체보기",
+      "news": "소식",
+      "tip": "꿀팁",
+      "tutorial": "튜토리얼"
+    },
+    "readMore": "자세히 보기",
+    "backToList": "목록으로 돌아가기",
+    "notFound": "게시글을 찾을 수 없습니다."
   }
 }
