@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import type { Metadata } from 'next';
 
 // In a real application, this would come from a CMS or a database.
 const getPostData = (slug: string) => {
@@ -68,6 +69,44 @@ const getPostData = (slug: string) => {
         }
     };
     return posts[slug] || null;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    const post = getPostData(resolvedParams.slug);
+
+    if (!post) {
+        return {
+            title: 'Post Not Found - byKnit'
+        };
+    }
+
+    const plainTextDesc = post.content.replace(/<[^>]+>/g, '').substring(0, 150) + '...';
+
+    return {
+        title: `${post.title} | byKnit Blog`,
+        description: plainTextDesc,
+        openGraph: {
+            title: post.title,
+            description: plainTextDesc,
+            url: `https://byknit.com/${resolvedParams.locale}/blog/${resolvedParams.slug}`,
+            images: [
+                {
+                    url: `https://byknit.com${post.imageUrl}`,
+                    width: 1200,
+                    height: 630,
+                    alt: post.title,
+                },
+            ],
+            type: 'article',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.title,
+            description: plainTextDesc,
+            images: [`https://byknit.com${post.imageUrl}`],
+        },
+    };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {

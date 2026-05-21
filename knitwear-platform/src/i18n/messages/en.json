@@ -1171,5 +1171,9 @@
     "readMore": "Read More",
     "backToList": "Back to List",
     "notFound": "Post not found."
+  },
+  "metadata": {
+    "title": "byKnit - Digital Knitting Pattern Platform",
+    "description": "The perfect space for knitters. Convert photos to colorwork charts, design patterns with our editor, and share with the world."
   }
 }

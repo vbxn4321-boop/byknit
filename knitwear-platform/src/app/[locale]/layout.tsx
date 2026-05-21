@@ -19,11 +19,38 @@ const nunito = Nunito({
 
 
 
-export const metadata: Metadata = {
-    title: "byKnit - Create, Share & Discover Knitting Patterns",
-    description: "Your creative knitting journey starts here. Discover patterns, create designs, and let AI inspire your next project.",
-    keywords: ["knitting", "patterns", "crochet", "yarn", "DIY", "crafts"],
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: 'metadata' });
+
+    return {
+        title: t('title'),
+        description: t('description'),
+        keywords: ["knitting", "patterns", "crochet", "yarn", "DIY", "crafts", "뜨개질", "도안", "코바늘", "대바늘"],
+        openGraph: {
+            title: t('title'),
+            description: t('description'),
+            url: 'https://byknit.com',
+            siteName: 'byKnit',
+            images: [
+                {
+                    url: 'https://byknit.com/og-image.png',
+                    width: 1200,
+                    height: 630,
+                    alt: 'byKnit Open Graph Image',
+                },
+            ],
+            locale: locale,
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: t('title'),
+            description: t('description'),
+            images: ['https://byknit.com/og-image.png'],
+        },
+    };
+}
 
 export function generateStaticParams() {
     return locales.map((locale) => ({ locale }));
