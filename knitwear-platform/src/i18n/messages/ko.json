@@ -125,7 +125,7 @@
     }
   },
   "marketplace": {
-    "title": "도안 마켓플레이스",
+    "title": "마켓플레이스",
     "searchPlaceholder": "도안 검색...",
     "sort": {
       "recommended": "추천순",

@@ -125,7 +125,7 @@
     }
   },
   "marketplace": {
-    "title": "Pattern Marketplace",
+    "title": "Marketplace",
     "searchPlaceholder": "Search patterns...",
     "sort": {
       "recommended": "Recommended",
