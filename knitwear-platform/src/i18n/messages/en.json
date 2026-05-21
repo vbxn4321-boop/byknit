@@ -1095,5 +1095,68 @@
       "submitting": "Submitting...",
       "cancel": "Cancel"
     }
+  },
+  "tutorials": {
+    "title": "byKnit User Guide",
+    "subtitle": "Discover how to master byKnit's core features to make your knitting faster and easier.",
+    "tabs": {
+      "editor": "Pattern Editor",
+      "converter": "Chart Converter",
+      "calculator": "Smart Calculator",
+      "translator": "AI Translator",
+      "community": "Sell & Share"
+    },
+    "editor": {
+      "title": "Pattern Editor",
+      "desc": "Create your own digital patterns easily and quickly without graph paper.",
+      "step1Title": "Step 1: Create Canvas",
+      "step1Desc": "Enter the desired number of stitches and rows to create a new blank canvas.",
+      "step2Title": "Step 2: Draw Symbols",
+      "step2Desc": "Select knitting or crochet symbols from the right toolbar and click anywhere on the canvas to fill your pattern.",
+      "step3Title": "Step 3: Save & Export",
+      "step3Desc": "Your pattern saves automatically. When finished, click the download button at the top to export as PDF or PNG."
+    },
+    "converter": {
+      "title": "Chart Converter",
+      "desc": "Upload a photo, and our AI automatically converts it into a colorwork knitting chart.",
+      "step1Title": "Step 1: Upload Image",
+      "step1Desc": "Select and upload a photo or image you want to convert into a colorwork pattern.",
+      "step2Title": "Step 2: Adjust Settings",
+      "step2Desc": "Set your desired number of stitches, rows, and maximum number of colors, then click convert.",
+      "step3Title": "Step 3: Open in Editor",
+      "step3Desc": "Review your converted chart. For fine-tuning, send it to the Pattern Editor to edit pixel by pixel."
+    },
+    "calculator": {
+      "title": "Smart Calculator",
+      "desc": "Leave the complex knitting math to our smart calculators.",
+      "step1Title": "Gauge Converter",
+      "step1Desc": "When your gauge differs from the pattern, this tool automatically recalculates the required stitches and rows.",
+      "step2Title": "Yarn Calculator",
+      "step2Desc": "Calculate how many balls of yarn you'll need when using a different yarn weight or yardage than the original.",
+      "step3Title": "Pattern Grading",
+      "step3Desc": "Easily scale your pattern to different sizes (e.g., from S to L) by calculating the necessary stitch adjustments."
+    },
+    "translator": {
+      "title": "AI Translator",
+      "desc": "AI translates complex knitting abbreviations into natural language.",
+      "step1Title": "Step 1: Paste Original",
+      "step1Desc": "Copy and paste the original pattern text into the left input box.",
+      "step2Title": "Step 2: Auto-Translate",
+      "step2Desc": "Click translate, and the AI will interpret complex abbreviations like k, p, and k2tog into easy-to-read terms.",
+      "step3Title": "Step 3: Copy and Use",
+      "step3Desc": "Copy the translated pattern and save it to your personal notes or editor to use."
+    },
+    "placeholder": "A demonstration video (GIF) for {title} will be placed here.",
+    "footer": "Have more questions? Please visit our community board or customer center.",
+    "community": {
+      "title": "Pattern Selling & Sharing",
+      "desc": "Earn money by selling your patterns or share them for free with the knitting community.",
+      "step1Title": "Step 1: Sell on Marketplace",
+      "step1Desc": "Register your completed patterns from the editor to the Marketplace. Manage your sales easily in the Seller Dashboard.",
+      "step2Title": "Step 2: Share in Community",
+      "step2Desc": "Write a post in the Community board to share your free patterns, show off your projects, and exchange tips with others.",
+      "step3Title": "Step 3: Payments & Earnings",
+      "step3Desc": "Receive secure and fast payouts from pattern sales through our integrated payment systems (Stripe, KakaoPay, etc)."
+    }
   }
 }

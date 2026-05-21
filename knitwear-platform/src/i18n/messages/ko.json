@@ -1,1101 +1,1164 @@
 {
-    "common": {
-        "appName": "byKnit",
-        "tagline": "나만의 니팅 도안을 만들고 공유하세요",
-        "loading": "로딩 중...",
-        "error": "오류가 발생했습니다",
-        "save": "저장",
-        "cancel": "취소",
-        "delete": "삭제",
-        "edit": "수정",
-        "search": "검색",
-        "filter": "필터",
-        "apply": "적용",
-        "reset": "초기화",
-        "download": "다운로드",
-        "upload": "업로드",
-        "signIn": "로그인",
-        "signUp": "회원가입",
-        "signOut": "로그아웃",
-        "profile": "프로필",
-        "settings": "설정",
-        "share": "공유",
-        "back": "뒤로",
-        "showMore": "더 보기",
-        "showLess": "접기",
-        "on": "에",
-        "credits": "크레딧",
-        "noOrders": "주문 내역이 없습니다.",
-        "noComments": "작성한 댓글이나 리뷰가 없습니다.",
-        "follow": "팔로우",
-        "following": "팔로잉",
-        "saved": "저장됨",
-        "unSaved": "저장",
-        "errorTitle": "오류",
-        "errorMessage": "오류가 발생했습니다",
-        "tryAgain": "다시 시도"
+  "common": {
+    "appName": "byKnit",
+    "tagline": "나만의 니팅 도안을 만들고 공유하세요",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "search": "검색",
+    "filter": "필터",
+    "apply": "적용",
+    "reset": "초기화",
+    "download": "다운로드",
+    "upload": "업로드",
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "signOut": "로그아웃",
+    "profile": "프로필",
+    "settings": "설정",
+    "share": "공유",
+    "back": "뒤로",
+    "showMore": "더 보기",
+    "showLess": "접기",
+    "on": "에",
+    "credits": "크레딧",
+    "noOrders": "주문 내역이 없습니다.",
+    "noComments": "작성한 댓글이나 리뷰가 없습니다.",
+    "follow": "팔로우",
+    "following": "팔로잉",
+    "saved": "저장됨",
+    "unSaved": "저장",
+    "errorTitle": "오류",
+    "errorMessage": "오류가 발생했습니다",
+    "tryAgain": "다시 시도"
+  },
+  "profile": {
+    "title": "내 프로필",
+    "deleteAccount": "계정 삭제",
+    "deleteConfirm": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "tabs": {
+      "orders": "주문 내역",
+      "comments": "작성한 댓글/리뷰"
     },
-    "profile": {
-        "title": "내 프로필",
-        "deleteAccount": "계정 삭제",
-        "deleteConfirm": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "tabs": {
-            "orders": "주문 내역",
-            "comments": "작성한 댓글/리뷰"
+    "info": "기본 정보",
+    "nickname": "닉네임",
+    "phone": "연락처",
+    "editInfo": "정보 수정하기",
+    "updateSuccess": "프로필이 성공적으로 업데이트되었습니다!",
+    "credits": {
+      "title": "크레딧 내역",
+      "history": "거래 내역",
+      "available": "사용 가능한 크레딧",
+      "noHistory": "내역이 없습니다",
+      "noHistoryDesc": "아직 크레딧을 획득하거나 사용하지 않았습니다.",
+      "signUpBonus": "가입 축하 적립",
+      "aiImageConversion": "AI 이미지 변환",
+      "aiEditorImport": "AI 에디터 편집",
+      "aiExport": "AI 도안 내보내기 ({format})",
+      "patternUploadBonus": "도안 업로드 보너스"
+    },
+    "security": {
+      "title": "계정 보안",
+      "changePassword": "비밀번호 변경",
+      "currentPassword": "현재 비밀번호",
+      "newPassword": "새 비밀번호",
+      "confirmNewPassword": "새 비밀번호 확인",
+      "update": "비밀번호 변경하기",
+      "success": "비밀번호가 성공적으로 변경되었습니다!",
+      "error": "비밀번호 변경에 실패했습니다. 현재 비밀번호를 다시 확인해주세요."
+    }
+  },
+  "nav": {
+    "home": "홈",
+    "marketplace": "마켓플레이스",
+    "editor": "도안 에디터",
+    "chartConverter": "차트 변환기",
+    "smartCalculator": "스마트계산기",
+    "myPatterns": "도안 스튜디오",
+    "myMarketplace": "내 마켓플레이스",
+    "community": "커뮤니티",
+    "aiGenerator": "AI 생성기",
+    "aiTranslator": "AI 도안 번역기",
+    "purchases": "주문 내역"
+  },
+  "home": {
+    "heroTitle": "당신의 창의적인 니팅 여정의 시작",
+    "heroSubtitle": "수만 개의 도안을 탐색하고, 나만의 디자인을 만들고, AI로 아이디어를 얻으세요",
+    "explorePatterns": "도안 탐색하기",
+    "startCreating": "만들기 시작하기",
+    "featuredPatterns": "추천 도안",
+    "categories": "카테고리별 탐색",
+    "aiBadge": "AI 기반 도안 제작",
+    "stats": {
+      "patterns": "도안",
+      "creators": "크리에이터",
+      "countries": "국가"
+    },
+    "features": {
+      "title": "창작을 위한 모든 것",
+      "subtitle": "아이디어를 얻는 것부터 나만의 작품을 만드는 것까지 모두 지원합니다",
+      "marketplaceDesc": "전 세계 크리에이터들의 수천 개 도안을 만나보세요. 초보자용부터 전문가용까지 다양합니다.",
+      "editorDesc": "직관적인 그리드 에디터로 나만의 니팅 차트를 만드세요. 모바일 최적화 완료.",
+      "aiDesc": "이미지를 배색 차트로 변환하거나 머릿속에만 있던 도안을 AI에게 설명해보세요."
+    },
+    "whyChoose": {
+      "title": "byKnit를 선택하는 이유",
+      "ai": {
+        "title": "AI 기반 제작",
+        "desc": "어떤 이미지든 니팅 차트로 변환하거나 설명만으로 도안을 만들어보세요."
+      },
+      "community": {
+        "title": "글로벌 커뮤니티",
+        "desc": "전 세계 니터들과 연결되고 도안을 공유해보세요."
+      },
+      "tools": {
+        "title": "전문적인 도구들",
+        "desc": "심볼 라이브러리와 다양한 내보내기 옵션을 갖춘 전문 에디터를 제공합니다."
+      }
+    },
+    "cta": {
+      "title": "지금 시작해보세요",
+      "subtitle": "이미 도안을 공유하고 영감을 나누고 있는 수많은 창작자들과 함께하세요."
+    }
+  },
+  "marketplace": {
+    "title": "도안 마켓플레이스",
+    "searchPlaceholder": "도안 검색...",
+    "sort": {
+      "recommended": "추천순",
+      "newest": "최신순",
+      "popular": "인기순"
+    },
+    "filter": "필터",
+    "filters": {
+      "category": "카테고리",
+      "yarnWeight": "실 굵기",
+      "needleSize": "바늘 사이즈",
+      "technique": "기법",
+      "difficulty": "난이도",
+      "priceRange": "가격대",
+      "freeOnly": "무료만 보기"
+    },
+    "yarnWeights": {
+      "lace": "레이스",
+      "fingering": "핑거링",
+      "sport": "스포츠",
+      "dk": "DK",
+      "worsted": "워스티드",
+      "aran": "아란",
+      "bulky": "벌키",
+      "superBulky": "슈퍼 벌키"
+    },
+    "techniques": {
+      "stockinette": "메리야스",
+      "cable": "꽈배기",
+      "colorwork": "배색",
+      "lace": "레이스",
+      "brioche": "브리오쉬",
+      "mosaic": "모자이크",
+      "knitting": "대바늘",
+      "chart": "차트"
+    },
+    "difficulty": {
+      "beginner": "초급",
+      "intermediate": "중급",
+      "advanced": "고급"
+    },
+    "downloadPdf": "PDF 다운로드",
+    "buyNow": "구매하기",
+    "addToCart": "장바구니",
+    "watchAdToDownload": "광고 보고 무료 다운로드",
+    "watchingAd": "광고 시청 중...",
+    "downloadNow": "지금 다운로드",
+    "purchased": "구매 완료",
+    "purchase": "구매하기",
+    "downloadPdfKr": "도안 PDF 다운로드 (한글)",
+    "downloadPdfEn": "도안 PDF 다운로드 (영어)",
+    "reviews": "리뷰",
+    "writeReview": "리뷰 작성하기",
+    "reviewPlaceholder": "리뷰를 10자 이상 입력해 주세요...",
+    "firstReview": "첫 번째 리뷰를 남겨보세요!",
+    "reply": "답글 달기",
+    "replyPlaceholder": "답글을 입력하세요...",
+    "post": "등록",
+    "free": "무료",
+    "sold": "판매됨",
+    "downloads": "다운로드",
+    "views": "조회수",
+    "backToMarketplace": "마켓플레이스로 돌아가기",
+    "patternInfo": {
+      "difficulty": "난이도",
+      "needleSize": "바늘 사이즈",
+      "yarnWeight": "실 굵기",
+      "gauge": "게이지",
+      "techniques": "사용 기법"
+    },
+    "patternsFound": "개의 도안을 찾았습니다"
+  },
+  "editor": {
+    "title": "도안 에디터",
+    "newPattern": "태 패턴 만들기",
+    "gridSize": "그리드 크기",
+    "width": "가로 (코)",
+    "height": "세로 (단)",
+    "colorPalette": "색상 팔레트",
+    "addColor": "색상 추가",
+    "symbols": "니팅 심볼",
+    "tools": {
+      "brush": "브러시",
+      "fill": "채우기",
+      "eraser": "지우개",
+      "picker": "스포이트"
+    },
+    "export": {
+      "title": "내보내기",
+      "png": "PNG로 저장",
+      "pdf": "PDF로 저장",
+      "json": "프로젝트 저장"
+    },
+    "stitchSymbols": {
+      "knit": "겉뜨기",
+      "purl": "안뜨기",
+      "yarnOver": "바늘비우기",
+      "k2tog": "오른코 모아뜨기",
+      "ssk": "왼코 모아뜨기",
+      "cableLeft": "왼꽈배기",
+      "cableRight": "오른꽈배기",
+      "tbl": "뒤틀어뜨기",
+      "cable": "꽈배기",
+      "noStitch": "코 없음",
+      "addSymbol": {
+        "title": "심볼 추가",
+        "name": "이름",
+        "namePlaceholder": "예: 교차뜨기",
+        "symbol": "심볼 (1-2자)",
+        "symbolPlaceholder": "예: C",
+        "add": "추가하기"
+      }
+    },
+    "legend": "기호 설명",
+    "onboarding": {
+      "welcome": {
+        "title": "그리드 에디터에 오신 것을 환영합니다!",
+        "desc": "니팅 차트를 쉽고 빠르게 만들 수 있는 도구들을 소개합니다."
+      },
+      "tools": {
+        "title": "그리기 도구",
+        "desc": "페인트통으로 한번에 채우거나, 심볼 도구로 기호를 배치해보세요."
+      },
+      "palette": {
+        "title": "팔레트와 심볼",
+        "desc": "원하는 색상을 고르거나 나만의 기호를 추가할 수 있습니다."
+      },
+      "shortcuts": {
+        "title": "유용한 단축키",
+        "desc": "Ctrl+Z는 실행 취소, Ctrl+Shift+Z는 다시 실행입니다."
+      },
+      "export": {
+        "title": "저장과 공유",
+        "desc": "완성된 도안을 이미지나 PDF로 내보내 기호 설명과 함께 저장하세요."
+      },
+      "next": "다음",
+      "skip": "건너뛰기",
+      "finish": "시작하기"
+    }
+  },
+  "ai": {
+    "title": "차트 변환기",
+    "imageToChart": {
+      "title": "이미지를 차트로",
+      "description": "사진을 업로드하면 배색 니팅 차트로 변환해줍니다",
+      "uploadImage": "이미지 업로드",
+      "dragDrop": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
+      "settings": "변환 설정",
+      "targetWidth": "차트 가로 너비 (코)",
+      "targetHeight": "차트 세로 높이 (단)",
+      "maxColors": "최대 색상 수",
+      "convert": "차트로 변환하기",
+      "converting": "변환 중...",
+      "maintainAspectRatio": "비율 유지",
+      "conversionMode": "변환 모드",
+      "modePhoto": "부드럽게",
+      "modePixel": "선명하게",
+      "palette": "생성된 팔레트",
+      "exportOptions": "내보내기 설정",
+      "format": "파일 형식",
+      "png": "PNG 이미지",
+      "jpg": "JPEG 이미지",
+      "pdf": "PDF 문서",
+      "showGrid": "그리드 선 표시",
+      "showNumbers": "행/열 번호 표시",
+      "available": "{count} 크레딧 보유 중",
+      "paletteInfo": "생성된 팔레트 ({count}색)",
+      "download": "다운로드",
+      "editInEditor": "에디터에서 수정하기",
+      "resultInfo": "변환 결과: {width} x {height}",
+      "stitchCount": "{count} 코"
+    },
+    "chatToPattern": {
+      "title": "대화로 도안 만들기",
+      "description": "운하는 도안을 설명하면 AI가 도안 제작을 도와줍니다",
+      "placeholder": "만들고 싶은 도안을 설명해주세요...",
+      "examples": {
+        "title": "이렇게 물어보세요:",
+        "ex1": "초보자도 뜰 수 있는 포근한 꽈배기 목도리",
+        "ex2": "눈꽃 무늬가 들어간 페어아일 모자",
+        "ex3": "워스티드 실을 사용하는 심플한 래글런 스웨터"
+      },
+      "preview": "생성된 도안 미리보기",
+      "editInEditor": "에디터에서 수정하기"
+    },
+    "warning": {
+      "title": "검증 필요",
+      "message": "AI가 생성한 도안은 구조적 오류가 있을 수 있습니다. 실제 제작 전에 반드시 검토해주세요."
+    }
+  },
+  "auth": {
+    "welcomeBack": "반가워요!",
+    "errorMessage": "오류가 발생했습니다. 다시 시도해주세요.",
+    "createAccount": "회원가입",
+    "signIn": "로그인",
+    "backToLogin": "로그인으로 돌아가기",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "forgotPasswordLink": "비밀번호를 잊으셨나요?",
+    "findIdLink": "계정을 잊으셨나요?",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "orContinueWith": "또는 다음 계정으로 계속하기",
+    "termsAgreement": "가입 시 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다.",
+    "ageVerification": "본인은 만 16세 이상이며, 서비스 이용 약관에 동의합니다.",
+    "findId": {
+      "title": "계정 찾기 (이메일)",
+      "description": "가입하실 때 사용한 프로필 닉네임을 입력해주세요.",
+      "inputLabel": "프로필 이름 (닉네임)",
+      "submit": "이메일 찾기",
+      "resultMessage": "회원님의 가입 이메일은 다음과 같습니다:"
+    },
+    "forgotPassword": {
+      "title": "비밀번호 재설정",
+      "description": "가입하신 이메일 주소를 입력해 주시면 비밀번호 재설정 링크를 보내드립니다.",
+      "submit": "재설정 링크 보내기",
+      "successMessage": "다음 메일 주소로 비밀번호 재설정 링크를 발송했습니다:"
+    },
+    "sending": "전송 중..."
+  },
+  "knitting": {
+    "abbreviations": {
+      "k": "겉뜨기",
+      "p": "안뜨기",
+      "CO": "코잡기",
+      "BO": "코막음",
+      "st": "코",
+      "sts": "코",
+      "rnd": "단/라운드",
+      "rep": "반복",
+      "yo": "바늘비우기",
+      "ssk": "왼코 모아뜨기",
+      "k2tog": "오른코 모아뜨기",
+      "inc": "늘림",
+      "dec": "줄임",
+      "RS": "겉면",
+      "WS": "안면",
+      "pm": "마커 표시",
+      "sm": "마커 옮기기"
+    }
+  },
+  "Studio": {
+    "unsavedChangesWarning": "저장되지 않은 변경사항이 있습니다. 정말 나가시겠습니까?",
+    "gridSize": "그리드 크기",
+    "width": "가로",
+    "height": "세로",
+    "symbols": "기호",
+    "palette": "팔레트",
+    "knit": "겉뜨기",
+    "purl": "안뜨기",
+    "yarnOver": "바늘비우기",
+    "k2tog": "오른코 모아뜨기",
+    "ssk": "왼코 모아뜨기",
+    "tbl": "뒤틀어뜨기",
+    "cable": "꽈배기",
+    "noStitch": "코 없음",
+    "addSymbol": {
+      "title": "기호 추가",
+      "name": "이름",
+      "namePlaceholder": "예: 꽈배기",
+      "symbol": "기호",
+      "symbolPlaceholder": "예: C",
+      "add": "추가"
+    },
+    "confirm": "확인",
+    "cancel": "취소",
+    "shapeTool": "모양 도구",
+    "shapeType": "모양 종류",
+    "drawMode": "그리기 모드",
+    "outline": "윤곽선",
+    "fill": "채우기",
+    "close": "닫기",
+    "shapes": {
+      "circle": "원형",
+      "square": "사각형",
+      "triangle": "삼각형",
+      "star": "별",
+      "heart": "하트"
+    },
+    "shapeToolHint": "드래그하여 이동/크기 조절 또는 우클릭하여 편집",
+    "selectionHint": "드래그하여 이동 또는 빈 공간 우클릭하여 선택 해제",
+    "copy": "복사",
+    "paste": "붙여넣기",
+    "cut": "잘라내기",
+    "flipH": "좌우 반전",
+    "flipV": "상하 반전",
+    "rotateMode": "회전 모드",
+    "erase": "지우기",
+    "dragToRotate": "드래그하여 회전",
+    "projectName": "프로젝트 이름",
+    "editProjectName": "프로젝트 이름 수정",
+    "pan": "화면 이동",
+    "paint": "채우기",
+    "symbol": "심볼",
+    "selectArea": "영역 선택",
+    "eraser": "지우개",
+    "areaSelectMode": "영역 선택 모드 (토글)",
+    "exportFormat": {
+      "png": "PNG 이미지",
+      "jpg": "JPG 이미지",
+      "pdf": "PDF 문서"
+    },
+    "gridStatus": "그리드 상태",
+    "rows": "행",
+    "cols": "열",
+    "cells": "셀",
+    "zoom": "확대/축소",
+    "clickToDelete": "클릭하여 삭제"
+  },
+  "Editor": {
+    "legend": "기호 설명",
+    "modeKnitting": "대바늘",
+    "modeCrochet": "코바늘",
+    "export": {
+      "title": "내보내기"
+    },
+    "stitchSymbols": {
+      "knit": "겉뜨기",
+      "purl": "안뜨기",
+      "yarnOver": "코늘리기",
+      "k2tog": "오른코 모아뜨기",
+      "ssk": "왼코 모아뜨기",
+      "cableLeft": "꽈배기 왼쪽",
+      "cableRight": "꽈배기 오른쪽",
+      "chain": "사슬뜨기",
+      "slipStitch": "빠진코",
+      "singleCrochet": "짧은뜨기",
+      "halfDouble": "중장뜨기",
+      "doubleCrochet": "장뜨기",
+      "trebleCrochet": "한길긴뜨기",
+      "doubleTreble": "두길긴뜨기",
+      "sc2tog": "짧은뜨기 2코모아",
+      "dc2tog": "장뜨기 2코모아",
+      "puff": "퍼프스티치",
+      "bobble": "보블스티치",
+      "popcorn": "팝콘스티치",
+      "picot": "피코뜨기",
+      "shell": "셸스티치"
+    },
+    "onboarding": {
+      "step1": {
+        "title": "그리드 에디터에 오신 것을 환영합니다",
+        "description": "직관적인 에디터로 아름다운 니팅 도안을 만들어보세요."
+      },
+      "step2": {
+        "title": "도구 선택",
+        "description": "기호, 페인트, 지우개 등을 사용해 도안을 디자인하세요."
+      },
+      "step3": {
+        "title": "기호 및 색상 추가",
+        "description": "다양한 니팅 기호와 색상으로 도안을 커스터마이징하세요."
+      },
+      "step4": {
+        "title": "내보내기",
+        "description": "완성된 도안을 PNG, JPG, PDF로 다운로드하세요."
+      },
+      "step5": {
+        "title": "게시 및 판매",
+        "description": "당신의 창의력을 공유하세요! 마켓플레이스에 도안을 올릴 수 있습니다."
+      }
+    }
+  },
+  "notifications": {
+    "title": "알림",
+    "markAllRead": "모두 읽음 처리",
+    "empty": "새로운 알림이 없습니다",
+    "purchase": "{title} 도안을 ${price}에 구매했습니다",
+    "review": "{title}에 리뷰를 남겼습니다: \"{content}\"",
+    "reviewWithPhoto": "{title}에 포토 리뷰를 남겼습니다: \"{content}\"",
+    "reply": "회원님의 리뷰에 답글을 남겼습니다: \"{content}\"",
+    "follow": "회원님을 팔로우하기 시작했습니다"
+  },
+  "Publish": {
+    "title": "마켓플레이스 출시",
+    "save": "저장",
+    "saving": "저장 중...",
+    "publish": "출시",
+    "publishing": "등록 중...",
+    "buttons": {
+      "submit": "마켓플레이스에 등록하기",
+      "submitting": "등록 중...",
+      "cancel": "취소",
+      "apply": "적용",
+      "delete": "삭제",
+      "crop": "자르기 / 편집",
+      "add": "추가"
+    },
+    "fields": {
+      "mainImage": "대표 이미지",
+      "mainImageHint": "권장: 1080x1080px (1:1)",
+      "uploadPlaceholder": "클릭하여 대표 이미지 업로드",
+      "tip": "꿀팁: 실제 완성된 작품 사진을 메인으로 사용하면 <strong>조회수와 다운로드 수가 평균 3배 이상 증가</strong>합니다!",
+      "subImages": "상세 이미지 (선택, 최대 10장)",
+      "patternTitle": "도안 제목",
+      "patternTitlePlaceholder": "작품 제목을 입력하세요",
+      "price": "가격",
+      "freeLabel": "무료",
+      "isFreeLabel": "무료",
+      "craftType": "기법",
+      "category": "카테고리",
+      "subcategory": "세부 카테고리",
+      "yarnWeight": "실 이름 및 색상",
+      "yarnAmount": "실 소요량 (선택)",
+      "needleSize": "바늘 사이즈",
+      "gauge": "게이지",
+      "usedColors": "사용된 색상",
+      "briefDescription": "간략 설명",
+      "briefDescriptionHint": "상품 페이지에 표시됩니다",
+      "briefDescriptionPlaceholder": "이 도안에 대한 간단한 소개를 작성해주세요. (초보자도 쉽게 만들 수 있는 포근한 니트 조끼 도안입니다.)",
+      "detailedDescription": "서술 도안 (상세 설명)",
+      "detailedDescriptionTag": "PDF에만 포함",
+      "detailedDescriptionHint": "구매자에게 제공되는 PDF에만 포함되며, 상품 페이지에는 노출되지 않습니다. 단별 상세한 뜨개 방법을 작성해주세요.",
+      "detailedDescriptionPlaceholder": "1단: 코잡기 60코\n2단: 겉뜨기...",
+      "hashtags": "해시태그",
+      "hashtagsHint": "구매자가 도안을 쉽게 찾을 수 있도록 3~10개의 해시태그를 입력하세요",
+      "hashtagPlaceholder": "태그 입력 후 Enter...",
+      "gaugePlaceholder": "24코 37단(10*10 cm, 3.5mm 대바늘, 메리야스 뜨기)",
+      "yarnAmountPlaceholder": "메리노블랜드 703 크렌베리 5볼 (5볼) 6볼",
+      "yarnAmountGuide": "샘플 실 이름, 색상, 소요량을 작성해주세요",
+      "measurements": "신체 치수 (선택)",
+      "measurementsPlaceholder": "예: 가슴둘레 90cm 기준 (S 사이즈)",
+      "yarnParts": "실 정보",
+      "addPart": "+ 파트 추가",
+      "partName": "파트 이름",
+      "yarnName": "실 이름 및 색상",
+      "partTechnique": "기법",
+      "partGauge": "게이지 (10cm x 10cm)",
+      "partAmount": "소요량",
+      "partNeedle": "바늘",
+      "removePart": "삭제",
+      "partNamePlaceholder": "소매",
+      "yarnNamePlaceholder": "울",
+      "techniquePlaceholder": "메리야스 뜨기",
+      "gaugeStitchPlaceholder": "코",
+      "gaugeRowPlaceholder": "단",
+      "amountPlaceholder": "300",
+      "sizes": "완성 사이즈 (서술)",
+      "sizesPlaceholder": "예: 가슴둘레 100cm, 총장 60cm (자유롭게 서술해주세요)"
+    },
+    "options": {
+      "knitting": "대바늘",
+      "crochet": "코바늘",
+      "mixed": "혼합",
+      "other": "기타",
+      "select": "선택해주세요",
+      "none": "선택 안함"
+    },
+    "success": {
+      "saveTitle": "저장 완료",
+      "saveDesc": "도안이 안전하게 저장되었습니다.",
+      "publishTitle": "출시 완료!",
+      "publishDesc": "마켓플레이스로 이동합니다..."
+    }
+  },
+  "footer": {
+    "platform": "플랫폼",
+    "marketplace": "마켓플레이스",
+    "patternEditor": "도안 에디터",
+    "aiGenerator": "AI 생성기",
+    "resources": "리소스",
+    "helpCenter": "고객센터",
+    "tutorials": "튜토리얼",
+    "blog": "블로그",
+    "legal": "정책",
+    "privacyPolicy": "개인정보 처리방침",
+    "termsOfService": "이용약관",
+    "copyright": "© {year} byKnit. 전 세계 니터들을 위해 💗로 만들었습니다.",
+    "businessInfo": {
+      "companyName": "84컴퍼니",
+      "representative": "대표자: 정진아",
+      "address": "주소: 광주광역시 북구 신용동 693, 402-2호",
+      "cpo": "개인정보보호책임자: 정진아 (vbxn4321@gmail.com)",
+      "contact": "연락처: vbxn4321@gmail.com",
+      "hosting": "호스팅 제공자: Vercel",
+      "businessLicense": "사업자등록번호: 754-12-00298",
+      "checkBusinessInfo": "사업자정보 확인",
+      "disclaimer": "84컴퍼니는 통신판매중개자이며 상품 거래의 당사자가 아닙니다. 상품 및 거래에 대한 책임은 판매자에게 있습니다."
+    }
+  },
+  "help": {
+    "title": "고객센터",
+    "subtitle": "무엇을 도와드릴까요?",
+    "faq": {
+      "title": "자주 묻는 질문 (FAQ)",
+      "q1": "구매한 도안은 어디서 다운로드하나요?",
+      "a1": "구매 후 '내 프로필 > 주문 내역' 메뉴에서 확인하실 수 있습니다. 해당 페이지에서 PDF 파일을 언제든 다시 다운로드할 수 있습니다.",
+      "q2": "제가 만든 도안을 판매할 수 있나요?",
+      "a2": "네, 물론입니다! 크리에이터로 등록하여 마켓플레이스에 도안을 판매할 수 있습니다. 에디터에서 도안을 완성한 후 '출시' 버튼을 눌러보세요.",
+      "q3": "AI 생성기는 어떻게 사용하나요?",
+      "a3": "원하는 디자인을 텍스트로 설명하거나 이미지를 업로드하면, AI가 자동으로 니팅 차트를 생성해줍니다. 생성된 차트는 에디터에서 자유롭게 수정할 수 있습니다.",
+      "q4": "어떤 파일 형식으로 내보낼 수 있나요?",
+      "a4": "서술 도안이 포함된 PDF, 고화질 이미지(PNG), 또는 나중에 다시 수정할 수 있는 프로젝트 파일로 내보낼 수 있습니다."
+    },
+    "contact": {
+      "title": "더 궁금한 점이 있으신가요?",
+      "desc": "원하시는 답변을 찾지 못하셨다면 이메일로 문의해 주세요.",
+      "emailButton": "이메일 문의하기"
+    }
+  },
+  "privacy": {
+    "title": "개인정보 처리방침",
+    "lastUpdated": "최종 수정일: {date}",
+    "labels": {
+      "collection": "수집 항목",
+      "collectionDesc": "이메일, ID, SNS",
+      "retention": "보유 기간",
+      "retentionDesc": "탈퇴 시 즉시 파기",
+      "outsourcingDesc": "Vercel, Supabase",
+      "contact": "책임자 연락처"
+    },
+    "sections": {
+      "overview": "총칙",
+      "collectedItems": "개인정보의 수집항목 및 수집방법",
+      "purpose": "개인정보의 처리 목적",
+      "retentionPeriod": "개인정보의 보유 및 이용기간",
+      "destruction": "개인정보의 파기절차 및 방법",
+      "outsourcing": "개인정보 처리의 위탁",
+      "overseas": "개인정보의 국외이전",
+      "rights": "이용자 및 법정대리인의 권리와 행사방법",
+      "cookies": "쿠키(Cookie)의 설치/운영 및 거부에 관한 사항",
+      "safety": "개인정보의 안전성 확보 조치",
+      "automatedDecision": "자동화된 결정에 관한 사항",
+      "cpo": "개인정보 보호책임자",
+      "remedies": "권익침해 구제방법"
+    },
+    "ui": {
+      "summaryTitle": "개인정보 처리 방칙 요약",
+      "detailsTitle": "상세 정보",
+      "showAll": "상세 내용 전체 보기",
+      "hideAll": "상세 내용 접기",
+      "thirdParty": "제3자 제공",
+      "noThirdParty": "없음",
+      "required": "필수 항목",
+      "optional": "선택 항목",
+      "auto": "자동 수집"
+    },
+    "content": {
+      "overview": "84컴퍼니(이하 '회사')는 이용자의 개인정보를 소중히 다루며, 「개인정보 보호법」 제30조 및 관련 법령, 그리고 GDPR(EU 일반 개인정보 보호법) 규정을 준수합니다. 본 방침을 통해 회사가 이용자의 어떠한 정보를 수집하고 어떻게 사용하는지 공개합니다.",
+      "collectedItems": {
+        "required": "필수: 이메일, 비밀번호, 닉네임, 구매/결제 기록",
+        "optional": "선택: 프로필 이미지, 뜨개질 숙련도 및 선호도",
+        "auto": "자동 수집: IP 주소, 쿠키, 서비스 이용 기록, 기기 정보"
+      },
+      "purpose": "회사는 서비스 제공, 본인 식별, 이용자 맞춤형 추천, 신규 서비스 개발, 분쟁 해결 및 민원 처리 등을 목적으로 개인정보를 처리합니다.",
+      "retentionPeriod": "원칙적으로 이용자가 서비스를 이용하는 동안 보유하며, 회원 탈퇴 시 즉시 파기합니다. 단, 관련 법령(상법, 전자상거래법 등)에 따라 보존이 필요한 경우 해당 기간 동안 보관합니다.",
+      "destruction": "회사는 목적 달성 시 개인정보를 지체 없이 파기합니다. 전자적 파일 형태는 복구 및 재생할 수 없는 기술적 방법(영구 삭제)을 사용하여 파기하며, 종이 문서는 분쇄기로 분쇄하여 파기합니다.",
+      "outsourcing": {
+        "title": "회사는 서비스 향상을 위해 아래와 같이 전문업체에 처리를 위탁하고 있습니다.",
+        "vercel": "Vercel: 웹 서비스 호스팅 및 인프라 관리",
+        "supabase": "Supabase (PostgreSQL): 데이터 저장 및 관리",
+        "google": "Google LLC: 플랫폼 분석(GA4) 및 광고 최적화"
+      },
+      "overseas": "데이터 효율성 및 안정성을 위해 클라우드 서비스(Supabase, Vercel)를 이용하며, 이 과정에서 개인정보가 국외 서버(AWS 등)로 보관/처리될 수 있습니다.",
+      "rights": "1. 정보주체는 회사에 대해 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.\n   가. 개인정보 열람 요구\n   나. 오류 등이 있을 경우 정정 요구\n   다. 삭제 요구\n   라. 처리 정지 요구 (Do Not Sell/Share My Personal Information 포함)\n\n2. 개인정보 판매 및 제공 거부권 (Opt-out):\n   회사는 이용자의 개인정보를 제3자에게 판매(유상 양도)하지 않습니다. 만약 향후 개인정보를 판매하거나 광고 목적으로 제3자에게 제공하는 경우, 이용자는 언제든지 이에 대한 거부권(Opt-out)을 행사할 수 있습니다.\n   * 거부 방법: 고객센터(vbxn4321@gmail.com) 이메일 접수 또는 내 정보 관리 페이지 내 '제3자 제공 동의 철회' 설정.\n\n3. 권리 행사는 회사에 대해 서면, 전자우편, 모사전송(FAX) 등을 통하여 하실 수 있으며 회사는 이에 대해 지체 없이 조치하겠습니다.",
+      "cookies": {
+        "title": "이용자는 쿠키 설치에 대한 선택권을 가지고 있습니다.",
+        "chrome": "Chrome: 설정 > 개인정보 및 보안 > 인터넷 사용 기록 삭제 또는 쿠키 설정",
+        "safari": "Safari: 설정 > 개인정보 보호 > 모든 쿠키 차단",
+        "edge": "Edge: 설정 > 쿠키 및 사이트 권한"
+      },
+      "safety": "회사는 SSL 암호화 통신, 비밀번호의 일방향 암호화 등 기술적 조치 외에도 '내부관리계획 수립 및 시행', '정기적 개인정보보호 교육' 등 관리적 조치를 수행하고 있습니다. 또한 법령에 따라 접속기록을 최소 1년 이상 보관 및 점검합니다.",
+      "automatedDecision": "회사는 AI 기술을 활용하여 서비스를 제공하나, 이용자의 권리 또는 의무에 중대한 영향을 미치는 '자동화된 결정'을 하지 않습니다. 향후 이러한 시스템 도입 시 정보주체에게 사전 고지하며, 정보주체는 이에 대한 거부권 및 설명요구권을 행사할 수 있습니다.",
+      "cpoInfo": {
+        "name": "정진아 (Jina Jung)",
+        "email": "vbxn4321@gmail.com",
+        "role": "대표 (Representative / CPO)"
+      },
+      "remedies": {
+        "title": "기타 개인정보 침해 신고나 상담이 필요한 경우 아래 기관에 문의하시기 바랍니다.",
+        "kopico": "개인정보분쟁조정위원회 (www.kopico.go.kr / 1833-6972)",
+        "kisa": "개인정보침해신고센터 (privacy.kisa.or.kr / 국번없이 118)",
+        "spo": "대검찰청 사이버수사과 (spo.go.kr / 국번없이 1301)",
+        "police": "경찰청 사이버수사국 (ecrm.cyber.go.kr / 국번없이 182)"
+      }
+    }
+  },
+  "cookieBanner": {
+    "message": "저희는 사용자 경험 개선과 마케팅을 위해 쿠키를 사용합니다.",
+    "acceptAll": "모두 동의",
+    "acceptSelection": "선택 허용",
+    "deny": "거부",
+    "privacyLink": "개인정보처리방침"
+  },
+  "terms": {
+    "title": "서비스 이용약관",
+    "lastUpdated": "최종 업데이트: {date}",
+    "sections": {
+      "ch1": "제1장 총칙",
+      "ch2": "제2장 회원가입 및 관리",
+      "ch3": "제3장 서비스 이용",
+      "ch4": "제4장 계약해지 및 이용제한",
+      "ch5": "제5장 손해배상 및 면책"
+    },
+    "articles": {
+      "art1": "제1조 (목적)",
+      "art2": "제2조 (정의)",
+      "art3": "제3조 (약관의 명시와 개정)",
+      "art6": "제6조 (개인정보보호)",
+      "art10": "제10조 (도안 등의 거래)",
+      "art16": "제16조 (청약철회 및 환불)",
+      "art20": "제20조 (게시물의 저작권 및 이용)",
+      "art22": "제22조 (금지행위 및 제재)",
+      "art28": "제28조 (회사의 면책)",
+      "provision": "부칙"
+    },
+    "ui": {
+      "summaryTitle": "이용약관 요약",
+      "detailsTitle": "약관 상세 내용",
+      "showAll": "상세 내용 전체 보기",
+      "hideAll": "상세 내용 접기",
+      "labels": {
+        "broker": {
+          "title": "중개자 면책",
+          "desc": "통신판매중개자"
         },
-        "info": "기본 정보",
-        "nickname": "닉네임",
-        "phone": "연락처",
-        "editInfo": "정보 수정하기",
-        "updateSuccess": "프로필이 성공적으로 업데이트되었습니다!",
-        "credits": {
-            "title": "크레딧 내역",
-            "history": "거래 내역",
-            "available": "사용 가능한 크레딧",
-            "noHistory": "내역이 없습니다",
-            "noHistoryDesc": "아직 크레딧을 획득하거나 사용하지 않았습니다.",
-            "signUpBonus": "가입 축하 적립",
-            "aiImageConversion": "AI 이미지 변환",
-            "aiEditorImport": "AI 에디터 편집",
-            "aiExport": "AI 도안 내보내기 ({format})",
-            "patternUploadBonus": "도안 업로드 보너스"
+        "refund": {
+          "title": "디지털 환불",
+          "desc": "다운로드 시 불가"
         },
-        "security": {
-            "title": "계정 보안",
-            "changePassword": "비밀번호 변경",
-            "currentPassword": "현재 비밀번호",
-            "newPassword": "새 비밀번호",
-            "confirmNewPassword": "새 비밀번호 확인",
-            "update": "비밀번호 변경하기",
-            "success": "비밀번호가 성공적으로 변경되었습니다!",
-            "error": "비밀번호 변경에 실패했습니다. 현재 비밀번호를 다시 확인해주세요."
+        "ugc": {
+          "title": "UGC 저작권",
+          "desc": "회원 소유 원칙"
+        },
+        "darkpattern": {
+          "title": "다크패턴 방지",
+          "desc": "30일 사전 고지"
+        },
+        "restriction": {
+          "title": "이용 제한",
+          "desc": "무단 배포 시 제재"
         }
+      }
     },
-    "nav": {
-        "home": "홈",
-        "marketplace": "마켓플레이스",
-        "editor": "도안 에디터",
-        "chartConverter": "차트 변환기",
-        "smartCalculator": "스마트계산기",
-        "myPatterns": "도안 스튜디오",
-        "myMarketplace": "내 마켓플레이스",
-        "community": "커뮤니티",
-        "aiGenerator": "AI 생성기",
-        "aiTranslator": "AI 도안 번역기",
-        "purchases": "주문 내역"
+    "content": {
+      "art1": "본 약관은 84컴퍼니(이하 \"회사\")가 운영하는 도안 및 핸드메이드 플랫폼 \"바이니트(ByKnit)\"(이하 \"바이니트\")에서 제공하는 전자상거래 관련 서비스(이하 \"서비스\")를 이용함에 있어 회사와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.",
+      "art2": "1. \"바이니트\"란 회사가 도안 및 관련 상품을 회원 간에 거래할 수 있도록 설정한 가상의 영업장을 말합니다.\n2. \"회원\"이란 바이니트에 접속하여 이 약관에 따라 회원가입을 한 자를 말합니다.\n3. \"판매자\"란 도안 등의 디지털 콘텐츠 또는 상품을 등록하여 판매하는 회원을 말합니다.\n4. \"구매자\"란 판매자의 상품을 구매하는 회원을 말합니다.\n5. \"통신판매중개\"란 바이니트를 통해 회원 간의 거래가 이루어지는 플랫폼을 제공하는 것을 말하며, 회사는 통신판매중개자로서 거래의 당사자가 아니며 판매자가 등록한 정보 및 거래에 대해 책임을 지지 않습니다.",
+      "art3": "1. 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행약관과 함께 서비스 초기화면에 그 적용일자 7일 전부터 적용일자 전일까지 공지합니다.\n2. [다크패턴 방지 정책]: 유료 서비스의 가격 인상, 자동 결제 전환 등 이용자의 권리에 중대한 영향을 미치는 변경 사항의 경우, 회사는 최소 30일 전에 회원에게 개별 통지하고 이용자의 명시적인 동의를 얻어야 합니다.",
+      "art6": "회사는 회원의 개인정보를 보호하기 위해 노력하며, 개인정보의 수집 및 이용에 대해서는 별도의 '개인정보처리방침'을 따릅니다.",
+      "art10": "1. 판매자는 등록한 도안 및 상품의 품질과 정보에 대한 책임을 집니다.\n2. 회사는 안전한 거래를 위한 결제 대금 보호 시스템(에스크로)을 제공할 수 있습니다.",
+      "art16": "1. [디지털 콘텐츠의 특수성]: PDF 등 디지털 콘텐츠는 「전자상거래법」 제17조 제2항 제5호에 의거하여, 다운로드가 개시되거나 열람이 완료된 경우 구매자의 단순 변심에 의한 청약철회 및 환불이 제한됩니다.\n2. 단, 제공된 파일이 설명과 현저히 다르거나 심각한 오류가 있는 경우, 중복 결제가 발생한 경우 환불이 가능합니다.\n3. 환불 신청은 구매 후 7일 이내에 고객센터를 통해 접수해야 합니다.",
+      "art20": "1. 회원이 서비스 내에 게시한 리뷰, 도안 이미지 등 게시물의 저작권은 해당 회원에게 귀속됩니다.\n2. [이용 라이선스]: 회사는 서비스의 운영, 홍보, 전시 및 판매 촉진을 위하여 회원이 작성한 게시물을 무상으로 전 세계적으로 이용(복제, 배포, 전송, 2차적 저작물 작성 포함)할 수 있는 비독점적 라이선스를 갖습니다.",
+      "art22": "1. 회원은 유료 도안의 무단 배포, 공유, 재판매, 타인의 저작권 침해, 악성 댓글 작성 등을 해서는 안 됩니다.\n2. 위 행위 적발 시 회사는 사전 통보 후(긴급 시 즉시) 서비스 이용 정지, 게시물 삭제, 영구 탈퇴 처리 및 관련 법적 조치를 취할 수 있습니다.",
+      "art28": "1. 회사는 통신판매중개자로서 회원 간 거래의 중개 플랫폼만을 제공하며, 판매자가 등록한 상품 정보의 진실성, 품질 등에 대하여 어떠한 보증도 하지 않습니다.\n2. 회사는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 책임을 지지 않습니다.",
+      "provision": "본 약관은 2026년 1월 22일부터 시행됩니다."
+    }
+  },
+  "calculator": {
+    "title": "Knitting Math Lab",
+    "subtitle": "뜨개질에 필요한 모든 계산을 한 곳에서. 게이지를 입력하면 모든 탭에서 자동으로 계산됩니다.",
+    "badge": "스마트 계산기",
+    "tabs": {
+      "basic": "기본 변환",
+      "converter": "게이지 변환",
+      "yarn": "실 계산",
+      "raglan": "래글런",
+      "sock": "양말",
+      "grading": "그레이딩",
+      "translator": "AI 도안 번역"
     },
-    "home": {
-        "heroTitle": "당신의 창의적인 니팅 여정의 시작",
-        "heroSubtitle": "수만 개의 도안을 탐색하고, 나만의 디자인을 만들고, AI로 아이디어를 얻으세요",
-        "explorePatterns": "도안 탐색하기",
-        "startCreating": "만들기 시작하기",
-        "featuredPatterns": "추천 도안",
-        "categories": "카테고리별 탐색",
-        "aiBadge": "AI 기반 도안 제작",
-        "stats": {
-            "patterns": "도안",
-            "creators": "크리에이터",
-            "countries": "국가"
-        },
-        "features": {
-            "title": "창작을 위한 모든 것",
-            "subtitle": "아이디어를 얻는 것부터 나만의 작품을 만드는 것까지 모두 지원합니다",
-            "marketplaceDesc": "전 세계 크리에이터들의 수천 개 도안을 만나보세요. 초보자용부터 전문가용까지 다양합니다.",
-            "editorDesc": "직관적인 그리드 에디터로 나만의 니팅 차트를 만드세요. 모바일 최적화 완료.",
-            "aiDesc": "이미지를 배색 차트로 변환하거나 머릿속에만 있던 도안을 AI에게 설명해보세요."
-        },
-        "whyChoose": {
-            "title": "byKnit를 선택하는 이유",
-            "ai": {
-                "title": "AI 기반 제작",
-                "desc": "어떤 이미지든 니팅 차트로 변환하거나 설명만으로 도안을 만들어보세요."
-            },
-            "community": {
-                "title": "글로벌 커뮤니티",
-                "desc": "전 세계 니터들과 연결되고 도안을 공유해보세요."
-            },
-            "tools": {
-                "title": "전문적인 도구들",
-                "desc": "심볼 라이브러리와 다양한 내보내기 옵션을 갖춘 전문 에디터를 제공합니다."
-            }
-        },
-        "cta": {
-            "title": "지금 시작해보세요",
-            "subtitle": "이미 도안을 공유하고 영감을 나누고 있는 수많은 창작자들과 함께하세요."
-        }
+    "patternConverter": {
+      "title": "내 게이지로 콧수/단수 바꾸기",
+      "description": "도안의 게이지와 내 게이지가 다를 때, 도안의 콧수와 단수를 내 게이지에 맞게 변환합니다.",
+      "patternGauge": "도안 게이지",
+      "myGauge": "내 게이지",
+      "fromTopBar": "상단 설정값",
+      "stitches": "콧수",
+      "rows": "단수",
+      "st": "코",
+      "row": "단",
+      "patternStitches": "도안 콧수",
+      "patternRows": "도안 단수",
+      "myStitches": "나의 콧수",
+      "myRows": "나의 단수",
+      "convert": "변환하기",
+      "stitchDiff": "콧수 차이",
+      "rowDiff": "단수 차이",
+      "example22": "예) 22",
+      "example30": "예) 30",
+      "example20": "예) 20",
+      "example28": "예) 28",
+      "example100": "예) 100"
     },
-    "marketplace": {
-        "title": "도안 마켓플레이스",
-        "searchPlaceholder": "도안 검색...",
-        "sort": {
-            "recommended": "추천순",
-            "newest": "최신순",
-            "popular": "인기순"
-        },
-        "filter": "필터",
-        "filters": {
-            "category": "카테고리",
-            "yarnWeight": "실 굵기",
-            "needleSize": "바늘 사이즈",
-            "technique": "기법",
-            "difficulty": "난이도",
-            "priceRange": "가격대",
-            "freeOnly": "무료만 보기"
-        },
-        "yarnWeights": {
-            "lace": "레이스",
-            "fingering": "핑거링",
-            "sport": "스포츠",
-            "dk": "DK",
-            "worsted": "워스티드",
-            "aran": "아란",
-            "bulky": "벌키",
-            "superBulky": "슈퍼 벌키"
-        },
-        "techniques": {
-            "stockinette": "메리야스",
-            "cable": "꽈배기",
-            "colorwork": "배색",
-            "lace": "레이스",
-            "brioche": "브리오쉬",
-            "mosaic": "모자이크",
-            "knitting": "대바늘",
-            "chart": "차트"
-        },
-        "difficulty": {
-            "beginner": "초급",
-            "intermediate": "중급",
-            "advanced": "고급"
-        },
-        "downloadPdf": "PDF 다운로드",
-        "buyNow": "구매하기",
-        "addToCart": "장바구니",
-        "watchAdToDownload": "광고 보고 무료 다운로드",
-        "watchingAd": "광고 시청 중...",
-        "downloadNow": "지금 다운로드",
-        "purchased": "구매 완료",
-        "purchase": "구매하기",
-        "downloadPdfKr": "도안 PDF 다운로드 (한글)",
-        "downloadPdfEn": "도안 PDF 다운로드 (영어)",
-        "reviews": "리뷰",
-        "writeReview": "리뷰 작성하기",
-        "reviewPlaceholder": "리뷰를 10자 이상 입력해 주세요...",
-        "firstReview": "첫 번째 리뷰를 남겨보세요!",
-        "reply": "답글 달기",
-        "replyPlaceholder": "답글을 입력하세요...",
-        "post": "등록",
-        "free": "무료",
-        "sold": "판매됨",
-        "downloads": "다운로드",
-        "views": "조회수",
-        "backToMarketplace": "마켓플레이스로 돌아가기",
-        "patternInfo": {
-            "difficulty": "난이도",
-            "needleSize": "바늘 사이즈",
-            "yarnWeight": "실 굵기",
-            "gauge": "게이지",
-            "techniques": "사용 기법"
-        },
-        "patternsFound": "개의 도안을 찾았습니다"
+    "gaugeBar": {
+      "title": "게이지 설정",
+      "subtitle": "10cm 기준",
+      "stitches": "콧수",
+      "rows": "단수",
+      "needle": "바늘",
+      "unit": "단위",
+      "apply": "적용하기",
+      "applied": "적용됨"
     },
-    "editor": {
-        "title": "도안 에디터",
-        "newPattern": "태 패턴 만들기",
-        "gridSize": "그리드 크기",
-        "width": "가로 (코)",
-        "height": "세로 (단)",
-        "colorPalette": "색상 팔레트",
-        "addColor": "색상 추가",
-        "symbols": "니팅 심볼",
-        "tools": {
-            "brush": "브러시",
-            "fill": "채우기",
-            "eraser": "지우개",
-            "picker": "스포이트"
-        },
-        "export": {
-            "title": "내보내기",
-            "png": "PNG로 저장",
-            "pdf": "PDF로 저장",
-            "json": "프로젝트 저장"
-        },
-        "stitchSymbols": {
-            "knit": "겉뜨기",
-            "purl": "안뜨기",
-            "yarnOver": "바늘비우기",
-            "k2tog": "오른코 모아뜨기",
-            "ssk": "왼코 모아뜨기",
-            "cableLeft": "왼꽈배기",
-            "cableRight": "오른꽈배기",
-            "tbl": "뒤틀어뜨기",
-            "cable": "꽈배기",
-            "noStitch": "코 없음",
-            "addSymbol": {
-                "title": "심볼 추가",
-                "name": "이름",
-                "namePlaceholder": "예: 교차뜨기",
-                "symbol": "심볼 (1-2자)",
-                "symbolPlaceholder": "예: C",
-                "add": "추가하기"
-            }
-        },
-        "legend": "기호 설명",
-        "onboarding": {
-            "welcome": {
-                "title": "그리드 에디터에 오신 것을 환영합니다!",
-                "desc": "니팅 차트를 쉽고 빠르게 만들 수 있는 도구들을 소개합니다."
-            },
-            "tools": {
-                "title": "그리기 도구",
-                "desc": "페인트통으로 한번에 채우거나, 심볼 도구로 기호를 배치해보세요."
-            },
-            "palette": {
-                "title": "팔레트와 심볼",
-                "desc": "원하는 색상을 고르거나 나만의 기호를 추가할 수 있습니다."
-            },
-            "shortcuts": {
-                "title": "유용한 단축키",
-                "desc": "Ctrl+Z는 실행 취소, Ctrl+Shift+Z는 다시 실행입니다."
-            },
-            "export": {
-                "title": "저장과 공유",
-                "desc": "완성된 도안을 이미지나 PDF로 내보내 기호 설명과 함께 저장하세요."
-            },
-            "next": "다음",
-            "skip": "건너뛰기",
-            "finish": "시작하기"
-        }
+    "emptyState": {
+      "title": "게이지를 먼저 입력해주세요",
+      "description": "정확한 계산을 위해 상단 바에서 10cm당 콧수와 단수를 입력해주세요.",
+      "hint": "위에서 게이지 입력"
     },
-    "ai": {
-        "title": "차트 변환기",
-        "imageToChart": {
-            "title": "이미지를 차트로",
-            "description": "사진을 업로드하면 배색 니팅 차트로 변환해줍니다",
-            "uploadImage": "이미지 업로드",
-            "dragDrop": "이미지를 끌어다 놓거나 클릭하여 선택하세요",
-            "settings": "변환 설정",
-            "targetWidth": "차트 가로 너비 (코)",
-            "targetHeight": "차트 세로 높이 (단)",
-            "maxColors": "최대 색상 수",
-            "convert": "차트로 변환하기",
-            "converting": "변환 중...",
-            "maintainAspectRatio": "비율 유지",
-            "conversionMode": "변환 모드",
-            "modePhoto": "부드럽게",
-            "modePixel": "선명하게",
-            "palette": "생성된 팔레트",
-            "exportOptions": "내보내기 설정",
-            "format": "파일 형식",
-            "png": "PNG 이미지",
-            "jpg": "JPEG 이미지",
-            "pdf": "PDF 문서",
-            "showGrid": "그리드 선 표시",
-            "showNumbers": "행/열 번호 표시",
-            "available": "{count} 크레딧 보유 중",
-            "paletteInfo": "생성된 팔레트 ({count}색)",
-            "download": "다운로드",
-            "editInEditor": "에디터에서 수정하기",
-            "resultInfo": "변환 결과: {width} x {height}",
-            "stitchCount": "{count} 코"
-        },
-        "chatToPattern": {
-            "title": "대화로 도안 만들기",
-            "description": "운하는 도안을 설명하면 AI가 도안 제작을 도와줍니다",
-            "placeholder": "만들고 싶은 도안을 설명해주세요...",
-            "examples": {
-                "title": "이렇게 물어보세요:",
-                "ex1": "초보자도 뜰 수 있는 포근한 꽈배기 목도리",
-                "ex2": "눈꽃 무늬가 들어간 페어아일 모자",
-                "ex3": "워스티드 실을 사용하는 심플한 래글런 스웨터"
-            },
-            "preview": "생성된 도안 미리보기",
-            "editInEditor": "에디터에서 수정하기"
-        },
-        "warning": {
-            "title": "검증 필요",
-            "message": "AI가 생성한 도안은 구조적 오류가 있을 수 있습니다. 실제 제작 전에 반드시 검토해주세요."
-        }
+    "resultCard": {
+      "copy": "복사",
+      "copied": "복사됨!"
     },
-    "auth": {
-        "welcomeBack": "반가워요!",
-        "errorMessage": "오류가 발생했습니다. 다시 시도해주세요.",
-        "createAccount": "회원가입",
-        "signIn": "로그인",
-        "backToLogin": "로그인으로 돌아가기",
-        "email": "이메일",
-        "password": "비밀번호",
-        "confirmPassword": "비밀번호 확인",
-        "forgotPasswordLink": "비밀번호를 잊으셨나요?",
-        "findIdLink": "계정을 잊으셨나요?",
-        "noAccount": "계정이 없으신가요?",
-        "hasAccount": "이미 계정이 있으신가요?",
-        "orContinueWith": "또는 다음 계정으로 계속하기",
-        "termsAgreement": "가입 시 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다.",
-        "ageVerification": "본인은 만 16세 이상이며, 서비스 이용 약관에 동의합니다.",
-        "findId": {
-            "title": "계정 찾기 (이메일)",
-            "description": "가입하실 때 사용한 프로필 닉네임을 입력해주세요.",
-            "inputLabel": "프로필 이름 (닉네임)",
-            "submit": "이메일 찾기",
-            "resultMessage": "회원님의 가입 이메일은 다음과 같습니다:"
-        },
-        "forgotPassword": {
-            "title": "비밀번호 재설정",
-            "description": "가입하신 이메일 주소를 입력해 주시면 비밀번호 재설정 링크를 보내드립니다.",
-            "submit": "재설정 링크 보내기",
-            "successMessage": "다음 메일 주소로 비밀번호 재설정 링크를 발송했습니다:"
-        },
-        "sending": "전송 중..."
+    "sizeModal": {
+      "title": "표준 사이즈 선택",
+      "women": "여성",
+      "men": "남성",
+      "chest": "가슴둘레",
+      "neck": "목둘레",
+      "disclaimer": "CYC 표준 치수 기준입니다. 개인차가 있을 수 있습니다."
     },
-    "knitting": {
-        "abbreviations": {
-            "k": "겉뜨기",
-            "p": "안뜨기",
-            "CO": "코잡기",
-            "BO": "코막음",
-            "st": "코",
-            "sts": "코",
-            "rnd": "단/라운드",
-            "rep": "반복",
-            "yo": "바늘비우기",
-            "ssk": "왼코 모아뜨기",
-            "k2tog": "오른코 모아뜨기",
-            "inc": "늘림",
-            "dec": "줄임",
-            "RS": "겉면",
-            "WS": "안면",
-            "pm": "마커 표시",
-            "sm": "마커 옮기기"
-        }
+    "basic": {
+      "description": "길이(cm/inch)를 콧수/단수로, 또는 콧수/단수를 길이(cm/inch)로 변환합니다.",
+      "cmToStitches": "cm → 콧수",
+      "stitchesToCm": "콧수 → cm",
+      "inputCm": "길이 (cm)",
+      "inputStitches": "콧수 또는 단수",
+      "inputWidth": "너비 (cm)",
+      "inputHeight": "길이 (cm)",
+      "inputWidthSt": "너비 (콧수)",
+      "inputHeightRow": "길이 (단수)",
+      "stitches": "콧수",
+      "rows": "단수",
+      "widthCm": "너비",
+      "heightCm": "높이",
+      "result": "계산 결과",
+      "st": "코",
+      "row": "단"
     },
-    "Studio": {
-        "unsavedChangesWarning": "저장되지 않은 변경사항이 있습니다. 정말 나가시겠습니까?",
-        "gridSize": "그리드 크기",
+    "yarn": {
+      "description": "패턴에 명시된 실 대신 다른 실을 사용할 때 필요한 볼 수를 계산합니다.",
+      "mode": {
+        "substitute": "패턴 실 대체",
+        "requirement": "실 소요량 계산"
+      },
+      "original": {
+        "title": "원작 패턴의 실",
+        "balls": "필요한 볼 수",
+        "metersPerBall": "1볼당 길이 (m)",
+        "weightPerBall": "1볼당 무게 (g)"
+      },
+      "myYarn": {
+        "title": "내가 사용할 실",
+        "metersPerBall": "1볼당 길이",
+        "weightPerBall": "1볼당 무게 (g)"
+      },
+      "requirement": {
+        "totalLengthTitle": "만들 작품 정보",
+        "lengthInput": "총 필요 길이",
+        "totalLengthDesc": "만들고자 하는 작품의 전체 실 소요 길이를 입력하세요.",
+        "myInfoTitle": "사용할 실 정보",
+        "ballLength": "1볼당 길이",
+        "strands": "합수 (몇 겹)",
+        "strandsUnit": "겹 (Strands)",
+        "strandsNote": "{count}겹으로 뜨면 실이 {count}배 더 필요합니다."
+      },
+      "reqMode": {
+        "length": "길이로 직접 입력",
+        "swatch": "스와치로 예측"
+      },
+      "swatch": {
+        "title": "내 스와치(샘플) 정보",
         "width": "가로",
         "height": "세로",
-        "symbols": "기호",
-        "palette": "팔레트",
-        "knit": "겉뜨기",
-        "purl": "안뜨기",
-        "yarnOver": "바늘비우기",
-        "k2tog": "오른코 모아뜨기",
-        "ssk": "왼코 모아뜨기",
-        "tbl": "뒤틀어뜨기",
-        "cable": "꽈배기",
-        "noStitch": "코 없음",
-        "addSymbol": {
-            "title": "기호 추가",
-            "name": "이름",
-            "namePlaceholder": "예: 꽈배기",
-            "symbol": "기호",
-            "symbolPlaceholder": "예: C",
-            "add": "추가"
-        },
-        "confirm": "확인",
-        "cancel": "취소",
-        "shapeTool": "모양 도구",
-        "shapeType": "모양 종류",
-        "drawMode": "그리기 모드",
-        "outline": "윤곽선",
-        "fill": "채우기",
-        "close": "닫기",
-        "shapes": {
-            "circle": "원형",
-            "square": "사각형",
-            "triangle": "삼각형",
-            "star": "별",
-            "heart": "하트"
-        },
-        "shapeToolHint": "드래그하여 이동/크기 조절 또는 우클릭하여 편집",
-        "selectionHint": "드래그하여 이동 또는 빈 공간 우클릭하여 선택 해제",
-        "copy": "복사",
-        "paste": "붙여넣기",
-        "cut": "잘라내기",
-        "flipH": "좌우 반전",
-        "flipV": "상하 반전",
-        "rotateMode": "회전 모드",
-        "erase": "지우기",
-        "dragToRotate": "드래그하여 회전",
-        "projectName": "프로젝트 이름",
-        "editProjectName": "프로젝트 이름 수정",
-        "pan": "화면 이동",
-        "paint": "채우기",
-        "symbol": "심볼",
-        "selectArea": "영역 선택",
-        "eraser": "지우개",
-        "areaSelectMode": "영역 선택 모드 (토글)",
-        "exportFormat": {
-            "png": "PNG 이미지",
-            "jpg": "JPG 이미지",
-            "pdf": "PDF 문서"
-        },
-        "gridStatus": "그리드 상태",
-        "rows": "행",
-        "cols": "열",
-        "cells": "셀",
-        "zoom": "확대/축소",
-        "clickToDelete": "클릭하여 삭제"
+        "weight": "무게",
+        "projectTitle": "만들 작품 크기",
+        "desc": "만들고자 하는 작품의 전체 가로/세로 길이를 입력하세요.",
+        "myInfoTitle": "내 실 정보",
+        "ballWeight": "1볼당 무게",
+        "totalWeight": "총 예상 무게"
+      },
+      "result": "필요한 실 양",
+      "totalMeters": "총 필요 길이",
+      "ballsNeeded": "필요한 볼 수",
+      "balls": "볼"
     },
-    "Editor": {
-        "legend": "기호 설명",
-        "modeKnitting": "대바늘",
-        "modeCrochet": "코바늘",
-        "export": {
-            "title": "내보내기"
-        },
-        "stitchSymbols": {
-            "knit": "겉뜨기",
-            "purl": "안뜨기",
-            "yarnOver": "코늘리기",
-            "k2tog": "오른코 모아뜨기",
-            "ssk": "왼코 모아뜨기",
-            "cableLeft": "꽈배기 왼쪽",
-            "cableRight": "꽈배기 오른쪽",
-            "chain": "사슬뜨기",
-            "slipStitch": "빠진코",
-            "singleCrochet": "짧은뜨기",
-            "halfDouble": "중장뜨기",
-            "doubleCrochet": "장뜨기",
-            "trebleCrochet": "한길긴뜨기",
-            "doubleTreble": "두길긴뜨기",
-            "sc2tog": "짧은뜨기 2코모아",
-            "dc2tog": "장뜨기 2코모아",
-            "puff": "퍼프스티치",
-            "bobble": "보블스티치",
-            "popcorn": "팝콘스티치",
-            "picot": "피코뜨기",
-            "shell": "셸스티치"
-        },
-        "onboarding": {
-            "step1": {
-                "title": "그리드 에디터에 오신 것을 환영합니다",
-                "description": "직관적인 에디터로 아름다운 니팅 도안을 만들어보세요."
-            },
-            "step2": {
-                "title": "도구 선택",
-                "description": "기호, 페인트, 지우개 등을 사용해 도안을 디자인하세요."
-            },
-            "step3": {
-                "title": "기호 및 색상 추가",
-                "description": "다양한 니팅 기호와 색상으로 도안을 커스터마이징하세요."
-            },
-            "step4": {
-                "title": "내보내기",
-                "description": "완성된 도안을 PNG, JPG, PDF로 다운로드하세요."
-            },
-            "step5": {
-                "title": "게시 및 판매",
-                "description": "당신의 창의력을 공유하세요! 마켓플레이스에 도안을 올릴 수 있습니다."
-            }
-        }
+    "raglan": {
+      "description": "탑다운 래글런 스웨터의 시작 콧수와 늘림 계획을 계산합니다.",
+      "sizeHelper": "표준 사이즈 사용하기",
+      "neckCirc": "목둘레",
+      "chestCirc": "가슴둘레",
+      "ease": "여유분",
+      "castOn": "시작 콧수",
+      "stitches": "코",
+      "st": "코",
+      "targetChest": "목표 가슴 콧수",
+      "totalIncreases": "총 늘림 코수",
+      "construction": "기본 구성",
+      "raglanDetails": "래글런 상세",
+      "increaseRounds": "늘림 횟수",
+      "totalRounds": "총 단수",
+      "frontBack": "앞/뒤판",
+      "eachSleeve": "소매 (각)"
     },
-    "notifications": {
-        "title": "알림",
-        "markAllRead": "모두 읽음 처리",
-        "empty": "새로운 알림이 없습니다",
-        "purchase": "{title} 도안을 ${price}에 구매했습니다",
-        "review": "{title}에 리뷰를 남겼습니다: \"{content}\"",
-        "reviewWithPhoto": "{title}에 포토 리뷰를 남겼습니다: \"{content}\"",
-        "reply": "회원님의 리뷰에 답글을 남겼습니다: \"{content}\"",
-        "follow": "회원님을 팔로우하기 시작했습니다"
+    "sock": {
+      "description": "발 둘레를 입력하면 양말 시작 콧수와 뒤꿈치 코수를 계산합니다.",
+      "negativeEaseTitle": "음수 여유분 (-10%)",
+      "negativeEaseDesc": "양말은 흘러내리지 않도록 발 둘레보다 10% 작게 떠야 합니다.",
+      "footCircumference": "발 둘레",
+      "calculation": "계산 과정",
+      "rawCalc": "원래 계산",
+      "roundedTo4": "4의 배수로 내림",
+      "result": "양말 콧수",
+      "castOn": "시작 콧수",
+      "heelFlap": "뒤꿈치 코수",
+      "perNeedle": "바늘당 (4개 기준)",
+      "stitches": "코",
+      "tips": {
+        "title": "양말 뜨기 팁",
+        "tip1": "2x2 고무단을 위해 4의 배수가 필요합니다",
+        "tip2": "뒤꿈치는 총 콧수의 절반을 사용합니다",
+        "tip3": "Magic Loop 사용 시 2의 배수도 가능합니다"
+      },
+      "selectSize": "표준 사이즈 선택",
+      "selectSizePlaceholder": "사이즈를 선택하거나 직접 입력하세요",
+      "footLength": "발 길이",
+      "total": "총",
+      "castOnInfo": "시작 콧수",
+      "ribbing": "추천 고무단",
+      "heelToe": "뒤꿈치 & 앞코",
+      "gussetPickup": "거싯 코줍기 (발등 연결)",
+      "toeDecrease": "앞코 줄임 시작점",
+      "fromStart": "지점부터",
+      "toeLengthNote": "예상 앞코 길이",
+      "constructionTips": "제작 상세 정보",
+      "sockCircumference": "양말 완성 둘레",
+      "totalFootLength": "최종 발 길이",
+      "startToeAt": "앞코 줄임 시작점",
+      "measuredFromHeel": "(뒤꿈치 끝부터)",
+      "appliedGauge": "적용된 게이지",
+      "rows": "단",
+      "courses": "단",
+      "enterGaugeWarning": "게이지를 입력하면 결과가 나타납니다.",
+      "sizes": {
+        "Baby (6-12 mo)": "아기 (6-12개월)",
+        "Toddler (1-3 yr)": "유아 (1-3세)",
+        "Child (4-6 yr)": "어린이 (4-6세)",
+        "Child (7-9 yr)": "어린이 (7-9세)",
+        "Woman S": "여성 S (220-230)",
+        "Woman M": "여성 M (235-245)",
+        "Woman L": "여성 L (250+)",
+        "Man M": "남성 M (250-265)",
+        "Man L": "남성 L (270+)"
+      }
     },
-    "Publish": {
-        "title": "마켓플레이스 출시",
-        "save": "저장",
-        "saving": "저장 중...",
-        "publish": "출시",
-        "publishing": "등록 중...",
-        "buttons": {
-            "submit": "마켓플레이스에 등록하기",
-            "submitting": "등록 중...",
-            "cancel": "취소",
-            "apply": "적용",
-            "delete": "삭제",
-            "crop": "자르기 / 편집",
-            "add": "추가"
-        },
-        "fields": {
-            "mainImage": "대표 이미지",
-            "mainImageHint": "권장: 1080x1080px (1:1)",
-            "uploadPlaceholder": "클릭하여 대표 이미지 업로드",
-            "tip": "꿀팁: 실제 완성된 작품 사진을 메인으로 사용하면 <strong>조회수와 다운로드 수가 평균 3배 이상 증가</strong>합니다!",
-            "subImages": "상세 이미지 (선택, 최대 10장)",
-            "patternTitle": "도안 제목",
-            "patternTitlePlaceholder": "작품 제목을 입력하세요",
-            "price": "가격",
-            "freeLabel": "무료",
-            "isFreeLabel": "무료",
-            "craftType": "기법",
-            "category": "카테고리",
-            "subcategory": "세부 카테고리",
-            "yarnWeight": "실 이름 및 색상",
-            "yarnAmount": "실 소요량 (선택)",
-            "needleSize": "바늘 사이즈",
-            "gauge": "게이지",
-            "usedColors": "사용된 색상",
-            "briefDescription": "간략 설명",
-            "briefDescriptionHint": "상품 페이지에 표시됩니다",
-            "briefDescriptionPlaceholder": "이 도안에 대한 간단한 소개를 작성해주세요. (초보자도 쉽게 만들 수 있는 포근한 니트 조끼 도안입니다.)",
-            "detailedDescription": "서술 도안 (상세 설명)",
-            "detailedDescriptionTag": "PDF에만 포함",
-            "detailedDescriptionHint": "구매자에게 제공되는 PDF에만 포함되며, 상품 페이지에는 노출되지 않습니다. 단별 상세한 뜨개 방법을 작성해주세요.",
-            "detailedDescriptionPlaceholder": "1단: 코잡기 60코\n2단: 겉뜨기...",
-            "hashtags": "해시태그",
-            "hashtagsHint": "구매자가 도안을 쉽게 찾을 수 있도록 3~10개의 해시태그를 입력하세요",
-            "hashtagPlaceholder": "태그 입력 후 Enter...",
-            "gaugePlaceholder": "24코 37단(10*10 cm, 3.5mm 대바늘, 메리야스 뜨기)",
-            "yarnAmountPlaceholder": "메리노블랜드 703 크렌베리 5볼 (5볼) 6볼",
-            "yarnAmountGuide": "샘플 실 이름, 색상, 소요량을 작성해주세요",
-            "measurements": "신체 치수 (선택)",
-            "measurementsPlaceholder": "예: 가슴둘레 90cm 기준 (S 사이즈)",
-            "yarnParts": "실 정보",
-            "addPart": "+ 파트 추가",
-            "partName": "파트 이름",
-            "yarnName": "실 이름 및 색상",
-            "partTechnique": "기법",
-            "partGauge": "게이지 (10cm x 10cm)",
-            "partAmount": "소요량",
-            "partNeedle": "바늘",
-            "removePart": "삭제",
-            "partNamePlaceholder": "소매",
-            "yarnNamePlaceholder": "울",
-            "techniquePlaceholder": "메리야스 뜨기",
-            "gaugeStitchPlaceholder": "코",
-            "gaugeRowPlaceholder": "단",
-            "amountPlaceholder": "300",
-            "sizes": "완성 사이즈 (서술)",
-            "sizesPlaceholder": "예: 가슴둘레 100cm, 총장 60cm (자유롭게 서술해주세요)"
-        },
-        "options": {
-            "knitting": "대바늘",
-            "crochet": "코바늘",
-            "mixed": "혼합",
-            "other": "기타",
-            "select": "선택해주세요",
-            "none": "선택 안함"
-        },
-        "success": {
-            "saveTitle": "저장 완료",
-            "saveDesc": "도안이 안전하게 저장되었습니다.",
-            "publishTitle": "출시 완료!",
-            "publishDesc": "마켓플레이스로 이동합니다..."
-        }
+    "grading": {
+      "modeBasic": "일반 그레이딩",
+      "modeAdvanced": "고급 그레이딩",
+      "descBasic": "원작의 비율을 유지하며 사이즈만 변경합니다.",
+      "descAdvanced": "내 게이지에 맞춰 도안의 치수와 콧수를 모두 재계산합니다.",
+      "widthCalc": "가로 (코/Stitch) 계산",
+      "heightCalc": "세로 (단/Row) 계산",
+      "myGaugeTitle": "내 게이지 입력",
+      "myGaugeSubtitle": "입력한 게이지를 기준으로 도안을 재계산합니다.",
+      "origWidth": "원작 가로 길이",
+      "origHeight": "원작 세로 길이",
+      "origStitchCount": "원작 콧수",
+      "origRowCount": "원작 단수",
+      "origGauge": "원작 게이지",
+      "targetWidth": "목표 가로 길이",
+      "targetHeight": "목표 세로 길이",
+      "newStitchCount": "변환된 콧수",
+      "newRowCount": "변환된 단수",
+      "per10cm": "10cm 기준",
+      "difference": "증감"
+    }
+  },
+  "community": {
+    "title": "커뮤니티",
+    "postsCount": "{count}개의 게시글",
+    "searchPlaceholder": "게시글 검색...",
+    "writePost": "글쓰기",
+    "categories": {
+      "all": "전체",
+      "general": "자유",
+      "showcase": "자랑",
+      "qna": "질문",
+      "tip": "팁"
     },
-    "footer": {
-        "platform": "플랫폼",
-        "marketplace": "마켓플레이스",
-        "patternEditor": "도안 에디터",
-        "aiGenerator": "AI 생성기",
-        "resources": "리소스",
-        "helpCenter": "고객센터",
-        "tutorials": "튜토리얼",
-        "blog": "블로그",
-        "legal": "정책",
-        "privacyPolicy": "개인정보 처리방침",
-        "termsOfService": "이용약관",
-        "copyright": "© {year} byKnit. 전 세계 니터들을 위해 💗로 만들었습니다.",
-        "businessInfo": {
-            "companyName": "84컴퍼니",
-            "representative": "대표자: 정진아",
-            "address": "주소: 광주광역시 북구 신용동 693, 402-2호",
-            "cpo": "개인정보보호책임자: 정진아 (vbxn4321@gmail.com)",
-            "contact": "연락처: vbxn4321@gmail.com",
-            "hosting": "호스팅 제공자: Vercel",
-            "businessLicense": "사업자등록번호: 754-12-00298",
-            "checkBusinessInfo": "사업자정보 확인",
-            "disclaimer": "84컴퍼니는 통신판매중개자이며 상품 거래의 당사자가 아닙니다. 상품 및 거래에 대한 책임은 판매자에게 있습니다."
-        }
+    "filters": {
+      "latest": "최신 게시물",
+      "popular": "인기 게시물",
+      "myActivity": "내 활동"
     },
-    "help": {
-        "title": "고객센터",
-        "subtitle": "무엇을 도와드릴까요?",
-        "faq": {
-            "title": "자주 묻는 질문 (FAQ)",
-            "q1": "구매한 도안은 어디서 다운로드하나요?",
-            "a1": "구매 후 '내 프로필 > 주문 내역' 메뉴에서 확인하실 수 있습니다. 해당 페이지에서 PDF 파일을 언제든 다시 다운로드할 수 있습니다.",
-            "q2": "제가 만든 도안을 판매할 수 있나요?",
-            "a2": "네, 물론입니다! 크리에이터로 등록하여 마켓플레이스에 도안을 판매할 수 있습니다. 에디터에서 도안을 완성한 후 '출시' 버튼을 눌러보세요.",
-            "q3": "AI 생성기는 어떻게 사용하나요?",
-            "a3": "원하는 디자인을 텍스트로 설명하거나 이미지를 업로드하면, AI가 자동으로 니팅 차트를 생성해줍니다. 생성된 차트는 에디터에서 자유롭게 수정할 수 있습니다.",
-            "q4": "어떤 파일 형식으로 내보낼 수 있나요?",
-            "a4": "서술 도안이 포함된 PDF, 고화질 이미지(PNG), 또는 나중에 다시 수정할 수 있는 프로젝트 파일로 내보낼 수 있습니다."
-        },
-        "contact": {
-            "title": "더 궁금한 점이 있으신가요?",
-            "desc": "원하시는 답변을 찾지 못하셨다면 이메일로 문의해 주세요.",
-            "emailButton": "이메일 문의하기"
-        }
+    "table": {
+      "category": "분류",
+      "title": "제목",
+      "author": "글쓴이",
+      "date": "날짜",
+      "views": "조회"
     },
-    "privacy": {
-        "title": "개인정보 처리방침",
-        "lastUpdated": "최종 수정일: {date}",
-        "labels": {
-            "collection": "수집 항목",
-            "collectionDesc": "이메일, ID, SNS",
-            "retention": "보유 기간",
-            "retentionDesc": "탈퇴 시 즉시 파기",
-            "outsourcingDesc": "Vercel, Supabase",
-            "contact": "책임자 연락처"
-        },
-        "sections": {
-            "overview": "총칙",
-            "collectedItems": "개인정보의 수집항목 및 수집방법",
-            "purpose": "개인정보의 처리 목적",
-            "retentionPeriod": "개인정보의 보유 및 이용기간",
-            "destruction": "개인정보의 파기절차 및 방법",
-            "outsourcing": "개인정보 처리의 위탁",
-            "overseas": "개인정보의 국외이전",
-            "rights": "이용자 및 법정대리인의 권리와 행사방법",
-            "cookies": "쿠키(Cookie)의 설치/운영 및 거부에 관한 사항",
-            "safety": "개인정보의 안전성 확보 조치",
-            "automatedDecision": "자동화된 결정에 관한 사항",
-            "cpo": "개인정보 보호책임자",
-            "remedies": "권익침해 구제방법"
-        },
-        "ui": {
-            "summaryTitle": "개인정보 처리 방칙 요약",
-            "detailsTitle": "상세 정보",
-            "showAll": "상세 내용 전체 보기",
-            "hideAll": "상세 내용 접기",
-            "thirdParty": "제3자 제공",
-            "noThirdParty": "없음",
-            "required": "필수 항목",
-            "optional": "선택 항목",
-            "auto": "자동 수집"
-        },
-        "content": {
-            "overview": "84컴퍼니(이하 '회사')는 이용자의 개인정보를 소중히 다루며, 「개인정보 보호법」 제30조 및 관련 법령, 그리고 GDPR(EU 일반 개인정보 보호법) 규정을 준수합니다. 본 방침을 통해 회사가 이용자의 어떠한 정보를 수집하고 어떻게 사용하는지 공개합니다.",
-            "collectedItems": {
-                "required": "필수: 이메일, 비밀번호, 닉네임, 구매/결제 기록",
-                "optional": "선택: 프로필 이미지, 뜨개질 숙련도 및 선호도",
-                "auto": "자동 수집: IP 주소, 쿠키, 서비스 이용 기록, 기기 정보"
-            },
-            "purpose": "회사는 서비스 제공, 본인 식별, 이용자 맞춤형 추천, 신규 서비스 개발, 분쟁 해결 및 민원 처리 등을 목적으로 개인정보를 처리합니다.",
-            "retentionPeriod": "원칙적으로 이용자가 서비스를 이용하는 동안 보유하며, 회원 탈퇴 시 즉시 파기합니다. 단, 관련 법령(상법, 전자상거래법 등)에 따라 보존이 필요한 경우 해당 기간 동안 보관합니다.",
-            "destruction": "회사는 목적 달성 시 개인정보를 지체 없이 파기합니다. 전자적 파일 형태는 복구 및 재생할 수 없는 기술적 방법(영구 삭제)을 사용하여 파기하며, 종이 문서는 분쇄기로 분쇄하여 파기합니다.",
-            "outsourcing": {
-                "title": "회사는 서비스 향상을 위해 아래와 같이 전문업체에 처리를 위탁하고 있습니다.",
-                "vercel": "Vercel: 웹 서비스 호스팅 및 인프라 관리",
-                "supabase": "Supabase (PostgreSQL): 데이터 저장 및 관리",
-                "google": "Google LLC: 플랫폼 분석(GA4) 및 광고 최적화"
-            },
-            "overseas": "데이터 효율성 및 안정성을 위해 클라우드 서비스(Supabase, Vercel)를 이용하며, 이 과정에서 개인정보가 국외 서버(AWS 등)로 보관/처리될 수 있습니다.",
-            "rights": "1. 정보주체는 회사에 대해 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.\n   가. 개인정보 열람 요구\n   나. 오류 등이 있을 경우 정정 요구\n   다. 삭제 요구\n   라. 처리 정지 요구 (Do Not Sell/Share My Personal Information 포함)\n\n2. 개인정보 판매 및 제공 거부권 (Opt-out):\n   회사는 이용자의 개인정보를 제3자에게 판매(유상 양도)하지 않습니다. 만약 향후 개인정보를 판매하거나 광고 목적으로 제3자에게 제공하는 경우, 이용자는 언제든지 이에 대한 거부권(Opt-out)을 행사할 수 있습니다.\n   * 거부 방법: 고객센터(vbxn4321@gmail.com) 이메일 접수 또는 내 정보 관리 페이지 내 '제3자 제공 동의 철회' 설정.\n\n3. 권리 행사는 회사에 대해 서면, 전자우편, 모사전송(FAX) 등을 통하여 하실 수 있으며 회사는 이에 대해 지체 없이 조치하겠습니다.",
-            "cookies": {
-                "title": "이용자는 쿠키 설치에 대한 선택권을 가지고 있습니다.",
-                "chrome": "Chrome: 설정 > 개인정보 및 보안 > 인터넷 사용 기록 삭제 또는 쿠키 설정",
-                "safari": "Safari: 설정 > 개인정보 보호 > 모든 쿠키 차단",
-                "edge": "Edge: 설정 > 쿠키 및 사이트 권한"
-            },
-            "safety": "회사는 SSL 암호화 통신, 비밀번호의 일방향 암호화 등 기술적 조치 외에도 '내부관리계획 수립 및 시행', '정기적 개인정보보호 교육' 등 관리적 조치를 수행하고 있습니다. 또한 법령에 따라 접속기록을 최소 1년 이상 보관 및 점검합니다.",
-            "automatedDecision": "회사는 AI 기술을 활용하여 서비스를 제공하나, 이용자의 권리 또는 의무에 중대한 영향을 미치는 '자동화된 결정'을 하지 않습니다. 향후 이러한 시스템 도입 시 정보주체에게 사전 고지하며, 정보주체는 이에 대한 거부권 및 설명요구권을 행사할 수 있습니다.",
-            "cpoInfo": {
-                "name": "정진아 (Jina Jung)",
-                "email": "vbxn4321@gmail.com",
-                "role": "대표 (Representative / CPO)"
-            },
-            "remedies": {
-                "title": "기타 개인정보 침해 신고나 상담이 필요한 경우 아래 기관에 문의하시기 바랍니다.",
-                "kopico": "개인정보분쟁조정위원회 (www.kopico.go.kr / 1833-6972)",
-                "kisa": "개인정보침해신고센터 (privacy.kisa.or.kr / 국번없이 118)",
-                "spo": "대검찰청 사이버수사과 (spo.go.kr / 국번없이 1301)",
-                "police": "경찰청 사이버수사국 (ecrm.cyber.go.kr / 국번없이 182)"
-            }
-        }
+    "sidebar": {
+      "myStats": "내 활동 통계",
+      "posts": "작성한 글",
+      "likes": "받은 좋아요",
+      "followers": "팔로워",
+      "loginPrompt": "로그인하고 커뮤니티 활동을 시작해보세요!",
+      "popularTags": "인기 태그",
+      "recommendedDesigners": "추천 도아너",
+      "emptyDesigners": "커뮤니티가 활성화되면\n인기 도아너가 여기에 표시됩니다!",
+      "coinRewardInfo": "코인 보상 안내",
+      "rewards": {
+        "patternShare": "도안 첨부 글 작성",
+        "signUpBonus": "가입 축하 적립",
+        "patternUploadBonus": "도안 업로드 보너스",
+        "aiAnalysis": "AI 패턴 분석",
+        "aiEditor": "AI 에디터 편집",
+        "aiImage": "AI 이미지 변환",
+        "aiExport": "AI 도안 내보내기 (PNG/JPG/PDF)"
+      }
     },
-    "cookieBanner": {
-        "message": "저희는 사용자 경험 개선과 마케팅을 위해 쿠키를 사용합니다.",
-        "acceptAll": "모두 동의",
-        "acceptSelection": "선택 허용",
-        "deny": "거부",
-        "privacyLink": "개인정보처리방침"
+    "detail": {
+      "backToList": "목록으로",
+      "author": "작성자",
+      "following": "팔로잉",
+      "follow": "팔로우",
+      "views": "조회 {count}",
+      "translateView": "번역 보기",
+      "originalView": "원문 보기",
+      "translating": "번역 중...",
+      "translationFailed": "번역에 실패했습니다.",
+      "deleteConfirm": "게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteCommentConfirm": "댓글을 삭제하시겠습니까?",
+      "deleteFailed": "삭제에 실패했습니다.",
+      "edit": "수정",
+      "delete": "삭제",
+      "save": "저장",
+      "saving": "저장 중...",
+      "cancel": "취소",
+      "attachments": "첨부파일 및 도안",
+      "sharedPattern": "공유 도안",
+      "attachedPhoto": "첨부 사진",
+      "view": "보기",
+      "saveFile": "저장",
+      "comments": "댓글",
+      "commentsCount": "댓글 {count}",
+      "replyTo": "{name}님에게 답글",
+      "replyPlaceholder": "답글을 입력하세요...",
+      "commentPlaceholder": "댓글을 입력하세요...",
+      "commentLoginPrompt": "댓글을 작성하려면 로그인이 필요합니다.",
+      "submitComment": "댓글 등록",
+      "submitReply": "답글 등록",
+      "submitCommentLoading": "등록 중...",
+      "submitReplyLoading": "등록 중...",
+      "noCommentsTitle": "아직 댓글이 없습니다",
+      "noCommentsDesc": "첫 번째 댓글을 남겨보세요!",
+      "reply": "답글"
     },
-    "terms": {
-        "title": "서비스 이용약관",
-        "lastUpdated": "최종 업데이트: {date}",
-        "sections": {
-            "ch1": "제1장 총칙",
-            "ch2": "제2장 회원가입 및 관리",
-            "ch3": "제3장 서비스 이용",
-            "ch4": "제4장 계약해지 및 이용제한",
-            "ch5": "제5장 손해배상 및 면책"
-        },
-        "articles": {
-            "art1": "제1조 (목적)",
-            "art2": "제2조 (정의)",
-            "art3": "제3조 (약관의 명시와 개정)",
-            "art6": "제6조 (개인정보보호)",
-            "art10": "제10조 (도안 등의 거래)",
-            "art16": "제16조 (청약철회 및 환불)",
-            "art20": "제20조 (게시물의 저작권 및 이용)",
-            "art22": "제22조 (금지행위 및 제재)",
-            "art28": "제28조 (회사의 면책)",
-            "provision": "부칙"
-        },
-        "ui": {
-            "summaryTitle": "이용약관 요약",
-            "detailsTitle": "약관 상세 내용",
-            "showAll": "상세 내용 전체 보기",
-            "hideAll": "상세 내용 접기",
-            "labels": {
-                "broker": {
-                    "title": "중개자 면책",
-                    "desc": "통신판매중개자"
-                },
-                "refund": {
-                    "title": "디지털 환불",
-                    "desc": "다운로드 시 불가"
-                },
-                "ugc": {
-                    "title": "UGC 저작권",
-                    "desc": "회원 소유 원칙"
-                },
-                "darkpattern": {
-                    "title": "다크패턴 방지",
-                    "desc": "30일 사전 고지"
-                },
-                "restriction": {
-                    "title": "이용 제한",
-                    "desc": "무단 배포 시 제재"
-                }
-            }
-        },
-        "content": {
-            "art1": "본 약관은 84컴퍼니(이하 \"회사\")가 운영하는 도안 및 핸드메이드 플랫폼 \"바이니트(ByKnit)\"(이하 \"바이니트\")에서 제공하는 전자상거래 관련 서비스(이하 \"서비스\")를 이용함에 있어 회사와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.",
-            "art2": "1. \"바이니트\"란 회사가 도안 및 관련 상품을 회원 간에 거래할 수 있도록 설정한 가상의 영업장을 말합니다.\n2. \"회원\"이란 바이니트에 접속하여 이 약관에 따라 회원가입을 한 자를 말합니다.\n3. \"판매자\"란 도안 등의 디지털 콘텐츠 또는 상품을 등록하여 판매하는 회원을 말합니다.\n4. \"구매자\"란 판매자의 상품을 구매하는 회원을 말합니다.\n5. \"통신판매중개\"란 바이니트를 통해 회원 간의 거래가 이루어지는 플랫폼을 제공하는 것을 말하며, 회사는 통신판매중개자로서 거래의 당사자가 아니며 판매자가 등록한 정보 및 거래에 대해 책임을 지지 않습니다.",
-            "art3": "1. 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행약관과 함께 서비스 초기화면에 그 적용일자 7일 전부터 적용일자 전일까지 공지합니다.\n2. [다크패턴 방지 정책]: 유료 서비스의 가격 인상, 자동 결제 전환 등 이용자의 권리에 중대한 영향을 미치는 변경 사항의 경우, 회사는 최소 30일 전에 회원에게 개별 통지하고 이용자의 명시적인 동의를 얻어야 합니다.",
-            "art6": "회사는 회원의 개인정보를 보호하기 위해 노력하며, 개인정보의 수집 및 이용에 대해서는 별도의 '개인정보처리방침'을 따릅니다.",
-            "art10": "1. 판매자는 등록한 도안 및 상품의 품질과 정보에 대한 책임을 집니다.\n2. 회사는 안전한 거래를 위한 결제 대금 보호 시스템(에스크로)을 제공할 수 있습니다.",
-            "art16": "1. [디지털 콘텐츠의 특수성]: PDF 등 디지털 콘텐츠는 「전자상거래법」 제17조 제2항 제5호에 의거하여, 다운로드가 개시되거나 열람이 완료된 경우 구매자의 단순 변심에 의한 청약철회 및 환불이 제한됩니다.\n2. 단, 제공된 파일이 설명과 현저히 다르거나 심각한 오류가 있는 경우, 중복 결제가 발생한 경우 환불이 가능합니다.\n3. 환불 신청은 구매 후 7일 이내에 고객센터를 통해 접수해야 합니다.",
-            "art20": "1. 회원이 서비스 내에 게시한 리뷰, 도안 이미지 등 게시물의 저작권은 해당 회원에게 귀속됩니다.\n2. [이용 라이선스]: 회사는 서비스의 운영, 홍보, 전시 및 판매 촉진을 위하여 회원이 작성한 게시물을 무상으로 전 세계적으로 이용(복제, 배포, 전송, 2차적 저작물 작성 포함)할 수 있는 비독점적 라이선스를 갖습니다.",
-            "art22": "1. 회원은 유료 도안의 무단 배포, 공유, 재판매, 타인의 저작권 침해, 악성 댓글 작성 등을 해서는 안 됩니다.\n2. 위 행위 적발 시 회사는 사전 통보 후(긴급 시 즉시) 서비스 이용 정지, 게시물 삭제, 영구 탈퇴 처리 및 관련 법적 조치를 취할 수 있습니다.",
-            "art28": "1. 회사는 통신판매중개자로서 회원 간 거래의 중개 플랫폼만을 제공하며, 판매자가 등록한 상품 정보의 진실성, 품질 등에 대하여 어떠한 보증도 하지 않습니다.\n2. 회사는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 책임을 지지 않습니다.",
-            "provision": "본 약관은 2026년 1월 22일부터 시행됩니다."
-        }
+    "time": {
+      "justNow": "방금",
+      "minutesAgo": "{count}분 전",
+      "hoursAgo": "{count}시간 전",
+      "daysAgo": "{count}일 전"
+    },
+    "writeModal": {
+      "title": "새 게시글 작성",
+      "editTitle": "게시글 수정",
+      "titleLabel": "제목",
+      "titlePlaceholder": "제목을 입력하세요",
+      "categoryLabel": "카테고리",
+      "contentLabel": "내용",
+      "contentPlaceholder": "내용을 입력하세요. 뜨개질 팁, 자랑거리, 질문 등을 자유롭게 공유해보세요!",
+      "attachPattern": "도안 첨부하기 (선택)",
+      "attachPatternDesc": "내 도안 중 하나를 첨부하여 공유하면 50코인을 획득합니다!",
+      "selectPatternPlaceholder": "첨부할 도안을 선택하세요",
+      "noPattern": "첨부 가능한 도안이 없습니다",
+      "uploadImages": "사진 첨부 (최대 4장)",
+      "uploadImagesDesc": "작품이나 게이지 스와치 사진을 업로드해보세요.",
+      "submit": "등록하기",
+      "submitting": "등록 중...",
+      "cancel": "취소"
+    }
+  },
+  "tutorials": {
+    "title": "byKnit 활용 가이드",
+    "subtitle": "쉽고 빠른 니팅의 시작, byKnit 핵심 기능들을 완벽하게 활용하는 방법을 알아보세요.",
+    "tabs": {
+      "editor": "도안 에디터",
+      "converter": "차트 변환기",
+      "calculator": "스마트 계산기",
+      "translator": "AI 번역기",
+      "community": "판매 & 공유"
+    },
+    "editor": {
+      "title": "도안 에디터 (Pattern Editor)",
+      "desc": "모눈종이 없이 디지털로 쉽고 빠르게 나만의 도안을 만드세요.",
+      "step1Title": "Step 1: 캔버스 생성",
+      "step1Desc": "만들고자 하는 도안의 목표 콧수와 단수를 입력하여 새로운 빈 캔버스를 생성합니다.",
+      "step2Title": "Step 2: 기호 그리기",
+      "step2Desc": "우측 툴바에서 대바늘이나 코바늘 기호를 선택하고, 캔버스의 원하는 위치에 클릭하여 도안을 채워 나갑니다.",
+      "step3Title": "Step 3: 저장 및 내보내기",
+      "step3Desc": "작업 중인 도안은 자동으로 저장됩니다. 완성된 도안은 상단의 다운로드 버튼을 눌러 PDF나 PNG 형식으로 내보낼 수 있습니다."
+    },
+    "converter": {
+      "title": "차트 변환기 (Chart Converter)",
+      "desc": "사진 한 장이면, AI가 뜨개질용 배색 차트로 자동 변환해 드립니다.",
+      "step1Title": "Step 1: 이미지 업로드",
+      "step1Desc": "배색 도안으로 바꾸고 싶은 사진이나 이미지를 컴퓨터에서 선택해 업로드합니다.",
+      "step2Title": "Step 2: 옵션 설정",
+      "step2Desc": "원하는 가로 콧수와 세로 단수, 그리고 최대 사용할 색상의 수를 설정한 뒤 변환 버튼을 누릅니다.",
+      "step3Title": "Step 3: 에디터로 연동",
+      "step3Desc": "변환이 완료된 배색 차트를 확인하고, 세밀한 수정이 필요하다면 에디터로 넘겨서 픽셀 단위로 수정할 수 있습니다."
     },
     "calculator": {
-        "title": "Knitting Math Lab",
-        "subtitle": "뜨개질에 필요한 모든 계산을 한 곳에서. 게이지를 입력하면 모든 탭에서 자동으로 계산됩니다.",
-        "badge": "스마트 계산기",
-        "tabs": {
-            "basic": "기본 변환",
-            "converter": "게이지 변환",
-            "yarn": "실 계산",
-            "raglan": "래글런",
-            "sock": "양말",
-            "grading": "그레이딩",
-            "translator": "AI 도안 번역"
-        },
-        "patternConverter": {
-            "title": "내 게이지로 콧수/단수 바꾸기",
-            "description": "도안의 게이지와 내 게이지가 다를 때, 도안의 콧수와 단수를 내 게이지에 맞게 변환합니다.",
-            "patternGauge": "도안 게이지",
-            "myGauge": "내 게이지",
-            "fromTopBar": "상단 설정값",
-            "stitches": "콧수",
-            "rows": "단수",
-            "st": "코",
-            "row": "단",
-            "patternStitches": "도안 콧수",
-            "patternRows": "도안 단수",
-            "myStitches": "나의 콧수",
-            "myRows": "나의 단수",
-            "convert": "변환하기",
-            "stitchDiff": "콧수 차이",
-            "rowDiff": "단수 차이",
-            "example22": "예) 22",
-            "example30": "예) 30",
-            "example20": "예) 20",
-            "example28": "예) 28",
-            "example100": "예) 100"
-        },
-        "gaugeBar": {
-            "title": "게이지 설정",
-            "subtitle": "10cm 기준",
-            "stitches": "콧수",
-            "rows": "단수",
-            "needle": "바늘",
-            "unit": "단위",
-            "apply": "적용하기",
-            "applied": "적용됨"
-        },
-        "emptyState": {
-            "title": "게이지를 먼저 입력해주세요",
-            "description": "정확한 계산을 위해 상단 바에서 10cm당 콧수와 단수를 입력해주세요.",
-            "hint": "위에서 게이지 입력"
-        },
-        "resultCard": {
-            "copy": "복사",
-            "copied": "복사됨!"
-        },
-        "sizeModal": {
-            "title": "표준 사이즈 선택",
-            "women": "여성",
-            "men": "남성",
-            "chest": "가슴둘레",
-            "neck": "목둘레",
-            "disclaimer": "CYC 표준 치수 기준입니다. 개인차가 있을 수 있습니다."
-        },
-        "basic": {
-            "description": "길이(cm/inch)를 콧수/단수로, 또는 콧수/단수를 길이(cm/inch)로 변환합니다.",
-            "cmToStitches": "cm → 콧수",
-            "stitchesToCm": "콧수 → cm",
-            "inputCm": "길이 (cm)",
-            "inputStitches": "콧수 또는 단수",
-            "inputWidth": "너비 (cm)",
-            "inputHeight": "길이 (cm)",
-            "inputWidthSt": "너비 (콧수)",
-            "inputHeightRow": "길이 (단수)",
-            "stitches": "콧수",
-            "rows": "단수",
-            "widthCm": "너비",
-            "heightCm": "높이",
-            "result": "계산 결과",
-            "st": "코",
-            "row": "단"
-        },
-        "yarn": {
-            "description": "패턴에 명시된 실 대신 다른 실을 사용할 때 필요한 볼 수를 계산합니다.",
-            "mode": {
-                "substitute": "패턴 실 대체",
-                "requirement": "실 소요량 계산"
-            },
-            "original": {
-                "title": "원작 패턴의 실",
-                "balls": "필요한 볼 수",
-                "metersPerBall": "1볼당 길이 (m)",
-                "weightPerBall": "1볼당 무게 (g)"
-            },
-            "myYarn": {
-                "title": "내가 사용할 실",
-                "metersPerBall": "1볼당 길이",
-                "weightPerBall": "1볼당 무게 (g)"
-            },
-            "requirement": {
-                "totalLengthTitle": "만들 작품 정보",
-                "lengthInput": "총 필요 길이",
-                "totalLengthDesc": "만들고자 하는 작품의 전체 실 소요 길이를 입력하세요.",
-                "myInfoTitle": "사용할 실 정보",
-                "ballLength": "1볼당 길이",
-                "strands": "합수 (몇 겹)",
-                "strandsUnit": "겹 (Strands)",
-                "strandsNote": "{count}겹으로 뜨면 실이 {count}배 더 필요합니다."
-            },
-            "reqMode": {
-                "length": "길이로 직접 입력",
-                "swatch": "스와치로 예측"
-            },
-            "swatch": {
-                "title": "내 스와치(샘플) 정보",
-                "width": "가로",
-                "height": "세로",
-                "weight": "무게",
-                "projectTitle": "만들 작품 크기",
-                "desc": "만들고자 하는 작품의 전체 가로/세로 길이를 입력하세요.",
-                "myInfoTitle": "내 실 정보",
-                "ballWeight": "1볼당 무게",
-                "totalWeight": "총 예상 무게"
-            },
-            "result": "필요한 실 양",
-            "totalMeters": "총 필요 길이",
-            "ballsNeeded": "필요한 볼 수",
-            "balls": "볼"
-        },
-        "raglan": {
-            "description": "탑다운 래글런 스웨터의 시작 콧수와 늘림 계획을 계산합니다.",
-            "sizeHelper": "표준 사이즈 사용하기",
-            "neckCirc": "목둘레",
-            "chestCirc": "가슴둘레",
-            "ease": "여유분",
-            "castOn": "시작 콧수",
-            "stitches": "코",
-            "st": "코",
-            "targetChest": "목표 가슴 콧수",
-            "totalIncreases": "총 늘림 코수",
-            "construction": "기본 구성",
-            "raglanDetails": "래글런 상세",
-            "increaseRounds": "늘림 횟수",
-            "totalRounds": "총 단수",
-            "frontBack": "앞/뒤판",
-            "eachSleeve": "소매 (각)"
-        },
-        "sock": {
-            "description": "발 둘레를 입력하면 양말 시작 콧수와 뒤꿈치 코수를 계산합니다.",
-            "negativeEaseTitle": "음수 여유분 (-10%)",
-            "negativeEaseDesc": "양말은 흘러내리지 않도록 발 둘레보다 10% 작게 떠야 합니다.",
-            "footCircumference": "발 둘레",
-            "calculation": "계산 과정",
-            "rawCalc": "원래 계산",
-            "roundedTo4": "4의 배수로 내림",
-            "result": "양말 콧수",
-            "castOn": "시작 콧수",
-            "heelFlap": "뒤꿈치 코수",
-            "perNeedle": "바늘당 (4개 기준)",
-            "stitches": "코",
-            "tips": {
-                "title": "양말 뜨기 팁",
-                "tip1": "2x2 고무단을 위해 4의 배수가 필요합니다",
-                "tip2": "뒤꿈치는 총 콧수의 절반을 사용합니다",
-                "tip3": "Magic Loop 사용 시 2의 배수도 가능합니다"
-            },
-            "selectSize": "표준 사이즈 선택",
-            "selectSizePlaceholder": "사이즈를 선택하거나 직접 입력하세요",
-            "footLength": "발 길이",
-            "total": "총",
-            "castOnInfo": "시작 콧수",
-            "ribbing": "추천 고무단",
-            "heelToe": "뒤꿈치 & 앞코",
-            "gussetPickup": "거싯 코줍기 (발등 연결)",
-            "toeDecrease": "앞코 줄임 시작점",
-            "fromStart": "지점부터",
-            "toeLengthNote": "예상 앞코 길이",
-            "constructionTips": "제작 상세 정보",
-            "sockCircumference": "양말 완성 둘레",
-            "totalFootLength": "최종 발 길이",
-            "startToeAt": "앞코 줄임 시작점",
-            "measuredFromHeel": "(뒤꿈치 끝부터)",
-            "appliedGauge": "적용된 게이지",
-            "rows": "단",
-            "courses": "단",
-            "enterGaugeWarning": "게이지를 입력하면 결과가 나타납니다.",
-            "sizes": {
-                "Baby (6-12 mo)": "아기 (6-12개월)",
-                "Toddler (1-3 yr)": "유아 (1-3세)",
-                "Child (4-6 yr)": "어린이 (4-6세)",
-                "Child (7-9 yr)": "어린이 (7-9세)",
-                "Woman S": "여성 S (220-230)",
-                "Woman M": "여성 M (235-245)",
-                "Woman L": "여성 L (250+)",
-                "Man M": "남성 M (250-265)",
-                "Man L": "남성 L (270+)"
-            }
-        },
-        "grading": {
-            "modeBasic": "일반 그레이딩",
-            "modeAdvanced": "고급 그레이딩",
-            "descBasic": "원작의 비율을 유지하며 사이즈만 변경합니다.",
-            "descAdvanced": "내 게이지에 맞춰 도안의 치수와 콧수를 모두 재계산합니다.",
-            "widthCalc": "가로 (코/Stitch) 계산",
-            "heightCalc": "세로 (단/Row) 계산",
-            "myGaugeTitle": "내 게이지 입력",
-            "myGaugeSubtitle": "입력한 게이지를 기준으로 도안을 재계산합니다.",
-            "origWidth": "원작 가로 길이",
-            "origHeight": "원작 세로 길이",
-            "origStitchCount": "원작 콧수",
-            "origRowCount": "원작 단수",
-            "origGauge": "원작 게이지",
-            "targetWidth": "목표 가로 길이",
-            "targetHeight": "목표 세로 길이",
-            "newStitchCount": "변환된 콧수",
-            "newRowCount": "변환된 단수",
-            "per10cm": "10cm 기준",
-            "difference": "증감"
-        }
+      "title": "스마트 계산기 (Smart Calculator)",
+      "desc": "복잡한 뜨개질 수학, 이제 스마트 계산기에 맡기세요.",
+      "step1Title": "게이지 변환",
+      "step1Desc": "원작 도안의 게이지와 내 손땀(게이지)이 다를 때, 변환 계산기를 사용하면 필요한 콧수와 단수를 자동으로 재계산해 줍니다.",
+      "step2Title": "실 소요량 계산",
+      "step2Desc": "원작과 다른 두께나 길이의 실을 사용할 때, 필요한 실의 볼 수를 즉시 계산할 수 있습니다.",
+      "step3Title": "사이즈 변환 (그레이딩)",
+      "step3Desc": "기존 도안을 다른 사이즈(예: S에서 L로)로 변경할 때 필요한 콧수 증감을 알려줍니다."
     },
+    "translator": {
+      "title": "AI 번역기 (AI Translator)",
+      "desc": "어려운 영문 도안, AI가 한국어 전문 뜨개 용어로 번역해 줍니다.",
+      "step1Title": "Step 1: 원본 입력",
+      "step1Desc": "번역하고 싶은 영문 도안 텍스트를 복사하여 왼쪽 입력창에 붙여넣습니다.",
+      "step2Title": "Step 2: 자동 번역",
+      "step2Desc": "번역 버튼을 누르면 AI가 k(겉뜨기), p(안뜨기), k2tog 등 복잡한 약어를 모두 해석하여 자연스러운 한국어 도안으로 바꿔줍니다.",
+      "step3Title": "Step 3: 복사하여 사용",
+      "step3Desc": "완성된 번역본을 복사하여 개인 메모장이나 에디터에 저장하여 사용하세요."
+    },
+    "placeholder": "이곳에 {title}의 사용 시연 영상(GIF)이 들어갈 예정입니다.",
+    "footer": "더 궁금한 점이 있으신가요? 커뮤니티 게시판이나 고객센터를 이용해 주세요.",
     "community": {
-        "title": "커뮤니티",
-        "postsCount": "{count}개의 게시글",
-        "searchPlaceholder": "게시글 검색...",
-        "writePost": "글쓰기",
-        "categories": {
-            "all": "전체",
-            "general": "자유",
-            "showcase": "자랑",
-            "qna": "질문",
-            "tip": "팁"
-        },
-        "filters": {
-            "latest": "최신 게시물",
-            "popular": "인기 게시물",
-            "myActivity": "내 활동"
-        },
-        "table": {
-            "category": "분류",
-            "title": "제목",
-            "author": "글쓴이",
-            "date": "날짜",
-            "views": "조회"
-        },
-        "sidebar": {
-            "myStats": "내 활동 통계",
-            "posts": "작성한 글",
-            "likes": "받은 좋아요",
-            "followers": "팔로워",
-            "loginPrompt": "로그인하고 커뮤니티 활동을 시작해보세요!",
-            "popularTags": "인기 태그",
-            "recommendedDesigners": "추천 도아너",
-            "emptyDesigners": "커뮤니티가 활성화되면\n인기 도아너가 여기에 표시됩니다!",
-            "coinRewardInfo": "코인 보상 안내",
-            "rewards": {
-                "patternShare": "도안 첨부 글 작성",
-                "signUpBonus": "가입 축하 적립",
-                "patternUploadBonus": "도안 업로드 보너스",
-                "aiAnalysis": "AI 패턴 분석",
-                "aiEditor": "AI 에디터 편집",
-                "aiImage": "AI 이미지 변환",
-                "aiExport": "AI 도안 내보내기 (PNG/JPG/PDF)"
-            }
-        },
-        "detail": {
-            "backToList": "목록으로",
-            "author": "작성자",
-            "following": "팔로잉",
-            "follow": "팔로우",
-            "views": "조회 {count}",
-            "translateView": "번역 보기",
-            "originalView": "원문 보기",
-            "translating": "번역 중...",
-            "translationFailed": "번역에 실패했습니다.",
-            "deleteConfirm": "게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-            "deleteCommentConfirm": "댓글을 삭제하시겠습니까?",
-            "deleteFailed": "삭제에 실패했습니다.",
-            "edit": "수정",
-            "delete": "삭제",
-            "save": "저장",
-            "saving": "저장 중...",
-            "cancel": "취소",
-            "attachments": "첨부파일 및 도안",
-            "sharedPattern": "공유 도안",
-            "attachedPhoto": "첨부 사진",
-            "view": "보기",
-            "saveFile": "저장",
-            "comments": "댓글",
-            "commentsCount": "댓글 {count}",
-            "replyTo": "{name}님에게 답글",
-            "replyPlaceholder": "답글을 입력하세요...",
-            "commentPlaceholder": "댓글을 입력하세요...",
-            "commentLoginPrompt": "댓글을 작성하려면 로그인이 필요합니다.",
-            "submitComment": "댓글 등록",
-            "submitReply": "답글 등록",
-            "submitCommentLoading": "등록 중...",
-            "submitReplyLoading": "등록 중...",
-            "noCommentsTitle": "아직 댓글이 없습니다",
-            "noCommentsDesc": "첫 번째 댓글을 남겨보세요!",
-            "reply": "답글"
-        },
-        "time": {
-            "justNow": "방금",
-            "minutesAgo": "{count}분 전",
-            "hoursAgo": "{count}시간 전",
-            "daysAgo": "{count}일 전"
-        },
-        "writeModal": {
-            "title": "새 게시글 작성",
-            "editTitle": "게시글 수정",
-            "titleLabel": "제목",
-            "titlePlaceholder": "제목을 입력하세요",
-            "categoryLabel": "카테고리",
-            "contentLabel": "내용",
-            "contentPlaceholder": "내용을 입력하세요. 뜨개질 팁, 자랑거리, 질문 등을 자유롭게 공유해보세요!",
-            "attachPattern": "도안 첨부하기 (선택)",
-            "attachPatternDesc": "내 도안 중 하나를 첨부하여 공유하면 50코인을 획득합니다!",
-            "selectPatternPlaceholder": "첨부할 도안을 선택하세요",
-            "noPattern": "첨부 가능한 도안이 없습니다",
-            "uploadImages": "사진 첨부 (최대 4장)",
-            "uploadImagesDesc": "작품이나 게이지 스와치 사진을 업로드해보세요.",
-            "submit": "등록하기",
-            "submitting": "등록 중...",
-            "cancel": "취소"
-        }
+      "title": "도안 판매 및 무료 공유 (Marketplace & Community)",
+      "desc": "직접 만든 도안을 판매하여 수익을 창출하거나, 사람들과 무료로 나누며 소통해 보세요.",
+      "step1Title": "Step 1: 마켓플레이스에서 판매하기",
+      "step1Desc": "에디터로 완성한 도안을 마켓플레이스에 등록하여 유료로 판매할 수 있습니다. 판매자 대시보드에서 간편하게 수익을 관리하세요.",
+      "step2Title": "Step 2: 커뮤니티에서 무료로 나누기",
+      "step2Desc": "커뮤니티 게시판에 글을 작성하여 내 도안을 사람들과 무료로 공유하고, 다른 유저들과 뜨개질 팁을 나누며 자랑해 보세요.",
+      "step3Title": "Step 3: 결제 및 수익 관리",
+      "step3Desc": "안전한 결제 시스템(카카오페이, Stripe 등)이 연동되어 있어, 도안 판매 시 수익을 빠르고 안전하게 정산받을 수 있습니다."
     }
+  }
 }

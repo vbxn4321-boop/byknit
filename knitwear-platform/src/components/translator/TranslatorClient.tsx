@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-    Sparkles, ArrowRightLeft, Copy, Check, Lock, 
+import {
+    Sparkles, ArrowRightLeft, Copy, Check, Lock,
     Bookmark, FileDown, BookOpen, AlertCircle, RefreshCw,
     History, Trash2, FolderHeart, Calendar, HelpCircle, X
 } from 'lucide-react';
@@ -49,7 +49,7 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                     setTranslatedText(parsed.translated || '');
                     setTargetLang(parsed.targetLang || 'ko');
                     localStorage.removeItem('pending_translation');
-                    
+
                     // If user is now logged in, automatically save it to their library
                     if (user) {
                         saveToLibraryLocal(parsed.source, parsed.translated, parsed.targetLang);
@@ -111,10 +111,10 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
         list = [newTrans, ...list.filter(t => t.source.trim() !== source.trim())];
         localStorage.setItem(key, JSON.stringify(list));
         setSavedTranslations(list);
-        
+
         // Show success alert
-        alert(locale === 'ko' 
-            ? '🎉 번역 도안이 나의 보관함 서재에 성공적으로 보관되었습니다!' 
+        alert(locale === 'ko'
+            ? '🎉 번역 도안이 나의 보관함 서재에 성공적으로 보관되었습니다!'
             : '🎉 Pattern translation successfully saved to your Library!');
     };
 
@@ -151,14 +151,14 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
             if (user) {
                 try {
                     await deductCredits(
-                        user.id, 
-                        1, 
+                        user.id,
+                        1,
                         locale === 'ko' ? 'AI 도안 번역' : 'AI Pattern Translation'
                     );
                 } catch (creditError: any) {
                     if (creditError.message === 'Insufficient credits') {
-                        alert(locale === 'ko' 
-                            ? '코인(크레딧)이 부족합니다! 😢\n커뮤니티 활동(글쓰기 +50 코인) 등을 통해 코인을 충전해 주세요.' 
+                        alert(locale === 'ko'
+                            ? '코인(크레딧)이 부족합니다! 😢\n커뮤니티 활동(글쓰기 +50 코인) 등을 통해 코인을 충전해 주세요.'
                             : 'Insufficient coins! 😢\nPlease earn coins by writing posts (+50 coins) or through other community activities.'
                         );
                         return;
@@ -195,17 +195,17 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
         }
 
         const doc = new jsPDF();
-        
+
         doc.setFont("Helvetica", "normal");
         doc.setFontSize(20);
         doc.text("byKnit AI Translated Pattern", 20, 20);
-        
+
         doc.setFontSize(12);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
-        
+
         const splitText = doc.splitTextToSize(translatedText, 170);
         doc.text(splitText, 20, 45);
-        
+
         doc.save("byknit-translated-pattern.pdf");
     };
 
@@ -240,11 +240,11 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
             <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-tan-200 shadow-soft mb-6 gap-4">
                 <div className="flex items-center gap-3">
                     <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
-                        {locale === 'ko' 
-                            ? (targetLang === 'ko' ? 'English (영문 도안)' : '한국어 (국문 도안)') 
+                        {locale === 'ko'
+                            ? (targetLang === 'ko' ? 'English (영문 도안)' : '한국어 (국문 도안)')
                             : (targetLang === 'ko' ? 'English Pattern' : 'Korean Pattern')}
                     </div>
-                    <button 
+                    <button
                         onClick={toggleLanguage}
                         className="p-2 rounded-full hover:bg-cream-100 text-brown-500 transition-colors border border-tan-200 bg-white"
                         title="Toggle translation direction"
@@ -252,13 +252,13 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                         <ArrowRightLeft className="w-4 h-4" />
                     </button>
                     <div className="px-3 py-1.5 rounded-lg bg-cream-100 text-xs font-bold text-brown-600 border border-tan-200">
-                        {locale === 'ko' 
-                            ? (targetLang === 'ko' ? '한국어 (국문 해설)' : 'English (US/UK Pattern)') 
+                        {locale === 'ko'
+                            ? (targetLang === 'ko' ? '한국어 (국문 해설)' : 'English (US/UK Pattern)')
                             : (targetLang === 'ko' ? 'Korean Translation' : 'English Translation')}
                     </div>
                 </div>
 
-                <button 
+                <button
                     onClick={loadSample}
                     className="text-xs font-semibold text-rose-400 hover:text-rose-500 flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-rose-50/50 border border-rose-100"
                 >
@@ -269,7 +269,7 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
 
             {showGuide && (
                 <div className="bg-gradient-to-r from-rose-50 to-cream-50/50 p-6 rounded-3xl border border-rose-100 shadow-rose-sm space-y-4 relative animate-in fade-in slide-in-from-top-3 duration-300">
-                    <button 
+                    <button
                         onClick={() => setShowGuide(false)}
                         className="absolute top-4 right-4 p-1.5 rounded-full text-stone-400 hover:text-stone-600 hover:bg-rose-100/50 transition-colors"
                         title="Close guide"
@@ -290,8 +290,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                                 {locale === 'ko' ? '원문 도안 복사' : 'Copy Original Pattern'}
                             </h4>
                             <p className="text-xs text-brown-600 leading-relaxed">
-                                {locale === 'ko' 
-                                    ? 'Ravelry 등 영문 도안에서 복잡한 약어로 된 단(Row)을 드래그하여 복사하세요.' 
+                                {locale === 'ko'
+                                    ? 'Ravelry 등 영문 도안에서 복잡한 약어로 된 단(Row)을 드래그하여 복사하세요.'
                                     : 'Drag and copy standard abbreviation lines (e.g. Row 1: k2, p2...) from Ravelry.'}
                             </p>
                         </div>
@@ -302,8 +302,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                                 {locale === 'ko' ? '방향 확인하기' : 'Verify Direction'}
                             </h4>
                             <p className="text-xs text-brown-600 leading-relaxed">
-                                {locale === 'ko' 
-                                    ? '기본값은 영문 ➡️ 한글입니다. 국문을 영문으로 바꾸려면 중앙의 ⇆ 버튼을 누르세요.' 
+                                {locale === 'ko'
+                                    ? '기본값은 영문 ➡️ 한글입니다. 국문을 영문으로 바꾸려면 중앙의 ⇆ 버튼을 누르세요.'
                                     : 'Default is EN ➡️ KO. Click the central ⇆ button if you want to translate KO ➡️ EN.'}
                             </p>
                         </div>
@@ -314,8 +314,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                                 {locale === 'ko' ? '정밀 분석 시작' : 'AI Translate'}
                             </h4>
                             <p className="text-xs text-brown-600 leading-relaxed">
-                                {locale === 'ko' 
-                                    ? '왼쪽 패널에 붙여넣고 번역기 버튼을 누르면 AI가 기호 약어들을 한글 전용 뜨개식 정형어로 해독합니다.' 
+                                {locale === 'ko'
+                                    ? '왼쪽 패널에 붙여넣고 번역기 버튼을 누르면 AI가 기호 약어들을 한글 전용 뜨개식 정형어로 해독합니다.'
                                     : 'Paste and click Translate. Our custom engine parses craft abbreviations into clean terms.'}
                             </p>
                         </div>
@@ -326,8 +326,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                                 {locale === 'ko' ? '보관 및 인쇄' : 'Save & Print'}
                             </h4>
                             <p className="text-xs text-brown-600 leading-relaxed">
-                                {locale === 'ko' 
-                                    ? '해석된 결과는 내 보관함에 영구 저장하거나 인쇄용 PDF로 다운받아 뜨개 곁에 두고 활용하세요!' 
+                                {locale === 'ko'
+                                    ? '해석된 결과는 내 보관함에 영구 저장하거나 인쇄용 PDF로 다운받아 뜨개 곁에 두고 활용하세요!'
                                     : 'Save translation to library for permanent sync, or download cleanly styled PDF for offline crafting.'}
                             </p>
                         </div>
@@ -341,8 +341,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                 <div className="flex flex-col rounded-3xl bg-white border border-tan-200 shadow-soft overflow-hidden min-h-[480px]">
                     <div className="bg-cream-50/60 px-6 py-4 border-b border-tan-100 flex items-center justify-between">
                         <span className="text-sm font-bold text-brown-700">
-                            {locale === 'ko' 
-                                ? (targetLang === 'ko' ? '영어 원문 도안 입력' : '한국어 원문 도안 입력') 
+                            {locale === 'ko'
+                                ? (targetLang === 'ko' ? '영어 원문 도안 입력' : '한국어 원문 도안 입력')
                                 : (targetLang === 'ko' ? 'English Original Pattern' : 'Korean Original Pattern')}
                         </span>
                         <span className="text-xs text-brown-500 font-medium">
@@ -353,12 +353,12 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                         <textarea
                             value={sourceText}
                             onChange={(e) => setSourceText(e.target.value)}
-                            placeholder={targetLang === 'ko' 
-                                ? (locale === 'ko' ? "여기에 영문 도안을 붙여넣으세요...\n\n예: Row 1 (RS): K2, p2, yo, k2tog..." : "Paste English pattern here...\n\nExample: Row 1 (RS): Sl 1, k 2, * yo, k2tog, k 3 *...") 
+                            placeholder={targetLang === 'ko'
+                                ? (locale === 'ko' ? "여기에 영문 도안을 붙여넣으세요...\n\n예: Row 1 (RS): K2, p2, yo, k2tog..." : "Paste English pattern here...\n\nExample: Row 1 (RS): Sl 1, k 2, * yo, k2tog, k 3 *...")
                                 : (locale === 'ko' ? "여기에 한국어 도안을 붙여넣으세요...\n\n예: 1단 (겉면): 겉뜨기 2코, 안뜨기 2코..." : "Paste Korean pattern here...\n\nExample: 1단 (겉면): 걸러뜨기 1코, 겉뜨기 2코...")}
                             className="w-full flex-1 min-h-[300px] outline-none resize-none text-brown-700 placeholder-brown-400/50 text-sm leading-relaxed"
                         />
-                        
+
                         <button
                             onClick={handleTranslate}
                             disabled={isTranslating || !sourceText.trim()}
@@ -386,7 +386,7 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                             {locale === 'ko' ? 'AI 실시간 번역 결과' : 'AI Translation Result'}
                         </span>
                         {translatedText && (
-                            <button 
+                            <button
                                 onClick={handleCopy}
                                 className="p-1.5 rounded-lg hover:bg-cream-100 text-brown-500 hover:text-brown-700 transition-all flex items-center gap-1.5 text-xs font-semibold"
                             >
@@ -439,8 +439,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                                     {locale === 'ko' ? '번역 대기 중' : 'Waiting for Translation'}
                                 </h3>
                                 <p className="text-xs text-brown-500 max-w-xs leading-normal">
-                                    {locale === 'ko' 
-                                        ? '왼쪽 창에 영문 도안을 붙여넣고 AI 번역하기 버튼을 누르면 정밀 해석이 여기에 표시됩니다.' 
+                                    {locale === 'ko'
+                                        ? '왼쪽 창에 영문 도안을 붙여넣고 AI 번역하기 버튼을 누르면 정밀 해석이 여기에 표시됩니다.'
                                         : 'Paste a pattern into the left panel and click Translate to see the specialized result here.'}
                                 </p>
                             </div>
@@ -489,7 +489,7 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
 
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {savedTranslations.map((item) => (
-                            <div 
+                            <div
                                 key={item.id}
                                 onClick={() => handleLoadTranslation(item)}
                                 className="bg-white p-5 rounded-2xl border border-tan-200 shadow-sm hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[140px]"
@@ -555,8 +555,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                         {locale === 'ko' ? '🔒 로그인이 필요한 장치입니다' : '🔒 Login Required'}
                     </h2>
                     <p className="text-sm text-brown-600 leading-relaxed">
-                        {locale === 'ko' 
-                            ? '이 도구(AI 도안 번역기)를 사용하시려면 먼저 로그인을 완료해 주세요.' 
+                        {locale === 'ko'
+                            ? '이 도구(AI 도안 번역기)를 사용하시려면 먼저 로그인을 완료해 주세요.'
                             : 'Please log in to your account to unlock and use the AI Pattern Translator.'}
                     </p>
                 </div>
@@ -611,8 +611,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                         {locale === 'ko' ? 'AI 뜨개 도안 번역기' : 'AI Knitwear Pattern Translator'}
                     </h1>
                     <p className="text-brown-600 text-md sm:text-lg max-w-2xl mx-auto font-medium">
-                        {locale === 'ko' 
-                            ? '구글 번역도 포기한 서술형 영문 도안 약어를 완벽하게 분석하여 직관적인 한국어 용어로 번역해 줍니다.' 
+                        {locale === 'ko'
+                            ? '구글 번역도 포기한 서술형 영문 도안 약어를 완벽하게 분석하여 직관적인 한국어 용어로 번역해 줍니다.'
                             : 'Translate specialized knitting patterns between Korean and English with craft-specific accuracy.'}
                     </p>
                 </div>

@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 
 export default function FindIdPage() {
     const t = useTranslations('auth.findId');
     const tAuth = useTranslations('auth'); // For "Back to Login"
+    const locale = useLocale();
     const [nickname, setNickname] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [result, setResult] = useState('');
@@ -53,7 +54,7 @@ export default function FindIdPage() {
     return (
         <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-stone-100 p-8">
-                <Link href="/login" className="inline-flex items-center text-stone-500 hover:text-rose-500 mb-6 transition-colors group">
+                <Link href={`/${locale}/login`} className="inline-flex items-center text-stone-500 hover:text-rose-500 mb-6 transition-colors group">
                     <svg className="w-4 h-4 mr-1 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
@@ -76,13 +77,13 @@ export default function FindIdPage() {
                         </p>
                         <div className="mt-6 space-y-3">
                             <Link
-                                href="/login"
+                                href={`/${locale}/login`}
                                 className="block w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow hover:shadow-lg"
                             >
                                 {tAuth('signIn')}
                             </Link>
                             <Link
-                                href="/forgot-password"
+                                href={`/${locale}/forgot-password`}
                                 className="block w-full py-3 bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 font-bold rounded-xl transition-all"
                             >
                                 {tAuth('forgotPasswordLink')}

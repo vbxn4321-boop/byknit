@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
     const t = useTranslations('auth');
+    const locale = useLocale();
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
@@ -18,7 +19,7 @@ export default function ForgotPasswordPage() {
 
         const supabase = createClient();
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/reset-password`,
+            redirectTo: `${window.location.origin}/${locale}/reset-password`,
         });
 
         if (error) {
@@ -49,7 +50,7 @@ export default function ForgotPasswordPage() {
                             <span className="font-bold">{email}</span>
                         </div>
                         <Link
-                            href="/login"
+                            href={`/${locale}/login`}
                             className="block w-full py-3 bg-stone-800 hover:bg-stone-900 text-white font-bold rounded-xl transition-all"
                         >
                             {t('backToLogin')}
@@ -86,7 +87,7 @@ export default function ForgotPasswordPage() {
                         </button>
 
                         <div className="text-center">
-                            <Link href="/login" className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                            <Link href={`/${locale}/login`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
                                 {t('backToLogin')}
                             </Link>
                         </div>

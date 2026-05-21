@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordPage() {
     const t = useTranslations('profile.security');
     const tAuth = useTranslations('auth');
+    const locale = useLocale();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -37,7 +38,7 @@ export default function ResetPasswordPage() {
             setStatus('success');
             setMessage(t('success'));
             setTimeout(() => {
-                router.push('/login');
+                router.push(`/${locale}/login`);
             }, 2000);
         }
     };

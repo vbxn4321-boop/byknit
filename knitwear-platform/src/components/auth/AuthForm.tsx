@@ -1,8 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
+
+const SAVED_EMAIL_KEY = 'byknit_saved_email';
+const REMEMBER_EMAIL_KEY = 'byknit_remember_email';
 
 interface AuthFormProps {
     type: 'login' | 'signup';
@@ -15,11 +18,41 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
     const t = useTranslations('auth');
     const locale = useLocale();
 
+    // Remember email feature
+    const [rememberEmail, setRememberEmail] = useState(false);
+    const [savedEmail, setSavedEmail] = useState('');
+    const emailInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (type === 'login') {
+            const remembered = localStorage.getItem(REMEMBER_EMAIL_KEY) === 'true';
+            const email = localStorage.getItem(SAVED_EMAIL_KEY) || '';
+            setRememberEmail(remembered);
+            if (remembered && email) {
+                setSavedEmail(email);
+            }
+        }
+    }, [type]);
+
+    const handleFormAction = async (formData: FormData) => {
+        if (type === 'login') {
+            const email = formData.get('email') as string;
+            if (rememberEmail && email) {
+                localStorage.setItem(SAVED_EMAIL_KEY, email);
+                localStorage.setItem(REMEMBER_EMAIL_KEY, 'true');
+            } else {
+                localStorage.removeItem(SAVED_EMAIL_KEY);
+                localStorage.removeItem(REMEMBER_EMAIL_KEY);
+            }
+        }
+        await action(formData);
+    };
+
     // Fallback translations if not loaded yet (for speed)
     const title = type === 'login' ? '로그인 (Log In)' : '회원가입 (Sign Up)';
     const btnText = type === 'login' ? '로그인' : '가입하기';
     const altLinkText = type === 'login' ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인';
-    const altLinkHref = type === 'login' ? '/signup' : '/login';
+    const altLinkHref = type === 'login' ? `/${locale}/signup` : `/${locale}/login`;
 
     const handleGoogleLogin = async () => {
         const supabase = createClient();
@@ -91,13 +124,15 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                 </div>
             </div>
 
-            <form action={action} className="space-y-8">
+            <form action={handleFormAction} className="space-y-8">
                 <div>
                     <label className="block text-sm font-bold text-stone-700 mb-2">Email</label>
                     <input
+                        ref={emailInputRef}
                         name="email"
                         type="email"
                         required
+                        defaultValue={savedEmail}
                         className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
                         placeholder="hello@example.com"
                     />
@@ -116,13 +151,26 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                 </div>
 
                 {type === 'login' && (
-                    <div className="flex justify-between items-center -mt-6 px-1">
-                        <a href="/find-id" className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
-                            {t('findIdLink')}
-                        </a>
-                        <a href="/forgot-password" className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
-                            {t('forgotPasswordLink')}
-                        </a>
+                    <div className="space-y-3 -mt-4">
+                        <label className="flex items-center gap-2 cursor-pointer group px-1">
+                            <input
+                                type="checkbox"
+                                checked={rememberEmail}
+                                onChange={(e) => setRememberEmail(e.target.checked)}
+                                className="w-4 h-4 rounded border-stone-300 text-rose-500 focus:ring-rose-200 cursor-pointer"
+                            />
+                            <span className="text-sm text-stone-500 group-hover:text-stone-700 transition-colors">
+                                {locale === 'ko' ? '아이디 저장' : 'Remember Email'}
+                            </span>
+                        </label>
+                        <div className="flex justify-between items-center px-1">
+                            <a href={`/${locale}/find-id`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                                {t('findIdLink')}
+                            </a>
+                            <a href={`/${locale}/forgot-password`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                                {t('forgotPasswordLink')}
+                            </a>
+                        </div>
                     </div>
                 )}
 
