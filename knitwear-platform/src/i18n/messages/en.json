@@ -195,7 +195,10 @@
       "gauge": "Gauge",
       "techniques": "Techniques"
     },
-    "patternsFound": "patterns found"
+    "patternsFound": "patterns found",
+    "itemsFound": "items",
+    "digital": "PDF Pattern",
+    "physical": "Physical Item"
   },
   "editor": {
     "title": "Pattern Editor",

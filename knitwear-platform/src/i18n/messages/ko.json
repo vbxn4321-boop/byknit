@@ -196,7 +196,10 @@
       "gauge": "게이지",
       "techniques": "사용 기법"
     },
-    "patternsFound": "개의 도안을 찾았습니다"
+    "patternsFound": "개의 도안을 찾았습니다",
+    "itemsFound": "개의 상품",
+    "digital": "PDF 도안",
+    "physical": "실물 배송"
   },
   "editor": {
     "title": "도안 에디터",

@@ -279,7 +279,7 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
             {/* Results */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-4 text-sm text-brown-600 flex items-center justify-between">
-                    <span>{patterns.length} patterns found</span>
+                    <span>{patterns.length} {t('itemsFound')}</span>
                     {isLoading && <span className="text-brown-400 animate-pulse">Loading...</span>}
                 </div>
 
@@ -345,6 +345,13 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
 
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                    <span className={`px-2 py-1 rounded shadow-sm font-bold text-[10px] ${
+                        pattern.item_type === 'physical' 
+                            ? 'bg-sage-600 text-white border border-sage-500'
+                            : 'bg-brown-800 text-white border border-brown-700'
+                    }`}>
+                        {pattern.item_type === 'physical' ? t('physical') : t('digital')}
+                    </span>
                     {pattern.is_on_sale && (
                         <span className="bg-rose-500 text-white px-2.5 py-0.5 rounded-full shadow-sm uppercase font-black text-[10px] animate-pulse">
                             Sale {pattern.discount_percentage}%

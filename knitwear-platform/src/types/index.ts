@@ -60,6 +60,8 @@ export interface Pattern {
     // New fields from user request (localized)
     sizes?: { ko: string; en: string };
     measurements?: { ko: string; en: string };
+    // Product Type distinction
+    item_type?: 'digital' | 'physical';
     // Grid editor data for PDF generation
     grid_data?: number[][] | any[][];
     palette?: string[];
