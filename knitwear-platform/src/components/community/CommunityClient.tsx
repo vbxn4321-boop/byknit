@@ -15,6 +15,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { DUMMY_COMMUNITY_POSTS } from '@/data/dummyData';
 
 interface Post {
     id: string;
@@ -49,7 +50,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const t = useTranslations('community');
     const tCommon = useTranslations('common');
 
-    const [posts, setPosts] = useState(initialPosts);
+    const [posts, setPosts] = useState(initialPosts && initialPosts.length > 0 ? initialPosts : DUMMY_COMMUNITY_POSTS as any);
     const [activeTab, setActiveTab] = useState(locale);
     const [listFilter, setListFilter] = useState<'latest' | 'popular' | 'my_activity'>('latest');
     const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
@@ -63,7 +64,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
 
     // Sync initialPosts to state when it changes
     useEffect(() => {
-        setPosts(initialPosts);
+        setPosts(initialPosts && initialPosts.length > 0 ? initialPosts : DUMMY_COMMUNITY_POSTS as any);
     }, [initialPosts]);
 
     // 북마크, 좋아요, 팔로잉 목록 및 내 활동 통계 불러오기

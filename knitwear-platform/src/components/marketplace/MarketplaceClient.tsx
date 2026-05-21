@@ -10,6 +10,7 @@ import { PatternDetailClient } from './PatternDetailClient';
 import { getDesignerProfile } from '@/app/actions/social';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import { DUMMY_PATTERNS } from '@/data/dummyData';
 
 interface MarketplaceClientProps {
     locale: string;
@@ -67,7 +68,7 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                 console.error('Error hint:', error.hint);
                 console.error('Error code:', error.code);
             } else {
-                setPatterns(data || []);
+                setPatterns(data && data.length > 0 ? data : DUMMY_PATTERNS);
             }
         } catch (err) {
             console.error('Failed to fetch patterns:', err);
