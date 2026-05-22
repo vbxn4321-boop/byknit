@@ -50,7 +50,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const t = useTranslations('community');
     const tCommon = useTranslations('common');
 
-    const [posts, setPosts] = useState(initialPosts && initialPosts.length > 0 ? initialPosts : DUMMY_COMMUNITY_POSTS as any);
+    const [posts, setPosts] = useState<Post[]>(initialPosts && initialPosts.length > 0 ? initialPosts : DUMMY_COMMUNITY_POSTS as any);
     const [activeTab, setActiveTab] = useState(locale);
     const [listFilter, setListFilter] = useState<'latest' | 'popular' | 'my_activity'>('latest');
     const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());

@@ -151,8 +151,8 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                 </div>
 
                 {type === 'login' && (
-                    <div className="space-y-3 -mt-4">
-                        <label className="flex items-center gap-2 cursor-pointer group px-1">
+                    <div className="flex justify-between items-center px-1 -mt-4">
+                        <label className="flex items-center gap-2 cursor-pointer group">
                             <input
                                 type="checkbox"
                                 checked={rememberEmail}
@@ -163,14 +163,9 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                                 {locale === 'ko' ? '아이디 저장' : 'Remember Email'}
                             </span>
                         </label>
-                        <div className="flex justify-between items-center px-1">
-                            <a href={`/${locale}/find-id`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
-                                {t('findIdLink')}
-                            </a>
-                            <a href={`/${locale}/forgot-password`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
-                                {t('forgotPasswordLink')}
-                            </a>
-                        </div>
+                        <a href={`/${locale}/forgot-password`} className="text-sm text-stone-500 hover:text-rose-500 transition-colors">
+                            {t('forgotPasswordLink')}
+                        </a>
                     </div>
                 )}
 
