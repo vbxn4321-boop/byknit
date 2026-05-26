@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
-import { ArrowRight, Sparkles, Palette, Bot, ShoppingBag, Zap, Globe, Heart } from 'lucide-react';
+import { ArrowRight, Sparkles, Palette, Bot, ShoppingBag, Zap, Globe, Heart, Languages, Calculator } from 'lucide-react';
 import { EditorDemo } from '@/components/home/EditorDemo';
 import { createClient } from '@/utils/supabase/server';
 
@@ -29,18 +29,35 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             titleKey: 'marketplace',
             descKey: 'marketplaceDesc',
             color: 'bg-rose-300',
+            href: 'marketplace',
         },
         {
             icon: Palette,
             titleKey: 'editor',
             descKey: 'editorDesc',
             color: 'bg-sage-300',
+            href: 'editor',
         },
         {
             icon: Bot,
             titleKey: 'aiGenerator',
             descKey: 'aiDesc',
             color: 'bg-peach-200',
+            href: 'ai',
+        },
+        {
+            icon: Languages,
+            titleKey: 'aiTranslator',
+            descKey: 'translatorDesc',
+            color: 'bg-indigo-300',
+            href: 'translator',
+        },
+        {
+            icon: Calculator,
+            titleKey: 'smartCalculator',
+            descKey: 'calculatorDesc',
+            color: 'bg-teal-300',
+            href: 'calculator',
         },
     ];
 
@@ -113,18 +130,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                         {features.map((feature) => (
-                            <div
+                            <Link
+                                href={`/${locale}/${feature.href}`}
                                 key={feature.titleKey}
-                                className="group card-cozy p-8 text-center shadow-soft-hover"
+                                className="group card-cozy p-6 text-center shadow-soft-hover hover:scale-102 hover:border-tan-300 transition-all duration-300 flex flex-col justify-between"
                             >
-                                <div className={`inline-flex p-4 rounded-2xl ${feature.color} mb-6 shadow-soft`}>
-                                    <feature.icon className="w-7 h-7 text-white" />
+                                <div>
+                                    <div className={`inline-flex p-4 rounded-2xl ${feature.color} mb-6 shadow-soft group-hover:scale-110 transition-transform duration-300`}>
+                                        <feature.icon className="w-7 h-7 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-brown-700 mb-3 group-hover:text-rose-500 transition-colors">{tNav(feature.titleKey)}</h3>
+                                    <p className="text-sm text-brown-600 leading-relaxed">{t(`features.${feature.descKey}`)}</p>
                                 </div>
-                                <h3 className="text-xl font-semibold text-brown-700 mb-3">{tNav(feature.titleKey)}</h3>
-                                <p className="text-brown-600 leading-relaxed">{t(`features.${feature.descKey}`)}</p>
-                            </div>
+                                <div className="mt-6 text-xs text-rose-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center justify-center gap-1">
+                                    <span>자세히 보기</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 </div>

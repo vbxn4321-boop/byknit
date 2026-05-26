@@ -16,7 +16,35 @@ export async function getUserCredits(userId: string) {
         return 0;
     }
 
-    return data.credits ?? 0;
+    // Auto-grant 1000 welcome credits if user has 0 credits and no transactions yet
+    const currentCredits = data.credits ?? 0;
+    if (currentCredits === 0) {
+        try {
+            const { data: txs, error: txError } = await supabase
+                .from('credit_transactions')
+                .select('id')
+                .eq('user_id', userId)
+                .limit(1);
+
+            if (!txError && (!txs || txs.length === 0)) {
+                console.log(`[Credits] Auto-granting 1000 welcome credits to new user: ${userId}`);
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ credits: 1000 })
+                    .eq('id', userId);
+
+                if (!updateError) {
+                    return 1000;
+                } else {
+                    console.error('[Credits] Failed to update welcome credits:', updateError.message);
+                }
+            }
+        } catch (e: any) {
+            console.error('[Credits] Welcome credit check failed:', e.message);
+        }
+    }
+
+    return currentCredits;
 }
 
 export async function getCreditHistory(userId: string) {

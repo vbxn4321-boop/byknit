@@ -323,8 +323,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const { showOnboarding, onCloseOnboarding, setShowOnboarding } = useOnboarding();
     const [onboardingStep, setOnboardingStep] = useState(1);
 
-    // Persistence for AI Import
-    const { hasAIImport, loadAIImport } = useEditorPersistence();
+    // Persistence for AI Import and Autosave
+    const { hasAIImport, loadAIImport, saveSession, loadSession, clearSession } = useEditorPersistence();
+    const [showRestoreDialog, setShowRestoreDialog] = useState(false);
 
     // Export
     const [showExportMenu, setShowExportMenu] = useState(false);
@@ -520,6 +521,60 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             hasCentered.current = true;
         }
     }, [isMounted, gridSize]);
+
+    // Restore and Discard Session handlers
+    const restoreSession = useCallback(() => {
+        const savedSession = loadSession();
+        if (savedSession) {
+            setGridSize({ cols: savedSession.width, rows: savedSession.height });
+            setGridData(savedSession.grid);
+            setProjectTitle(savedSession.name);
+            if (savedSession.palette && savedSession.palette.length > 0) {
+                setCustomColors(savedSession.palette);
+            }
+            if (savedSession.projectId) {
+                setProjectId(savedSession.projectId);
+            }
+            // Reset history to restored state
+            setHistory([savedSession.grid]);
+            setHistoryIndex(0);
+            setIsDirty(true);
+        }
+        setShowRestoreDialog(false);
+    }, [loadSession]);
+
+    const discardSession = useCallback(() => {
+        clearSession();
+        setShowRestoreDialog(false);
+    }, [clearSession]);
+
+    // Check for saved local draft on mount (ONLY when logged in and starting a new pattern draft)
+    useEffect(() => {
+        if (isMounted && user && !initialProject) {
+            const savedSession = loadSession();
+            if (savedSession && savedSession.grid && savedSession.grid.length > 0) {
+                setShowRestoreDialog(true);
+            }
+        }
+    }, [isMounted, user, initialProject, loadSession]);
+
+    // Auto-save unsaved sessions to localStorage (Debounced 3s - ONLY when logged in and grid is dirty)
+    useEffect(() => {
+        if (!isMounted || !user || !isDirty || gridData.length === 0) return;
+
+        const timer = setTimeout(() => {
+            saveSession({
+                projectId: projectId,
+                name: projectTitle,
+                width: gridSize.cols,
+                height: gridSize.rows,
+                grid: gridData,
+                palette: customColors,
+            });
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, [isMounted, user, isDirty, gridData, gridSize, projectTitle, customColors, projectId, saveSession]);
 
     // History Management
     const saveToHistory = (newData: GridCellData[][]) => {
@@ -2213,6 +2268,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 setProjectId(res.project.id);
                 setIsDirty(false);
                 setShowSaveSuccess(true);
+                clearSession(); // Clear local backup session once safely stored in cloud database
                 setTimeout(() => setShowSaveSuccess(false), 2000);
             }
         } catch (e) {
@@ -4087,6 +4143,41 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         </div>
                                     </>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                showRestoreDialog && (
+                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-brown-950/40 backdrop-blur-md animate-fade-in px-4">
+                        <div className="bg-white/95 border border-tan-100 rounded-[32px] p-8 max-w-md w-full shadow-[0_32px_64px_-16px_rgba(74,63,53,0.25)] text-center space-y-6 animate-zoom-in">
+                            <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto shadow-rose-sm text-rose-500">
+                                <FileText size={32} />
+                            </div>
+                            <div className="space-y-2">
+                                <h2 className="text-2xl font-extrabold text-brown-800 tracking-tight">
+                                    {locale === 'ko' ? '임시 도안 복구' : 'Restore Previous Work?'}
+                                </h2>
+                                <p className="text-stone-600 leading-relaxed text-sm">
+                                    {locale === 'ko' 
+                                        ? '이전에 작업 중이던 임시 저장 도안이 발견되었습니다. 이어서 그리시겠습니까?' 
+                                        : 'We found an unsaved pattern from your last session. Would you like to restore it and continue?'}
+                                </p>
+                            </div>
+                            <div className="flex gap-4 pt-2">
+                                <button
+                                    onClick={discardSession}
+                                    className="flex-1 px-6 py-4 rounded-full border-2 border-tan-200 text-stone-600 font-bold hover:bg-stone-50 active:scale-98 transition-all cursor-pointer"
+                                >
+                                    {locale === 'ko' ? '새로 시작' : 'Start Fresh'}
+                                </button>
+                                <button
+                                    onClick={restoreSession}
+                                    className="flex-1 px-6 py-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold hover:from-rose-600 hover:to-pink-600 hover:shadow-rose-md active:scale-98 transition-all cursor-pointer"
+                                >
+                                    {locale === 'ko' ? '이어서 그리기' : 'Restore'}
+                                </button>
                             </div>
                         </div>
                     </div>

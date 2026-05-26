@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 export interface EditorSession {
     id: string;
+    projectId?: string | null;
     name: string;
     width: number;
     height: number;
-    grid: { color: string; symbol: string }[][];
+    grid: any[][];
     palette: string[];
     lastModified: string;
 }

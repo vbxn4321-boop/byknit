@@ -102,7 +102,9 @@
       "subtitle": "From discovering inspiration to creating your own masterpiece, we've got you covered",
       "marketplaceDesc": "Discover thousands of patterns from creators worldwide. From beginner-friendly to advanced designs.",
       "editorDesc": "Create your own knitting charts with our intuitive grid editor. Touch-optimized for mobile.",
-      "aiDesc": "Transform images into colorwork charts or describe your dream pattern and let AI help create it."
+      "aiDesc": "Transform images into colorwork charts or describe your dream pattern and let AI help create it.",
+      "translatorDesc": "Instantly translate difficult abbreviations (k2tog, ssk, yo) in English patterns into standard symbols.",
+      "calculatorDesc": "All the calculations you need for knitting—stitch scaling, gauge conversion, and CYC-compliant size grading."
     },
     "whyChoose": {
       "title": "Why Creators Choose byKnit",
