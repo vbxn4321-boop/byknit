@@ -812,7 +812,19 @@
       "example30": "예) 30",
       "example20": "예) 20",
       "example28": "예) 28",
-      "example100": "예) 100"
+      "example100": "예) 100",
+      "gaugeSize": "측정 기준",
+      "targetSize": "도안의 목표 옷 치수",
+      "targetWidth": "목표 너비(가슴둘레 등)",
+      "targetHeight": "목표 높이(총장 등)",
+      "predictionResult": "✨ 내 게이지 기준 완성 사이즈 예측",
+      "actualWidth": "완성 시 실제 너비",
+      "actualHeight": "완성 시 실제 높이",
+      "solutionApplied": "처방전 및 바늘 추천",
+      "difference": "편차",
+      "solutionComfortable": "원작과 게이지가 아주 훌륭하게 일치합니다! 바늘 변경 없이 도안 그대로 뜨셔도 좋습니다.",
+      "solutionTight": "편물이 도안보다 촘촘하여 옷이 약 {diff}cm 작게 완성됩니다. 굵은 바늘(0.5mm~1.0mm UP)로 바꾸시거나, 도안에서 한두 치수 큰 사이즈의 코수로 잡아서 뜨시는 것을 권장합니다!",
+      "solutionLoose": "편물이 도안보다 느슨하여 옷이 약 {diff}cm 크게 완성됩니다. 얇은 바늘(0.5mm~1.0mm DOWN)로 바꾸시거나, 도안에서 한두 치수 작은 사이즈의 코수로 잡아서 뜨시는 것을 권장합니다!"
     },
     "gaugeBar": {
       "title": "게이지 설정",

@@ -217,8 +217,24 @@ export function BasicConverterTab() {
                 </div>
             </div>
 
-            {/* Result */}
-            <ResultCard title={tBasic('result')} results={results} hideIcon={true} />
+            {/* Result or Warning Guide */}
+            {stitchGauge > 0 && rowGauge > 0 ? (
+                <ResultCard title={tBasic('result')} results={results} hideIcon={true} />
+            ) : (
+                <div className="max-w-xl mx-auto p-5 rounded-2xl bg-amber-50/80 border border-amber-200 shadow-soft flex items-start gap-3 mt-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-extrabold text-lg shrink-0">
+                        ⚠️
+                    </div>
+                    <div className="space-y-1">
+                        <h4 className="font-extrabold text-amber-800 text-sm">
+                            {t('emptyState.title')}
+                        </h4>
+                        <p className="text-xs text-amber-600 leading-relaxed">
+                            {t('emptyState.description')}
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
