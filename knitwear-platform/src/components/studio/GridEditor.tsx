@@ -145,13 +145,16 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
 
-    const handleAuthCheck = (e: React.MouseEvent) => {
-        if (!user) {
+    const handleAuthCheck = (e?: React.MouseEvent | any) => {
+        if (e && e.preventDefault) {
             e.preventDefault();
             e.stopPropagation();
-            alert(t('authRequired') || 'Authentication required');
-            router.push('/login');
         }
+        alert(locale === 'ko'
+            ? '🔒 로그인이 필요한 장치입니다. 이 도구(도안 에디터)를 사용하시려면 먼저 로그인을 완료해 주세요.'
+            : '🔒 Login Required. Please log in to unlock and use the Pattern Editor.'
+        );
+        router.push(`/${locale}/login`);
     };
 
 
@@ -626,6 +629,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     // Grid Interaction
     const updateCell = (r: number, c: number) => {
+        if (!user) {
+            handleAuthCheck();
+            return;
+        }
         if (r < 0 || r >= gridSize.rows || c < 0 || c >= gridSize.cols) return;
         const currentCell = gridData[r][c];
         let newCell = { ...currentCell };
@@ -657,6 +664,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const isDraggingRef = useRef(false);
 
     const handleMouseDown = (e: any) => {
+        if (!user) {
+            if (activeTool === 'move' || isSpacePressed) return;
+            handleAuthCheck();
+            return;
+        }
         if (activeTool === 'move' || isSpacePressed) return;
         if (isShapeMenuOpen) setIsShapeMenuOpen(false);
 
@@ -1873,6 +1885,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     }, [clipboard, contextMenuPos, gridSize, gridData, position, scale, saveToHistory]);
 
     const handleDownload = async (format: 'png' | 'jpg' | 'pdf') => {
+        if (!user) {
+            handleAuthCheck();
+            return;
+        }
         if (!stageRef.current) return;
 
         try {
@@ -2218,6 +2234,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     };
 
     const handleSave = async () => {
+        if (!user) {
+            handleAuthCheck();
+            return;
+        }
         setIsSaving(true);
         try {
             // Generate thumbnail from grid data
@@ -2677,12 +2697,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     return (
         <div className="flex flex-col h-[85vh] bg-cream-50 font-sans select-none relative">
-            {!user && (
-                <div
-                    className="absolute inset-0 z-[9999] cursor-pointer bg-transparent"
-                    onClick={handleAuthCheck}
-                />
-            )}
             {/* Onboarding Modal */}
             {showOnboarding && (
                 <div className="fixed inset-0 z-[10000]">
@@ -2865,6 +2879,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     {/* Publish Button (New) */}
                     <button
                         onClick={() => {
+                            if (!user) {
+                                handleAuthCheck();
+                                return;
+                            }
                             if (!projectId) {
                                 if (confirm(tPublish('success.saveDesc'))) {
                                     handleSave().then(() => setShowPublishModal(true));
@@ -3117,6 +3135,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         value={localCols}
                                         onChange={e => setLocalCols(e.target.value)}
                                         onBlur={() => {
+                                            if (!user) {
+                                                handleAuthCheck();
+                                                setLocalCols(gridSize.cols.toString());
+                                                return;
+                                            }
                                             const val = Math.max(5, Math.min(3000, parseInt(localCols) || 5));
                                             if (val !== gridSize.cols) {
                                                 const newData = Array(gridSize.rows).fill(null).map((_, r) =>
@@ -3148,6 +3171,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         value={localRows}
                                         onChange={e => setLocalRows(e.target.value)}
                                         onBlur={() => {
+                                            if (!user) {
+                                                handleAuthCheck();
+                                                setLocalRows(gridSize.rows.toString());
+                                                return;
+                                            }
                                             const val = Math.max(5, Math.min(3000, parseInt(localRows) || 5));
                                             if (val !== gridSize.rows) {
                                                 const newData = Array(val).fill(null).map((_, r) =>
