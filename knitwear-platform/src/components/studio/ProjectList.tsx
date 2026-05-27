@@ -17,9 +17,10 @@ interface Project {
 
 interface ProjectListProps {
     initialProjects: Project[];
+    locale: string;
 }
 
-export function ProjectList({ initialProjects }: ProjectListProps) {
+export function ProjectList({ initialProjects, locale }: ProjectListProps) {
     const [projects, setProjects] = useState<Project[]>(initialProjects);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const router = useRouter();
@@ -42,7 +43,7 @@ export function ProjectList({ initialProjects }: ProjectListProps) {
             <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-tan-300">
                 <h3 className="text-xl font-bold text-brown-800 mb-2">저장된 도안이 없습니다</h3>
                 <p className="text-brown-600 mb-6">지금 새로운 도안을 만들어보세요!</p>
-                <Link href="/editor" className="btn-primary px-8 py-3 rounded-xl inline-block">
+                <Link href={`/${locale}/editor`} className="btn-primary px-8 py-3 rounded-xl inline-block">
                     새 도안 만들기
                 </Link>
             </div>
@@ -61,7 +62,7 @@ export function ProjectList({ initialProjects }: ProjectListProps) {
                             <Grid className="text-tan-300" size={48} />
                         )}
                         <div className="absolute inset-0 bg-brown-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 group-active:opacity-100 touch-none md:touch-auto">
-                            <Link href={`/editor?id=${project.id}`} className="p-4 bg-white rounded-full text-brown-800 hover:scale-110 active:scale-95 transition-all shadow-lg" title="수정">
+                            <Link href={`/${locale}/editor?id=${project.id}`} className="p-4 bg-white rounded-full text-brown-800 hover:scale-110 active:scale-95 transition-all shadow-lg" title="수정">
                                 <Edit3 size={24} />
                             </Link>
                             <button
@@ -102,11 +103,11 @@ export function ProjectList({ initialProjects }: ProjectListProps) {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <Link href={`/editor?id=${project.id}`} className="btn-secondary py-2 text-sm rounded-xl text-center">
+                            <Link href={`/${locale}/editor?id=${project.id}`} className="btn-secondary py-2 text-sm rounded-xl text-center">
                                 수 정
                             </Link>
                             <button
-                                onClick={() => router.push(`/editor?id=${project.id}&publish=true`)}
+                                onClick={() => router.push(`/${locale}/editor?id=${project.id}&publish=true`)}
                                 className="btn-primary py-2 text-sm rounded-xl text-center flex items-center justify-center gap-2"
                             >
                                 <ShoppingBag size={14} /> 출 시

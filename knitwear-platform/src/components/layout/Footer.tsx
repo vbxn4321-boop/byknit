@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Heart, Instagram, Twitter } from 'lucide-react';
 
 export function Footer() {
     const t = useTranslations('common');
     const tFooter = useTranslations('footer');
     const tCommunity = useTranslations('community');
+    const locale = useLocale();
 
     return (
         <footer className="border-t border-tan-200 bg-cream-100">
@@ -30,9 +31,9 @@ export function Footer() {
                     <div className="text-center">
                         <h3 className="font-semibold text-brown-700 mb-4">{tFooter('platform')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/marketplace" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('marketplace')}</Link></li>
-                            <li><Link href="/editor" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('patternEditor')}</Link></li>
-                            <li><Link href="/ai" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('aiGenerator')}</Link></li>
+                            <li><Link href={`/${locale}/marketplace`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('marketplace')}</Link></li>
+                            <li><Link href={`/${locale}/editor`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('patternEditor')}</Link></li>
+                            <li><Link href={`/${locale}/ai`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('aiGenerator')}</Link></li>
                         </ul>
                     </div>
 
@@ -40,9 +41,9 @@ export function Footer() {
                     <div className="text-center">
                         <h3 className="font-semibold text-brown-700 mb-4">{tCommunity('title')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.latest')}</Link></li>
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.popular')}</Link></li>
-                            <li><Link href="/community" className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.myActivity')}</Link></li>
+                            <li><Link href={`/${locale}/community`} className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.latest')}</Link></li>
+                            <li><Link href={`/${locale}/community`} className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.popular')}</Link></li>
+                            <li><Link href={`/${locale}/community`} className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('filters.myActivity')}</Link></li>
                         </ul>
                     </div>
 
@@ -50,9 +51,9 @@ export function Footer() {
                     <div className="text-center">
                         <h3 className="font-semibold text-brown-700 mb-4">{tFooter('resources')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/help" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('helpCenter')}</Link></li>
-                            <li><Link href="/tutorials" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('tutorials')}</Link></li>
-                            <li><Link href="/blog" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('blog')}</Link></li>
+                            <li><Link href={`/${locale}/help`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('helpCenter')}</Link></li>
+                            <li><Link href={`/${locale}/tutorials`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('tutorials')}</Link></li>
+                            <li><Link href={`/${locale}/blog`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('blog')}</Link></li>
                         </ul>
                     </div>
 
@@ -60,8 +61,8 @@ export function Footer() {
                     <div className="text-center">
                         <h3 className="font-semibold text-brown-700 mb-4">{tFooter('legal')}</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/privacy" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('privacyPolicy')}</Link></li>
-                            <li><Link href="/terms" className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('termsOfService')}</Link></li>
+                            <li><Link href={`/${locale}/privacy`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('privacyPolicy')}</Link></li>
+                            <li><Link href={`/${locale}/terms`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('termsOfService')}</Link></li>
                         </ul>
                     </div>
                 </div>
