@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 import { signout } from '@/app/actions/auth';
-import { LogOut, User as UserIcon, LayoutDashboard, CreditCard, Palette, PenTool, ShoppingBag, Coins } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, CreditCard, Palette, PenTool, ShoppingBag, Coins, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
@@ -160,6 +160,21 @@ export function UserNav({ user }: { user: User | null }) {
                         >
                             <ShoppingBag size={18} />
                             <span>{tNav('myMarketplace')}</span>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsOpen(false);
+                                alert(locale === 'ko' ? '프리미엄 멤버십 기능이 성공적으로 예약되었습니다!' : 'Premium membership has been successfully reserved!');
+                            }}
+                            className="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-amber-600 hover:bg-amber-50 rounded-2xl transition-all"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Sparkles size={18} className="text-amber-500 animate-pulse" />
+                                <span>{locale === 'ko' ? '광고 제거하기' : 'Remove Ads'}</span>
+                            </div>
+                            <span className="bg-amber-100 text-amber-700 text-[9px] px-2 py-0.5 rounded-full font-black">
+                                PREMIUM
+                            </span>
                         </button>
                     </div>
 
