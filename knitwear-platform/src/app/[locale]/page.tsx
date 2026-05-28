@@ -3,6 +3,8 @@ import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { ArrowRight, Sparkles, Palette, Bot, ShoppingBag, Zap, Globe, Heart, Languages, Calculator } from 'lucide-react';
 import { EditorDemo } from '@/components/home/EditorDemo';
+import HomeTutorials from '@/components/home/HomeTutorials';
+import HomeBlogSection from '@/components/home/HomeBlogSection';
 import { createClient } from '@/utils/supabase/server';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -118,6 +120,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 </div>
             </section>
 
+            {/* Tutorials Section */}
+            <HomeTutorials locale={locale} />
+
             {/* Features Section */}
             <section className="relative py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -201,6 +206,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     </div>
                 </div>
             </section>
+
+            {/* Blog Section */}
+            <HomeBlogSection locale={locale} />
 
             {/* CTA Section - 로그인하지 않은 유저에게만 노출 */}
             {!user && (

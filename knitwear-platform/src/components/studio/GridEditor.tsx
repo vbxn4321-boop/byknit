@@ -1889,13 +1889,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
         if (!stageRef.current) return;
 
-        try {
-            await deductCredits(user?.id!, 1, `Pattern Export (${format.toUpperCase()})`);
-        } catch (error) {
-            console.error('Download credit error:', error);
-            alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
-            return;
-        }
 
         setShowExportMenu(false);
 

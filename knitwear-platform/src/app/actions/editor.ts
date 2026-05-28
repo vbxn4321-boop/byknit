@@ -27,7 +27,6 @@ export async function saveGridProject(data: any) {
             width: data.width,
             height: data.height,
             original_image_url: data.originalImage || null,
-            thumbnail_url: data.thumbnailUrl || null,
             updated_at: new Date().toISOString()
         };
 

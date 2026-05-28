@@ -124,7 +124,13 @@
     "cta": {
       "title": "지금 시작해보세요",
       "subtitle": "이미 도안을 공유하고 영감을 나누고 있는 수많은 창작자들과 함께하세요."
-    }
+    },
+    "tutorialsTitle": "byKnit 사용법 알아보기",
+    "tutorialsSubtitle": "각 기능별 시연 영상과 단계별 가이드로 빠르게 익혀보세요",
+    "viewAllTutorials": "튜토리얼 전체 보기",
+    "blogTitle": "최신 블로그",
+    "blogSubtitle": "byKnit의 새로운 소식과 뜨개질 꿀팁을 확인하세요",
+    "viewAllBlog": "블로그 전체 보기"
   },
   "marketplace": {
     "title": "마켓플레이스",

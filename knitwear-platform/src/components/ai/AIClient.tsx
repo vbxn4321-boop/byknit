@@ -156,12 +156,6 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
     const handleConvert = async () => {
         if (!image) return;
 
-        // Check credits before starting
-        const cost = 100;
-        if (credits < cost) {
-            alert(locale === 'ko' ? '크레딧이 부족합니다. (필요: 100)' : 'Insufficient credits. (Need: 100)');
-            return;
-        }
 
         setIsConverting(true);
 
@@ -233,8 +227,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 settings.maxColors
             );
 
-            // Deduct credits after successful conversion
-            await deductCredits(user?.id!, 100, 'AI Image Conversion');
+            // Preview conversion is FREE - credits are only deducted on export/editor import
 
             setResult({
                 width: targetWidth,
@@ -525,10 +518,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     <span>{t('convert')}</span>
                                 </>
                             )}
-                            <div className="absolute top-[-10px] right-[-10px] flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-[11px] font-black border-2 border-white text-amber-700 shadow-lg">
-                                <Coins className="w-3.5 h-3.5 text-amber-500" />
-                                <span>-100</span>
-                            </div>
+
                         </button>
                     </div>
                 </div>

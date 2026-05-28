@@ -124,7 +124,13 @@
     "cta": {
       "title": "Ready to Start Your Journey?",
       "subtitle": "Join thousands of creators who are already sharing their patterns and inspiring others."
-    }
+    },
+    "tutorialsTitle": "Learn how to use byKnit",
+    "tutorialsSubtitle": "Get up to speed quickly with feature-specific demos and step-by-step guides",
+    "viewAllTutorials": "View all tutorials",
+    "blogTitle": "Latest Blog Posts",
+    "blogSubtitle": "Check out the latest news and knitting tips from byKnit",
+    "viewAllBlog": "View all blog posts"
   },
   "marketplace": {
     "title": "Marketplace",
