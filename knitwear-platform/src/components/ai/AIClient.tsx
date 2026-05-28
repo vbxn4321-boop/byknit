@@ -72,19 +72,6 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
                 </div>
             </div>
 
-            {/* AI Warning */}
-            {user && (
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 animate-in fade-in duration-300">
-                    <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-soft">
-                        <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h3 className="font-medium text-amber-700">{t('warning.title')}</h3>
-                            <p className="text-sm text-amber-600 mt-1">{t('warning.message')}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 {!user ? (
