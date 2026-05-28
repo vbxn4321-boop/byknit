@@ -170,8 +170,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                 } catch (creditError: any) {
                     if (creditError.message === 'Insufficient credits') {
                         alert(locale === 'ko'
-                            ? '코인(크레딧)이 부족합니다! 😢\n커뮤니티 활동(글쓰기 +50 코인) 등을 통해 코인을 충전해 주세요.'
-                            : 'Insufficient coins! 😢\nPlease earn coins by writing posts (+50 coins) or through other community activities.'
+                            ? '크레딧이 부족합니다! 😢\n커뮤니티 활동(글쓰기 +50 크레딧) 등을 통해 크레딧을 충전해 주세요.'
+                            : 'Insufficient credits! 😢\nPlease earn credits by writing posts (+50 credits) or through other community activities.'
                         );
                         return;
                     }

@@ -6,3 +6,6 @@ Result: Schema seems up to date.
 Testing connection to: https://moctsfwrfjhluxqrydpk.supabase.co
 Result: Connection Successful, "patterns" table exists.
 Result: Schema seems up to date.
+Testing connection to: https://ggtykciehwqiwtjrebmw.supabase.co
+Result: Connection Successful, "patterns" table exists.
+Result: Schema seems up to date.

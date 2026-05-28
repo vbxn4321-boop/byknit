@@ -1042,7 +1042,7 @@
       "popularTags": "인기 태그",
       "recommendedDesigners": "추천 크리에이터",
       "emptyDesigners": "커뮤니티가 활성화되면\n인기 크리에이터가 여기에 표시됩니다!",
-      "coinRewardInfo": "코인 보상 안내",
+      "coinRewardInfo": "크레딧 보상 안내",
       "rewards": {
         "patternShare": "도안 첨부 글 작성",
         "signUpBonus": "가입 축하 적립",
@@ -1105,7 +1105,7 @@
       "contentLabel": "내용",
       "contentPlaceholder": "내용을 입력하세요. 뜨개질 팁, 자랑거리, 질문 등을 자유롭게 공유해보세요!",
       "attachPattern": "도안 첨부하기 (선택)",
-      "attachPatternDesc": "내 도안 중 하나를 첨부하여 공유하면 50코인을 획득합니다!",
+      "attachPatternDesc": "내 도안 중 하나를 첨부하여 공유하면 50크레딧을 획득합니다!",
       "selectPatternPlaceholder": "첨부할 도안을 선택하세요",
       "noPattern": "첨부 가능한 도안이 없습니다",
       "uploadImages": "사진 첨부 (최대 4장)",

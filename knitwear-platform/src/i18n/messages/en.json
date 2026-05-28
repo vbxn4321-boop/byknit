@@ -1040,7 +1040,7 @@
       "popularTags": "Popular Tags",
       "recommendedDesigners": "Recommended Designers",
       "emptyDesigners": "Popular designers will be\ndisplayed here when active!",
-      "coinRewardInfo": "Coin Reward Info",
+      "coinRewardInfo": "Credit Reward Info",
       "rewards": {
         "patternShare": "Post with Pattern Share",
         "signUpBonus": "Welcome Bonus",
@@ -1103,7 +1103,7 @@
       "contentLabel": "Content",
       "contentPlaceholder": "Write your content here. Feel free to share knitting tips, show off your projects, or ask questions!",
       "attachPattern": "Attach Pattern (Optional)",
-      "attachPatternDesc": "Earn 50 coins by attaching and sharing one of your patterns!",
+      "attachPatternDesc": "Earn 50 credits by attaching and sharing one of your patterns!",
       "selectPatternPlaceholder": "Select a pattern to attach",
       "noPattern": "No patterns available to attach",
       "uploadImages": "Attach Photos (Max 4)",

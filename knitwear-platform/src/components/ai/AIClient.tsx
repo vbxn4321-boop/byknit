@@ -172,7 +172,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         // Check credits before starting
         const cost = 100;
         if (credits < cost) {
-            alert(locale === 'ko' ? '코인이 부족합니다. (필요: 100)' : 'Insufficient credits. (Need: 100)');
+            alert(locale === 'ko' ? '크레딧이 부족합니다. (필요: 100)' : 'Insufficient credits. (Need: 100)');
             return;
         }
 
@@ -293,7 +293,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
     const handleEditInEditor = async () => {
         if (!result) return;
         if (credits < 10) {
-            alert(locale === 'ko' ? '코인이 부족합니다.' : 'Insufficient credits.');
+            alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
 

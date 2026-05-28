@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Search, SlidersHorizontal, X, ChevronDown, Download, Eye, Star, Heart, User as UserIcon, Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { Search, SlidersHorizontal, X, ChevronDown, Download, Eye, Star, Heart, User as UserIcon, Sparkles, Clock, TrendingUp, Crown, Coins, ChevronRight, Package } from 'lucide-react';
 import { CATEGORY_TAXONOMY, YARN_WEIGHTS } from '@/constants/taxonomy';
 import type { Pattern, PatternFilters, YarnWeight, Technique, Difficulty } from '@/types';
 import { PatternDetailClient } from './PatternDetailClient';
@@ -20,6 +20,8 @@ type SortOption = 'recommended' | 'newest' | 'popular';
 
 export function MarketplaceClient({ locale }: MarketplaceClientProps) {
     const t = useTranslations('marketplace');
+    const tCommunity = useTranslations('community');
+    const [isCreditsExpanded, setIsCreditsExpanded] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filters, setFilters] = useState<PatternFilters>({});
@@ -279,26 +281,128 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
 
             {/* Results */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-4 text-sm text-brown-600 flex items-center justify-between">
-                    <span>{patterns.length} {t('itemsFound')}</span>
-                    {isLoading && <span className="text-brown-400 animate-pulse">Loading...</span>}
-                </div>
+                <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+                    {/* Main Results */}
+                    <div>
+                        <div className="mb-4 text-sm text-brown-600 flex items-center justify-between">
+                            <span>{patterns.length} {t('itemsFound')}</span>
+                            {isLoading && <span className="text-brown-400 animate-pulse">Loading...</span>}
+                        </div>
 
-                {isLoading && patterns.length === 0 ? (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                            <div key={i} className="aspect-[3/4] bg-tan-100/50 rounded-2xl animate-pulse" />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {patterns.map((pattern) => (
-                            <div key={pattern.id} onClick={() => setSelectedPatternId(pattern.id)} className="cursor-pointer">
-                                <PatternCard pattern={pattern} locale={locale} />
+                        {isLoading && patterns.length === 0 ? (
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                    <div key={i} className="aspect-[3/4] bg-tan-100/50 rounded-2xl animate-pulse" />
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {patterns.map((pattern) => (
+                                    <div key={pattern.id} onClick={() => setSelectedPatternId(pattern.id)} className="cursor-pointer">
+                                        <PatternCard pattern={pattern} locale={locale} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                )}
+
+                    {/* Sidebar */}
+                    <div className="space-y-5">
+                        {/* 추천 크리에이터 (팔로우 추천) */}
+                        <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
+                            <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
+                                <Crown className="w-4 h-4 text-rose-400" />
+                                {tCommunity('sidebar.recommendedDesigners')}
+                            </h3>
+                            <div className="py-6 text-center">
+                                <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
+                                    <UserIcon className="w-5 h-5 text-rose-300" />
+                                </div>
+                                <p className="text-xs text-stone-400 font-bold whitespace-pre-line">{tCommunity('sidebar.emptyDesigners')}</p>
+                            </div>
+                        </div>
+
+                        {/* 인기 태그 */}
+                        <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
+                            <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-amber-400" />
+                                {tCommunity('sidebar.popularTags')}
+                            </h3>
+                            <div className="flex flex-wrap gap-1.5">
+                                {['#여름니트', '#대바늘뜨기', '#입문자환영', '#니팅도안', '#KnitWithLove', '#byKnit'].map(tag => (
+                                    <span key={tag} className="px-3 py-1.5 rounded-lg bg-stone-50 text-stone-600 text-[11px] font-bold border border-stone-100 hover:border-rose-200 hover:bg-rose-50 cursor-pointer transition-all">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 크레딧 보상 안내 */}
+                        <div id="credit-rewards" className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden transition-all duration-300 shadow-soft">
+                            <div className="relative z-10 text-left">
+                                <div 
+                                    onClick={() => setIsCreditsExpanded(!isCreditsExpanded)}
+                                    className="flex items-center justify-between mb-3 cursor-pointer group/title select-none"
+                                >
+                                    <h3 className="font-black text-sm flex items-center gap-2 group-hover/title:text-amber-300 transition-colors">
+                                        <Coins className="w-4 h-4 text-amber-400 animate-pulse" /> {tCommunity('sidebar.coinRewardInfo')}
+                                    </h3>
+                                    <button 
+                                        type="button"
+                                        className="text-stone-400 group-hover/title:text-white transition-all p-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-90"
+                                        aria-label={isCreditsExpanded ? "접기" : "펼치기"}
+                                    >
+                                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCreditsExpanded ? 'rotate-90 text-amber-300' : ''}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-2 text-xs text-stone-300">
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{tCommunity('sidebar.rewards.patternShare')}</span>
+                                        <span className="font-black text-amber-400">+50</span>
+                                    </div>
+                                    
+                                    {isCreditsExpanded && (
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <span>{tCommunity('sidebar.rewards.signUpBonus')}</span>
+                                            <span className="font-black text-amber-400">+5</span>
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{tCommunity('sidebar.rewards.patternUploadBonus')}</span>
+                                        <span className="font-black text-amber-400">+3</span>
+                                    </div>
+
+                                    {isCreditsExpanded && (
+                                        <>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{tCommunity('sidebar.rewards.aiAnalysis')}</span>
+                                                <span className="font-black text-rose-400">-1</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{tCommunity('sidebar.rewards.aiEditor')}</span>
+                                                <span className="font-black text-rose-400">-10</span>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{tCommunity('sidebar.rewards.aiImage')}</span>
+                                        <span className="font-black text-rose-400">-100</span>
+                                    </div>
+
+                                    {isCreditsExpanded && (
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <span>{tCommunity('sidebar.rewards.aiExport')}</span>
+                                            <span className="font-black text-rose-400">-10</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Pattern Detail Modal */}

@@ -60,7 +60,6 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const [bookmarkSet, setBookmarkSet] = useState<Set<string>>(new Set());
     const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
     const [myStats, setMyStats] = useState({ postCount: 0, likeCount: 0, followerCount: 0 });
-    const [isCoinsExpanded, setIsCoinsExpanded] = useState(false);
 
     // Sync initialPosts to state when it changes
     useEffect(() => {
@@ -539,99 +538,6 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             </div>
                         )}
 
-                        {/* 인기 태그 */}
-                        <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
-                            <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-amber-400" />
-                                {t('sidebar.popularTags')}
-                            </h3>
-                            <div className="flex flex-wrap gap-1.5">
-                                {['#여름니트', '#대바늘뜨기', '#입문자환영', '#니팅도안', '#KnitWithLove', '#byKnit'].map(tag => (
-                                    <span key={tag} className="px-3 py-1.5 rounded-lg bg-stone-50 text-stone-600 text-[11px] font-bold border border-stone-100 hover:border-rose-200 hover:bg-rose-50 cursor-pointer transition-all">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* 추천 크리에이터 (팔로우 추천) */}
-                        <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
-                            <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
-                                <Crown className="w-4 h-4 text-rose-400" />
-                                {t('sidebar.recommendedDesigners')}
-                            </h3>
-                            <div className="py-6 text-center">
-                                <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
-                                    <UserIcon className="w-5 h-5 text-rose-300" />
-                                </div>
-                                <p className="text-xs text-stone-400 font-bold whitespace-pre-line">{t('sidebar.emptyDesigners')}</p>
-                            </div>
-                        </div>
-
-                        {/* 코인 보상 안내 */}
-                        <div className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden transition-all duration-300 shadow-soft">
-                            <div className="relative z-10">
-                                <div 
-                                    onClick={() => setIsCoinsExpanded(!isCoinsExpanded)}
-                                    className="flex items-center justify-between mb-3 cursor-pointer group/title select-none"
-                                >
-                                    <h3 className="font-black text-sm flex items-center gap-2 group-hover/title:text-amber-300 transition-colors">
-                                        <Coins className="w-4 h-4 text-amber-400 animate-pulse" /> {t('sidebar.coinRewardInfo')}
-                                    </h3>
-                                    <button 
-                                        type="button"
-                                        className="text-stone-400 group-hover/title:text-white transition-all p-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-90"
-                                        aria-label={isCoinsExpanded ? "접기" : "펼치기"}
-                                    >
-                                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCoinsExpanded ? 'rotate-90 text-amber-300' : ''}`} />
-                                    </button>
-                                </div>
-                                <div className="space-y-2 text-xs text-stone-300">
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{t('sidebar.rewards.patternShare')}</span>
-                                        <span className="font-black text-amber-400">+50</span>
-                                    </div>
-                                    
-                                    {isCoinsExpanded && (
-                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                            <span>{t('sidebar.rewards.signUpBonus')}</span>
-                                            <span className="font-black text-amber-400">+5</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{t('sidebar.rewards.patternUploadBonus')}</span>
-                                        <span className="font-black text-amber-400">+3</span>
-                                    </div>
-
-                                    {isCoinsExpanded && (
-                                        <>
-                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <span>{t('sidebar.rewards.aiAnalysis')}</span>
-                                                <span className="font-black text-rose-400">-1</span>
-                                            </div>
-                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <span>{t('sidebar.rewards.aiEditor')}</span>
-                                                <span className="font-black text-rose-400">-10</span>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{t('sidebar.rewards.aiImage')}</span>
-                                        <span className="font-black text-rose-400">-100</span>
-                                    </div>
-
-                                    {isCoinsExpanded && (
-                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                            <span>{t('sidebar.rewards.aiExport')}</span>
-                                            <span className="font-black text-rose-400">-10</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
-                        </div>
                     </div>
                 </div>
             </div>

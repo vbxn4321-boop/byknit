@@ -54,6 +54,7 @@ export function Footer() {
                             <li><Link href={`/${locale}/help`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('helpCenter')}</Link></li>
                             <li><Link href={`/${locale}/tutorials`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('tutorials')}</Link></li>
                             <li><Link href={`/${locale}/blog`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('blog')}</Link></li>
+                            <li><Link href={`/${locale}/marketplace#credit-rewards`} className="text-brown-600 hover:text-rose-400 transition-colors">{tCommunity('sidebar.coinRewardInfo')}</Link></li>
                         </ul>
                     </div>
 
