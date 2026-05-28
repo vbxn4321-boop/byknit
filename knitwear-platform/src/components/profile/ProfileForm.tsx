@@ -19,7 +19,6 @@ export function ProfileForm({ profile, locale }: ProfileFormProps) {
 
     const [formData, setFormData] = useState({
         display_name: profile?.display_name || '',
-        phone: profile?.phone || '',
         bio: profile?.bio || '',
         instagram_handle: profile?.instagram_handle || ''
     });
@@ -39,7 +38,15 @@ export function ProfileForm({ profile, locale }: ProfileFormProps) {
                 setTimeout(() => setSuccess(false), 3000);
             }
         } catch (err: any) {
-            setError(err.message || "An unexpected error occurred");
+            let errorMsg = err.message || "An unexpected error occurred";
+            if (locale === 'ko') {
+                if (errorMsg.includes('duplicate key') || errorMsg.includes('unique constraint')) {
+                    errorMsg = '이미 사용 중인 닉네임입니다.';
+                } else {
+                    errorMsg = '정보 수정 중 오류가 발생했습니다.';
+                }
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -67,16 +74,6 @@ export function ProfileForm({ profile, locale }: ProfileFormProps) {
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-brown-600 ml-1">{t('phone')}</label>
-                    <input
-                        type="text"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-4 py-3 rounded-2xl border border-tan-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition-all bg-cream-50/30"
-                        placeholder="010-0000-0000"
-                    />
-                </div>
             </div>
 
 

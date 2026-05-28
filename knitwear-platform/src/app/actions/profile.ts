@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache';
 
 export async function updateProfile(formData: {
     display_name?: string;
-    phone?: string;
     bio?: string;
     instagram_handle?: string;
     avatar_url?: string;

@@ -205,9 +205,6 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             <h1 className="text-2xl font-black text-stone-800">
                                 {t('title')}
                             </h1>
-                            <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-500 text-[10px] font-black uppercase tracking-wider border border-rose-100">
-                                {t('postsCount', { count: displayPosts.length })}
-                            </span>
                         </div>
                         
                         <div className="flex items-center gap-3">
