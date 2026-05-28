@@ -34,6 +34,7 @@ export function Footer() {
                             <li><Link href={`/${locale}/marketplace`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('marketplace')}</Link></li>
                             <li><Link href={`/${locale}/editor`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('patternEditor')}</Link></li>
                             <li><Link href={`/${locale}/ai`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('aiGenerator')}</Link></li>
+                            <li><Link href={`/${locale}/calculator`} className="text-brown-600 hover:text-rose-400 transition-colors">{tFooter('smartCalculator')}</Link></li>
                         </ul>
                     </div>
 
