@@ -151,19 +151,3 @@ export async function deductCredits(userId: string, amount: number, description:
     revalidatePath('/', 'layout');
 }
 
-export async function resetUserCredits(userId: string) {
-    const supabase = await createClient();
-    
-    const { error } = await supabase
-        .from('profiles')
-        .update({ credits: 1000 })
-        .eq('id', userId);
-
-    if (error) {
-        console.error('Error resetting credits:', error.message);
-        throw new Error('Failed to reset credits');
-    }
-
-    revalidatePath('/', 'layout');
-}
-

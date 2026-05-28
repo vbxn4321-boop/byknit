@@ -12,7 +12,7 @@ import { useEditorPersistence } from '@/hooks/useEditorPersistence';
 import { jsPDF } from 'jspdf';
 import { quantizeImage } from '@/utils/imageProcessing';
 import { createClient } from '@/utils/supabase/client';
-import { deductCredits, resetUserCredits } from '@/app/actions/credits';
+import { deductCredits } from '@/app/actions/credits';
 
 interface ConversionResult {
     grid: number[][];
@@ -57,15 +57,6 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
             .subscribe();
         return () => { supabase.removeChannel(channel); };
     }, [user]);
-
-    // Auto-reset credits for cdw90260224@gmail.com to 1000
-    useEffect(() => {
-        if (user && user.email === 'cdw90260224@gmail.com' && credits < 1000) {
-            resetUserCredits(user.id).then(() => {
-                router.refresh();
-            }).catch(console.error);
-        }
-    }, [user, credits]);
 
     return (
         <div className="min-h-screen bg-cream-50 pb-20 relative">
