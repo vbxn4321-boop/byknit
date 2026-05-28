@@ -621,8 +621,8 @@
       "a2": "Absolutely! You can register as a creator and list your patterns on our Marketplace. Go to the Editor and click 'Publish' to get started.",
       "q3": "How does the AI Generator work?",
       "a3": "Our AI analyzes your text description or uploaded image to generate a unique knitting chart. You can then edit it in our Pattern Editor.",
-      "q4": "What file formats can I export?",
-      "a4": "You can export your patterns as PDF (including instructions), PNG images, or JSON project files associated with your account."
+      "q4": "What file formats can I export for designs created in the Pattern Editor?",
+      "a4": "You can export your patterns as PDF (including instructions) or PNG images, and your project is saved securely on byKnit so you can edit it at any time in the Pattern Editor."
     },
     "contact": {
       "title": "Still need help?",
