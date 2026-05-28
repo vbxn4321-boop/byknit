@@ -2295,6 +2295,28 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             alert('Please save the project first.');
             return;
         }
+
+        // Validate
+        if (!publishMetadata.imageUrl) {
+            alert(locale === 'ko' ? '대표 이미지를 업로드해주세요.' : 'Please upload a main image.');
+            document.getElementById('publish-image')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (!publishMetadata.subcategory) {
+            alert(locale === 'ko' ? '세부 카테고리를 선택해주세요.' : 'Please select a subcategory.');
+            document.getElementById('publish-category')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (!publishMetadata.briefDescription) {
+            alert(locale === 'ko' ? '도안에 대한 간단한 설명을 입력해주세요.' : 'Please enter a brief description.');
+            document.getElementById('publish-description')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (publishMetadata.hashtags.length < 3) {
+            alert(locale === 'ko' ? '해시태그를 3개 이상 입력해주세요.' : 'Please enter at least 3 hashtags.');
+            document.getElementById('publish-hashtags')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         setIsPublishing(true);
         try {
             const res = await publishPattern(projectId, {
@@ -3565,7 +3587,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 ) : (
                                     <>
                                         {/* Main Image Section (REQUIRED) */}
-                                        <div className="space-y-4">
+                                        <div className="space-y-4" id="publish-image">
                                             <div className="flex justify-between items-end">
                                                 <label className="text-base font-bold text-stone-800">{tPublish('fields.mainImage')} <span className="text-rose-500">*</span></label>
                                                 <span className="text-xs text-stone-400">{tPublish('fields.mainImageHint')}</span>
@@ -3668,10 +3690,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             {/* Price Row (Full Width) */}
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center px-1">
-                                                    <label className="text-base font-bold text-stone-800">
-                                                        {tPublish('fields.price')} <span className="text-rose-500">*</span>
-                                                        <span className="text-xs font-normal text-stone-400 ml-1.5">
+                                                    <label className="text-base font-bold text-stone-800 flex items-center flex-wrap gap-2">
+                                                        <span>{tPublish('fields.price')} <span className="text-rose-500">*</span></span>
+                                                        <span className="text-xs font-normal text-stone-400">
                                                             ({router.toString().includes('/ko') ? 'KRW' : 'USD'})
+                                                        </span>
+                                                        <span className="text-[10px] sm:text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
+                                                            {router.toString().includes('/ko') ? '현재는 베타서비스라 무료만 가능합니다' : 'Beta: Only free is available'}
                                                         </span>
                                                     </label>
                                                     <label className="flex items-center gap-2 cursor-pointer group bg-stone-50 px-3 py-1.5 rounded-full hover:bg-stone-100 transition-colors">
@@ -3739,7 +3764,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             </div>
 
                                             {/* Categories Row */}
-                                            <div className="grid grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-2 gap-6" id="publish-category">
                                                 <div>
                                                     <label className="text-base font-bold text-stone-800 block mb-2">{tPublish('fields.category')} <span className="text-rose-500">*</span></label>
                                                     <select
@@ -4039,7 +4064,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             )}
 
                                             {/* Descriptions */}
-                                            <div className="space-y-8 pt-8 border-t border-stone-100">
+                                            <div className="space-y-8 pt-8 border-t border-stone-100" id="publish-description">
                                                 <div>
                                                     <div className="flex justify-between items-baseline mb-3 px-1">
                                                         <label className="text-base font-bold text-stone-800">{tPublish('fields.briefDescription')} <span className="text-rose-500">*</span></label>
@@ -4074,7 +4099,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             </div>
 
                                             {/* Hashtags Section */}
-                                            <div>
+                                            <div id="publish-hashtags">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <label className="text-sm font-bold text-stone-800">
                                                         {tPublish('fields.hashtags')} <span className="text-rose-500">*</span>
@@ -4136,7 +4161,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
                                             <button
                                                 onClick={handlePublish}
-                                                disabled={isPublishing || !publishMetadata.imageUrl || !publishMetadata.briefDescription || !publishMetadata.subcategory || !publishMetadata.needles || publishMetadata.hashtags.length < 3}
+                                                disabled={isPublishing}
                                                 className="w-full bg-rose-500 hover:bg-rose-600 disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-bold py-5 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95 text-xl mt-6 flex items-center justify-center gap-3"
                                             >
                                                 {isPublishing ? (
