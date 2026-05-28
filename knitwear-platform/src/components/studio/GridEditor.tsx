@@ -506,9 +506,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     useEffect(() => {
         setIsMounted(true);
-        const hasSeen = localStorage.getItem('hasSeenOnboarding');
-        if (!hasSeen) setShowOnboarding(true);
-    }, [setShowOnboarding]);
+    }, []);
 
     // Center grid on mount
     useEffect(() => {
@@ -2693,24 +2691,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     if (!isMounted) return <div className="h-full flex items-center justify-center bg-cream-50">Loading Studio...</div>;
 
-    const hasOpenModal = showGridSizeModal || showPublishModal || showOnboarding || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
+    const hasOpenModal = showGridSizeModal || showPublishModal || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
 
     return (
         <div className="flex flex-col h-[85vh] bg-cream-50 font-sans select-none relative">
-            {/* Onboarding Modal */}
-            {showOnboarding && (
-                <div className="fixed inset-0 z-[10000]">
-                    <OnboardingOverlay
-                        t={tEditor}
-                        step={onboardingStep}
-                        setStep={setOnboardingStep}
-                        onClose={() => {
-                            setShowOnboarding(false);
-                            localStorage.setItem('hasSeenOnboarding', 'true');
-                        }}
-                    />
-                </div>
-            )}
+            {/* Onboarding Modal - Removed as requested */}
 
             {/* Top Toolbar */}
             <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
