@@ -68,10 +68,10 @@ export async function getCreditHistory(userId: string) {
     // This handles users who were created before the history logging was implemented
     if (data && data.length === 0) {
         const credits = await getUserCredits(userId);
-        if (credits >= 5) {
+        if (credits >= 1000) {
             return [{
                 id: 'sign-up-bonus',
-                amount: 5,
+                amount: 1000,
                 description: 'signUpBonus', // Special key for localization
                 created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // Approximate
             }];

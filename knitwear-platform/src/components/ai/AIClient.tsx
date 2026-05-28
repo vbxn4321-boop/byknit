@@ -280,7 +280,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         }
 
         try {
-            await deductCredits(user?.id!, 10, 'AI Editor Import');
+            await deductCredits(user?.id!, 50, 'AI Editor Import');
             saveAIImport(result);
             router.push(`/${locale}/editor?import=ai`);
         } catch (error) {
@@ -362,7 +362,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         if (!canvas) return;
 
         try {
-            await deductCredits(user?.id!, 10, `AI Export (${exportFormat.toUpperCase()})`);
+            await deductCredits(user?.id!, 50, `AI Export (${exportFormat.toUpperCase()})`);
             if (exportFormat === 'pdf') {
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 const pdf = new jsPDF({

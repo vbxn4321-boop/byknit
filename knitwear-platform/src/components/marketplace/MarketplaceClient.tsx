@@ -357,45 +357,47 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                                 </div>
                                 <div className="space-y-2 text-xs text-stone-300">
                                     <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{tCommunity('sidebar.rewards.patternShare')}</span>
-                                        <span className="font-black text-amber-400">+50</span>
+                                        <span>{locale === 'ko' ? '가입 축하 적립' : 'Sign Up Bonus'}</span>
+                                        <span className="font-black text-amber-400">+1000</span>
                                     </div>
                                     
                                     {isCreditsExpanded && (
-                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                            <span>{tCommunity('sidebar.rewards.signUpBonus')}</span>
-                                            <span className="font-black text-amber-400">+5</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{tCommunity('sidebar.rewards.patternUploadBonus')}</span>
-                                        <span className="font-black text-amber-400">+3</span>
-                                    </div>
-
-                                    {isCreditsExpanded && (
                                         <>
                                             <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <span>{tCommunity('sidebar.rewards.aiAnalysis')}</span>
-                                                <span className="font-black text-rose-400">-1</span>
+                                                <span>{locale === 'ko' ? '추천인/가입자 보너스' : 'Referral Bonus'}</span>
+                                                <span className="font-black text-amber-400">+100</span>
                                             </div>
                                             <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                                <span>{tCommunity('sidebar.rewards.aiEditor')}</span>
-                                                <span className="font-black text-rose-400">-10</span>
+                                                <span>{locale === 'ko' ? '마켓플레이스 도안 다운로드' : 'Marketplace Download'}</span>
+                                                <span className="font-black text-amber-400">+10</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '마켓플레이스 도안 좋아요' : 'Marketplace Like'}</span>
+                                                <span className="font-black text-amber-400">+1</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '커뮤니티 인기게시물 선정' : 'Popular Community Post'}</span>
+                                                <span className="font-black text-amber-400">+50</span>
                                             </div>
                                         </>
                                     )}
 
                                     <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
-                                        <span>{tCommunity('sidebar.rewards.aiImage')}</span>
-                                        <span className="font-black text-rose-400">-100</span>
+                                        <span>{locale === 'ko' ? '도안 업로드 보너스' : 'Pattern Upload Bonus'}</span>
+                                        <span className="font-black text-amber-400">+100</span>
                                     </div>
 
                                     {isCreditsExpanded && (
-                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
-                                            <span>{tCommunity('sidebar.rewards.aiExport')}</span>
-                                            <span className="font-black text-rose-400">-10</span>
-                                        </div>
+                                        <>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '차트변환 파일 내보내기' : 'Chart Export'}</span>
+                                                <span className="font-black text-rose-400">-50</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '도안에디터 파일 내보내기' : 'Editor Export'}</span>
+                                                <span className="font-black text-rose-400">-50</span>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </div>

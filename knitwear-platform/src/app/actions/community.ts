@@ -138,7 +138,7 @@ export async function createPost(formData: FormData) {
     // 도안을 첨부한 게시글이면 +50 크레딧 보상 (서버 사이드에서만 처리)
     if (patternId) {
         try {
-            await addCredits(user.id, 50, 'Community Pattern Share Reward');
+            await addCredits(user.id, 100, 'Pattern Upload Bonus');
         } catch (creditError) {
             console.error('Failed to award pattern share credits:', creditError);
             // 크레딧 지급 실패해도 게시글은 정상 등록
@@ -196,6 +196,17 @@ export async function toggleLike(postId: string) {
                 const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
                 const senderName = profile?.display_name || '누군가';
                 await sendNotification(post.user_id, user.id, 'like', postId, `${senderName}님이 "${post.title}" 글을 좋아합니다 ♥`);
+                
+                // 인기 게시물 보상 (+50)
+                const { count } = await supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId);
+                if (count === 10) {
+                    const { data: existingReward } = await supabase.from('credit_transactions')
+                        .select('id').eq('user_id', post.user_id).like('description', `%Popular Post%${postId}%`).maybeSingle();
+                    
+                    if (!existingReward) {
+                        await addCredits(post.user_id, 50, `Popular Post Reward (${postId})`);
+                    }
+                }
             }
         } catch (e) { /* 알림 실패 무시 */ }
     }

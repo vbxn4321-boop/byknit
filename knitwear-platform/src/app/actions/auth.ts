@@ -56,7 +56,9 @@ export async function signup(formData: FormData) {
         return redirect('/signup?error=' + encodeURIComponent('필수 약관에 동의해주세요.'))
     }
 
-    const { error } = await supabase.auth.signUp({
+    const referrerName = data.referrer_name as string;
+
+    const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -66,6 +68,7 @@ export async function signup(formData: FormData) {
                 privacy_policy_agreed: privacyAgreed,
                 ad_agreement: adAgreement,
                 marketing_consent: marketingConsent,
+                referrer_name: referrerName || null,
             },
             // Explicitly require email confirmation flow if enabled in Supabase
             emailRedirectTo: `${origin}/auth/callback`,
@@ -74,6 +77,34 @@ export async function signup(formData: FormData) {
 
     if (error) {
         return redirect('/signup?error=' + encodeURIComponent(error.message)) // Changed to error param for red box
+    }
+
+    // Process Referral Bonus if provided
+    if (referrerName && signUpData.user) {
+        // Find referrer by username (display_name in profiles)
+        const { data: referrerData } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('display_name', referrerName)
+            .single();
+
+        if (referrerData) {
+            // Grant +100 to referrer
+            await supabase.from('credit_transactions').insert({
+                user_id: referrerData.id,
+                amount: 100,
+                type: 'earning',
+                description: `Referral Bonus (referred ${username})`
+            });
+
+            // Grant +100 to new user
+            await supabase.from('credit_transactions').insert({
+                user_id: signUpData.user.id,
+                amount: 100,
+                type: 'earning',
+                description: 'Referred Sign Up Bonus'
+            });
+        }
     }
 
     // Success - Tell them to check email

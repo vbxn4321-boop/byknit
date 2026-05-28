@@ -1890,6 +1890,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         if (!stageRef.current) return;
 
 
+        try {
+            await deductCredits(user.id, 50, 'Pattern Editor Export');
+        } catch (e) {
+            alert(locale === 'ko' ? '크레딧이 부족합니다. (내보내기: 50 크레딧 필요)' : 'Insufficient credits (50 required for export).');
+            return;
+        }
+
         setShowExportMenu(false);
 
         const stage = stageRef.current;

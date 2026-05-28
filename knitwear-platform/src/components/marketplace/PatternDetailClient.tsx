@@ -282,6 +282,16 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         });
         await pdfGenerator.generate();
         await incrementDownloadCount(patternId);
+
+        // 🔔 Reward the designer (+10) for download
+        if (pattern.designer_id && pattern.designer_id !== user?.id) {
+            try {
+                const { addCredits } = await import('@/app/actions/credits');
+                await addCredits(pattern.designer_id, 10, `Marketplace Download Reward (${patternId})`);
+            } catch (e) {
+                console.error('Failed to reward pattern download:', e);
+            }
+        }
     };
 
     if (isLoading || !pattern) {

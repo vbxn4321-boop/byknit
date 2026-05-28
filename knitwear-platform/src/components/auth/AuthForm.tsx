@@ -224,6 +224,15 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
 
                 {type === 'signup' && (
                     <div className="space-y-4 pt-2">
+                        <div>
+                            <label className="block text-sm font-bold text-stone-700 mb-2">추천인 닉네임 (Referral Name) <span className="text-stone-400 font-normal ml-1">[선택]</span></label>
+                            <input
+                                name="referrer_name"
+                                type="text"
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                                placeholder="추천인의 닉네임을 입력하세요 (+100 크레딧)"
+                            />
+                        </div>
                         <label className="flex items-start gap-3 cursor-pointer group">
                             <input
                                 name="privacy_policy_agreed"

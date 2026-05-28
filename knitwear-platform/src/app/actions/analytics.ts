@@ -39,6 +39,20 @@ export async function togglePatternLike(patternId: string) {
             pattern_id: patternId,
             user_id: user.id
         });
+
+        // 🔔 Reward the designer (+1)
+        try {
+            const { data: pattern } = await supabase.from('patterns').select('designer_id').eq('id', patternId).single();
+            if (pattern && pattern.designer_id !== user.id) {
+                // Import addCredits at top of file or use dynamic import if needed.
+                // It's probably better to use dynamic import to avoid circular dependencies if any, or just import it.
+                const { addCredits } = await import('./credits');
+                await addCredits(pattern.designer_id, 1, `Marketplace Like Reward (${patternId})`);
+            }
+        } catch (e) {
+            console.error('Failed to reward pattern like:', e);
+        }
+
         return { liked: true };
     }
 }
