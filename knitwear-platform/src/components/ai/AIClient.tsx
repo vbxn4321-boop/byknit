@@ -510,7 +510,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                         <button
                             onClick={handleConvert}
                             disabled={!image || isConverting}
-                            className="w-full btn-primary flex items-center justify-center gap-2 py-3 disabled:opacity-50 disabled:cursor-not-allowed group relative"
+                            className="w-full btn-primary disabled:bg-none disabled:bg-stone-250 disabled:text-stone-400 disabled:shadow-none disabled:opacity-100 flex items-center justify-center gap-2 py-3 disabled:cursor-not-allowed group relative"
                         >
                             {isConverting ? (
                                 <>
