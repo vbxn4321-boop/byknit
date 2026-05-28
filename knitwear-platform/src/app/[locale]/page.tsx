@@ -115,6 +115,29 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                             </Link>
                         </div>
 
+                        {/* Concept A: Editorial Photo Cards */}
+                        <div className="mt-20 max-w-5xl mx-auto grid grid-cols-3 gap-4 sm:gap-6 md:gap-10 relative">
+                            {/* Card 1 (Left - staggered down) */}
+                            <div className="flex flex-col mt-16 transform transition-transform hover:-translate-y-2 duration-500">
+                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-tan-200/50">
+                                    <img src="/seed/pattern1.png" alt="Knitting Pattern" className="w-full h-full object-cover" />
+                                </div>
+                            </div>
+                            
+                            {/* Card 2 (Center - higher) */}
+                            <div className="flex flex-col -mt-8 transform transition-transform hover:-translate-y-2 duration-500">
+                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-tan-200/50">
+                                    <img src="/seed/post2.png" alt="Knitting Project" className="w-full h-full object-cover" />
+                                </div>
+                            </div>
+                            
+                            {/* Card 3 (Right - staggered further down) */}
+                            <div className="flex flex-col mt-24 transform transition-transform hover:-translate-y-2 duration-500">
+                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-tan-200/50">
+                                    <img src="/seed/post1.png" alt="Finished Knitwear" className="w-full h-full object-cover" />
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
