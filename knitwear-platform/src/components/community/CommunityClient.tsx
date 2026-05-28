@@ -554,7 +554,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             </div>
                         </div>
 
-                        {/* 추천 도아너 (팔로우 추천) */}
+                        {/* 추천 크리에이터 (팔로우 추천) */}
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">
                             <h3 className="text-sm font-black text-stone-800 mb-4 flex items-center gap-2">
                                 <Crown className="w-4 h-4 text-rose-400" />

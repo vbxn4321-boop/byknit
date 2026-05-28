@@ -471,14 +471,14 @@ export function MyPageClient({
                         도안 제작자이신가요?
                     </h3>
                     <p className="text-stone-500 text-[11px] mt-1 font-medium leading-relaxed">
-                        꿈꿔왔던 도안 판매, 도아너 가이드와 함께 첫걸음을 내딛으세요.
+                        꿈꿔왔던 도안 판매, 크리에이터 가이드와 함께 첫걸음을 내딛으세요.
                     </p>
                 </div>
                 <Link
                     href={`/studio`}
                     className="inline-flex items-center gap-1 px-4.5 py-2 border-2 border-stone-800 hover:bg-stone-850 hover:border-rose-500 hover:text-rose-500 text-stone-850 text-xs font-black rounded-xl transition-all cursor-pointer flex-shrink-0"
                 >
-                    <span>도아너 가이드</span>
+                    <span>크리에이터 가이드</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
             </div>

@@ -1040,8 +1040,8 @@
       "followers": "팔로워",
       "loginPrompt": "로그인하고 커뮤니티 활동을 시작해보세요!",
       "popularTags": "인기 태그",
-      "recommendedDesigners": "추천 도아너",
-      "emptyDesigners": "커뮤니티가 활성화되면\n인기 도아너가 여기에 표시됩니다!",
+      "recommendedDesigners": "추천 크리에이터",
+      "emptyDesigners": "커뮤니티가 활성화되면\n인기 크리에이터가 여기에 표시됩니다!",
       "coinRewardInfo": "코인 보상 안내",
       "rewards": {
         "patternShare": "도안 첨부 글 작성",
