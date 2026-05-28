@@ -83,6 +83,10 @@ export async function getCreditHistory(userId: string) {
 
 export async function addCredits(userId: string, amount: number, description: string) {
     const supabase = await createClient();
+    
+    // 1. Get current balance
+    const currentCredits = await getUserCredits(userId);
+
     const { error } = await supabase
         .from('credit_transactions')
         .insert({
@@ -93,8 +97,18 @@ export async function addCredits(userId: string, amount: number, description: st
         });
 
     if (error) {
-        console.error('Error adding credits:', error);
-        throw new Error('Failed to add credits');
+        console.warn('Error inserting transaction into credit_transactions, falling back to direct profiles update:', error.message);
+        
+        // Fallback: update profile credits directly
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ credits: currentCredits + amount })
+            .eq('id', userId);
+
+        if (profileError) {
+            console.error('Fallback direct profile update failed:', profileError.message);
+            throw new Error('Failed to add credits');
+        }
     }
 
     revalidatePath('/', 'layout');
@@ -120,8 +134,18 @@ export async function deductCredits(userId: string, amount: number, description:
         });
 
     if (error) {
-        console.error('Error deducting credits:', error);
-        throw new Error('Failed to deduct credits');
+        console.warn('Error inserting transaction into credit_transactions, falling back to direct profiles update:', error.message);
+        
+        // Fallback: update profile credits directly
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ credits: currentCredits - amount })
+            .eq('id', userId);
+
+        if (profileError) {
+            console.error('Fallback direct profile update failed:', profileError.message);
+            throw new Error('Failed to deduct credits');
+        }
     }
 
     revalidatePath('/', 'layout');
