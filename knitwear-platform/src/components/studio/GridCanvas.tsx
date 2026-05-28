@@ -50,6 +50,7 @@ interface GridCanvasProps {
     } | null;
     shapeRotation?: number;
     isRotationMode?: boolean;
+    shapeApplyTarget?: 'both' | 'color' | 'symbol';
 }
 
 export default function GridCanvas({
@@ -83,7 +84,8 @@ export default function GridCanvas({
     selectedSymbol,
     finalSelection,
     shapeRotation = 0,
-    isRotationMode = false
+    isRotationMode = false,
+    shapeApplyTarget = 'both'
 }: GridCanvasProps) {
     const CELL_SIZE = 30;
 
@@ -258,17 +260,17 @@ export default function GridCanvas({
                             y={cell.row * CELL_SIZE}
                             width={CELL_SIZE}
                             height={CELL_SIZE}
-                            fill={selectedColor || '#E8B4B8'}
-                            stroke="#e2e8f0"
+                            fill={shapeApplyTarget === 'symbol' ? 'transparent' : (selectedColor || '#E8B4B8')}
+                            stroke={shapeApplyTarget === 'symbol' ? 'transparent' : '#e2e8f0'}
                             strokeWidth={1}
                             listening={false}
                         />
-                        {selectedSymbol && renderSymbol(selectedSymbol, cell.col * CELL_SIZE, cell.row * CELL_SIZE, CELL_SIZE)}
+                        {shapeApplyTarget !== 'color' && selectedSymbol && renderSymbol(selectedSymbol, cell.col * CELL_SIZE, cell.row * CELL_SIZE, CELL_SIZE)}
                     </Group>
                 ))}
             </Group>
         );
-    }, [shapePreview, selectedColor, selectedSymbol, symbolDefs]);
+    }, [shapePreview, selectedColor, selectedSymbol, symbolDefs, shapeApplyTarget]);
 
     return (
         <Stage
@@ -487,7 +489,7 @@ export default function GridCanvas({
                                 listening={true}
                                 onMouseEnter={(e) => {
                                     const stage = e.target.getStage();
-                                    if (stage) stage.container().style.cursor = 'pointer';
+                                    if (stage) stage.container().style.cursor = 'ns-resize';
                                 }}
                                 onMouseLeave={(e) => {
                                     const stage = e.target.getStage();
@@ -509,7 +511,7 @@ export default function GridCanvas({
                                 listening={true}
                                 onMouseEnter={(e) => {
                                     const stage = e.target.getStage();
-                                    if (stage) stage.container().style.cursor = 'pointer';
+                                    if (stage) stage.container().style.cursor = 'ew-resize';
                                 }}
                                 onMouseLeave={(e) => {
                                     const stage = e.target.getStage();
@@ -531,7 +533,7 @@ export default function GridCanvas({
                                 listening={true}
                                 onMouseEnter={(e) => {
                                     const stage = e.target.getStage();
-                                    if (stage) stage.container().style.cursor = 'pointer';
+                                    if (stage) stage.container().style.cursor = 'ns-resize';
                                 }}
                                 onMouseLeave={(e) => {
                                     const stage = e.target.getStage();
@@ -553,7 +555,7 @@ export default function GridCanvas({
                                 listening={true}
                                 onMouseEnter={(e) => {
                                     const stage = e.target.getStage();
-                                    if (stage) stage.container().style.cursor = 'pointer';
+                                    if (stage) stage.container().style.cursor = 'ew-resize';
                                 }}
                                 onMouseLeave={(e) => {
                                     const stage = e.target.getStage();
@@ -573,7 +575,7 @@ export default function GridCanvas({
                                 listening={true}
                                 onMouseEnter={(e) => {
                                     const stage = e.target.getStage();
-                                    if (stage) stage.container().style.cursor = 'pointer';
+                                    if (stage) stage.container().style.cursor = 'ew-resize';
                                 }}
                                 onMouseLeave={(e) => {
                                     const stage = e.target.getStage();

@@ -9,7 +9,7 @@ import {
     PaintBucket, Plus, ChevronDown, Check, X,
     FileText, Image as ImageIcon,
     Settings,
-    HelpCircle,
+    HelpCircle, Info, Pipette, Paintbrush,
     ShoppingBag,
     BoxSelect, SquareDashed,
     Loader2,
@@ -144,17 +144,25 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const locale = useLocale();
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
+    const [customAlert, setCustomAlert] = useState<{
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        onCancel?: () => void;
+    } | null>(null);
 
-    const handleAuthCheck = (e?: React.MouseEvent | any) => {
-        if (e && e.preventDefault) {
+    const handleAuthCheck = (e: React.MouseEvent) => {
+        if (!user) {
             e.preventDefault();
             e.stopPropagation();
+            setCustomAlert({
+                title: locale === 'ko' ? '로그인 필요' : 'Login Required',
+                message: t('authRequired') || 'Authentication required',
+                onConfirm: () => {
+                    router.push('/login');
+                }
+            });
         }
-        alert(locale === 'ko'
-            ? '🔒 로그인이 필요한 장치입니다. 이 도구(도안 에디터)를 사용하시려면 먼저 로그인을 완료해 주세요.'
-            : '🔒 Login Required. Please log in to unlock and use the Pattern Editor.'
-        );
-        router.push(`/${locale}/login`);
     };
 
 
@@ -199,7 +207,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         usedColors?: string[];         // Actual colors used in grid
         hashtags: string[];            // Required: min 3, max 10
         yarnParts?: YarnPart[];        // Dynamic yarn parts
-        sizeParts?: { id: string; name: string; detail: string; }[];
+        sizeParts?: { id: string; name: string; detail: string }[];
     }>({
         title: '',
         price: 0,
@@ -265,13 +273,21 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     }, [initialProject]);
 
     // Tools & Selection
-    const [activeTool, setActiveTool] = useState<'symbol' | 'paint' | 'eraser' | 'move' | 'shape' | 'selection'>('symbol');
+    const [activeTool, setActiveTool] = useState<'symbol' | 'paint' | 'eraser' | 'move' | 'shape' | 'selection' | 'bucket' | 'eyedropper'>('symbol');
     const [activeShape, setActiveShape] = useState<'circle' | 'square' | 'triangle' | 'star' | 'heart'>('circle');
     const [shapeMode, setShapeMode] = useState<'outline' | 'fill'>('outline');
     const [shapeRotation, setShapeRotation] = useState<number>(0);
     const handleTypeRef = useRef<'resize' | 'rotate' | null>(null);
     const [shapePreview, setShapePreview] = useState<{ startRow: number; startCol: number; endRow: number; endCol: number } | null>(null);
     const [isShapeMenuOpen, setIsShapeMenuOpen] = useState(false);
+    const [isBucketMenuOpen, setIsBucketMenuOpen] = useState(false);
+    const [shapeApplyTarget, setShapeApplyTarget] = useState<'both' | 'color' | 'symbol'>('both');
+    const [showTransformationHint, setShowTransformationHint] = useState(false);
+
+    const [isSimultaneousDraw, setIsSimultaneousDraw] = useState(false);
+    const [bucketMode, setBucketMode] = useState<'both' | 'color' | 'symbol'>('both');
+    const [eyedropperMode, setEyedropperMode] = useState<'both' | 'color' | 'symbol'>('both');
+    const previousToolRef = useRef<string>('symbol');
 
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedSymbol, setSelectedSymbol] = useState<string>('knit');
@@ -326,9 +342,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const { showOnboarding, onCloseOnboarding, setShowOnboarding } = useOnboarding();
     const [onboardingStep, setOnboardingStep] = useState(1);
 
-    // Persistence for AI Import and Autosave
-    const { hasAIImport, loadAIImport, saveSession, loadSession, clearSession } = useEditorPersistence();
-    const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+    // Persistence for AI Import
+    const { hasAIImport, loadAIImport } = useEditorPersistence();
 
     // Export
     const [showExportMenu, setShowExportMenu] = useState(false);
@@ -382,6 +397,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     // Selection Moving State
     const selectionBoxMoveRef = useRef<{ isMoving: boolean; startRow: number; startCol: number; hasMoved: boolean } | null>(null);
     const selectionContentMoveRef = useRef<{ isMoving: boolean; startRow: number; startCol: number; originalStartRow: number; originalStartCol: number; hasMoved: boolean; initialData: GridCellData[][] } | null>(null);
+    const lastPointerPosRef = useRef<{ row: number; col: number } | null>(null);
+
+    const bucketDropdownRef = useRef<HTMLDivElement>(null);
+    const shapeDropdownRef = useRef<HTMLDivElement>(null);
 
     // Disable body scroll when editor is mounted
     useEffect(() => {
@@ -390,6 +409,23 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             document.body.style.overflow = '';
         };
     }, []);
+
+    // Handle clicks outside of dropdown menus to close them
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (isBucketMenuOpen && bucketDropdownRef.current && !bucketDropdownRef.current.contains(e.target as Node)) {
+                setIsBucketMenuOpen(false);
+            }
+            if (isShapeMenuOpen && shapeDropdownRef.current && !shapeDropdownRef.current.contains(e.target as Node)) {
+                setIsShapeMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isBucketMenuOpen, isShapeMenuOpen]);
 
     // Handle Unsaved Changes Warning
     useEffect(() => {
@@ -418,10 +454,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 const href = target.getAttribute('href');
                 // Only intercept actual navigation links (not button-like <a> or tel/mailto)
                 if (href && !href.startsWith('#') && !href.startsWith('tel:') && !href.startsWith('mailto:')) {
-                    if (!window.confirm(t('unsavedChangesWarning'))) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    setCustomAlert({
+                        title: locale === 'ko' ? '저장되지 않은 변경사항' : 'Unsaved Changes',
+                        message: t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to leave?',
+                        onConfirm: () => {
+                            setIsDirty(false);
+                            router.push(href);
+                        },
+                        onCancel: () => {}
+                    });
                 }
             }
         };
@@ -502,11 +546,25 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         };
     }, []);
 
+    useEffect(() => {
+        if (finalSelection && (activeTool === 'shape' || isRotationMode)) {
+            setShowTransformationHint(true);
+            const timer = setTimeout(() => {
+                setShowTransformationHint(false);
+            }, 6000); // Hide after 6 seconds
+            return () => clearTimeout(timer);
+        } else {
+            setShowTransformationHint(false);
+        }
+    }, [finalSelection, activeTool, isRotationMode]);
+
     const CELL_SIZE = 30;
 
     useEffect(() => {
         setIsMounted(true);
-    }, []);
+        const hasSeen = localStorage.getItem('hasSeenOnboarding');
+        if (!hasSeen) setShowOnboarding(true);
+    }, [setShowOnboarding]);
 
     // Center grid on mount
     useEffect(() => {
@@ -522,60 +580,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             hasCentered.current = true;
         }
     }, [isMounted, gridSize]);
-
-    // Restore and Discard Session handlers
-    const restoreSession = useCallback(() => {
-        const savedSession = loadSession();
-        if (savedSession) {
-            setGridSize({ cols: savedSession.width, rows: savedSession.height });
-            setGridData(savedSession.grid);
-            setProjectTitle(savedSession.name);
-            if (savedSession.palette && savedSession.palette.length > 0) {
-                setCustomColors(savedSession.palette);
-            }
-            if (savedSession.projectId) {
-                setProjectId(savedSession.projectId);
-            }
-            // Reset history to restored state
-            setHistory([savedSession.grid]);
-            setHistoryIndex(0);
-            setIsDirty(true);
-        }
-        setShowRestoreDialog(false);
-    }, [loadSession]);
-
-    const discardSession = useCallback(() => {
-        clearSession();
-        setShowRestoreDialog(false);
-    }, [clearSession]);
-
-    // Check for saved local draft on mount (ONLY when logged in and starting a new pattern draft)
-    useEffect(() => {
-        if (isMounted && user && !initialProject) {
-            const savedSession = loadSession();
-            if (savedSession && savedSession.grid && savedSession.grid.length > 0) {
-                setShowRestoreDialog(true);
-            }
-        }
-    }, [isMounted, user, initialProject, loadSession]);
-
-    // Auto-save unsaved sessions to localStorage (Debounced 3s - ONLY when logged in and grid is dirty)
-    useEffect(() => {
-        if (!isMounted || !user || !isDirty || gridData.length === 0) return;
-
-        const timer = setTimeout(() => {
-            saveSession({
-                projectId: projectId,
-                name: projectTitle,
-                width: gridSize.cols,
-                height: gridSize.rows,
-                grid: gridData,
-                palette: customColors,
-            });
-        }, 3000);
-
-        return () => clearTimeout(timer);
-    }, [isMounted, user, isDirty, gridData, gridSize, projectTitle, customColors, projectId, saveSession]);
 
     // History Management
     const saveToHistory = (newData: GridCellData[][]) => {
@@ -627,15 +631,14 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     // Grid Interaction
     const updateCell = (r: number, c: number) => {
-        if (!user) {
-            handleAuthCheck();
-            return;
-        }
         if (r < 0 || r >= gridSize.rows || c < 0 || c >= gridSize.cols) return;
         const currentCell = gridData[r][c];
         let newCell = { ...currentCell };
 
-        if (activeTool === 'symbol') {
+        if (isSimultaneousDraw && (activeTool === 'symbol' || activeTool === 'paint')) {
+            newCell.symbolId = selectedSymbol;
+            newCell.color = selectedColor;
+        } else if (activeTool === 'symbol') {
             newCell.symbolId = selectedSymbol;
         } else if (activeTool === 'paint') {
             newCell.color = selectedColor;
@@ -650,9 +653,150 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             const newData = gridData.map(row => [...row]);
             newData[r][c] = newCell;
             saveToHistory(newData); // In a real app, debounce this
+        }
+    };
+
+    const paintCellsLine = (startRow: number, startCol: number, endRow: number, endCol: number) => {
+        const cells: { r: number; c: number }[] = [];
+        const dr = Math.abs(endRow - startRow);
+        const dc = Math.abs(endCol - startCol);
+        const sr = startRow < endRow ? 1 : -1;
+        const sc = startCol < endCol ? 1 : -1;
+        let err = dc - dr;
+
+        let r = startRow;
+        let c = startCol;
+
+        while (true) {
+            if (r >= 0 && r < gridSize.rows && c >= 0 && c < gridSize.cols) {
+                cells.push({ r, c });
+            }
+            if (r === endRow && c === endCol) break;
+
+            const e2 = 2 * err;
+            if (e2 > -dr) {
+                err -= dr;
+                c += sc;
+            }
+            if (e2 < dc) {
+                err += dc;
+                r += sr;
+            }
+        }
+
+        if (cells.length === 0) return;
+
+        let newData: GridCellData[][] | null = null;
+
+        for (const cell of cells) {
+            const currentCell = (newData || gridData)[cell.r][cell.c];
+            let newCell = { ...currentCell };
+
+            if (isSimultaneousDraw && (activeTool === 'symbol' || activeTool === 'paint')) {
+                newCell.symbolId = selectedSymbol;
+                newCell.color = selectedColor;
+            } else if (activeTool === 'symbol') {
+                newCell.symbolId = selectedSymbol;
+            } else if (activeTool === 'paint') {
+                newCell.color = selectedColor;
+            } else if (activeTool === 'eraser') {
+                newCell.symbolId = null;
+                newCell.color = '#ffffff';
+            } else {
+                continue;
+            }
+
+            if (JSON.stringify(newCell) !== JSON.stringify(currentCell)) {
+                if (!newData) {
+                    newData = gridData.map(row => [...row]);
+                }
+                newData[cell.r][cell.c] = newCell;
+            }
+        }
+
+        if (newData) {
+            saveToHistory(newData);
             setGridData(newData);
             setIsDirty(true);
         }
+    };
+
+    const performFloodFill = (startRow: number, startCol: number) => {
+        if (startRow < 0 || startRow >= gridSize.rows || startCol < 0 || startCol >= gridSize.cols) return;
+
+        const targetCell = gridData[startRow][startCol];
+        const targetColor = targetCell.color || '#ffffff';
+        const targetSymbol = targetCell.symbolId || null;
+
+        const fillColor = selectedColor;
+        const fillSymbol = selectedSymbol;
+
+        const isColorMatch = targetColor === fillColor;
+        const isSymbolMatch = targetSymbol === fillSymbol;
+
+        let shouldSkip = false;
+        if (bucketMode === 'both') {
+            if (isColorMatch && isSymbolMatch) shouldSkip = true;
+        } else if (bucketMode === 'color') {
+            if (isColorMatch) shouldSkip = true;
+        } else if (bucketMode === 'symbol') {
+            if (isSymbolMatch) shouldSkip = true;
+        }
+        if (shouldSkip) return;
+
+        const newData = gridData.map(row => [...row]);
+        const visited = Array(gridSize.rows).fill(null).map(() => Array(gridSize.cols).fill(false));
+        const stack: [number, number][] = [[startRow, startCol]];
+
+        while (stack.length > 0) {
+            const [r, c] = stack.pop()!;
+            if (r < 0 || r >= gridSize.rows || c < 0 || c >= gridSize.cols) continue;
+            if (visited[r][c]) continue;
+
+            const currentCell = newData[r][c];
+            const currentColor = currentCell.color || '#ffffff';
+            const currentSymbol = currentCell.symbolId || null;
+
+            let matches = false;
+            if (bucketMode === 'both') {
+                matches = currentColor === targetColor && currentSymbol === targetSymbol;
+            } else if (bucketMode === 'color') {
+                matches = currentColor === targetColor;
+            } else if (bucketMode === 'symbol') {
+                matches = currentSymbol === targetSymbol;
+            }
+
+            if (matches) {
+                visited[r][c] = true;
+
+                if (bucketMode === 'both') {
+                    newData[r][c] = {
+                        ...currentCell,
+                        color: fillColor,
+                        symbolId: fillSymbol
+                    };
+                } else if (bucketMode === 'color') {
+                    newData[r][c] = {
+                        ...currentCell,
+                        color: fillColor
+                    };
+                } else if (bucketMode === 'symbol') {
+                    newData[r][c] = {
+                        ...currentCell,
+                        symbolId: fillSymbol
+                    };
+                }
+
+                stack.push([r + 1, c]);
+                stack.push([r - 1, c]);
+                stack.push([r, c + 1]);
+                stack.push([r, c - 1]);
+            }
+        }
+
+        saveToHistory(newData);
+        setGridData(newData);
+        setIsDirty(true);
     };
 
     // Mouse Event Handlers
@@ -662,13 +806,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const isDraggingRef = useRef(false);
 
     const handleMouseDown = (e: any) => {
-        if (!user) {
-            if (activeTool === 'move' || isSpacePressed) return;
-            handleAuthCheck();
-            return;
-        }
         if (activeTool === 'move' || isSpacePressed) return;
         if (isShapeMenuOpen) setIsShapeMenuOpen(false);
+        if (isBucketMenuOpen) setIsBucketMenuOpen(false);
 
         // Detect Handle clicks via event argument (Passed from GridCanvas wrapper)
         if ((activeTool === 'shape' || isRotationMode) && finalSelection) {
@@ -790,6 +930,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 if (pos) {
                     // Close shape dropdown menu when drawing starts
                     setIsShapeMenuOpen(false);
+                    setIsBucketMenuOpen(false);
                     setIsDragging(true);
                     setSelectionStart(pos);
                     setSelectionEnd(pos);
@@ -801,9 +942,34 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         endCol: pos.col
                     });
                 }
+            } else if (activeTool === 'bucket') {
+                performFloodFill(pos.row, pos.col);
+            } else if (activeTool === 'eyedropper') {
+                const clickedCell = gridData[pos.row][pos.col];
+                const cellColor = clickedCell.color || '#ffffff';
+                const cellSymbol = clickedCell.symbolId || null;
+
+                const hasColor = cellColor && cellColor !== '#ffffff';
+                const hasSymbol = !!cellSymbol;
+
+                // Auto-detect: extract what the cell actually has
+                if (hasColor) setSelectedColor(cellColor);
+                if (hasSymbol) setSelectedSymbol(cellSymbol);
+
+                // Restore previous active tool (fallback to symbol if invalid)
+                const prevTool = previousToolRef.current;
+                if (prevTool === 'selection') {
+                    setActiveTool('selection' as any);
+                    setIsSelectionMode(true);
+                } else if (['paint', 'symbol', 'eraser', 'move', 'shape', 'bucket'].includes(prevTool)) {
+                    setActiveTool(prevTool as any);
+                } else {
+                    setActiveTool('symbol');
+                }
             } else {
                 setIsDragging(true);
-                updateCell(pos.row, pos.col); // Paint initial cell
+                paintCellsLine(pos.row, pos.col, pos.row, pos.col); // Paint initial cell
+                lastPointerPosRef.current = pos;
             }
         }
     };
@@ -1000,12 +1166,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         if (isSelecting && selectionStart) {
             setSelectionEnd(pos);
         } else if (isDragging) {
-            updateCell(pos.row, pos.col);
+            if (lastPointerPosRef.current) {
+                paintCellsLine(lastPointerPosRef.current.row, lastPointerPosRef.current.col, pos.row, pos.col);
+            } else {
+                paintCellsLine(pos.row, pos.col, pos.row, pos.col);
+            }
+            lastPointerPosRef.current = pos;
         }
     };
 
     const handleMouseUp = useCallback((e?: any) => {
         resizeHandleRef.current = null;
+        lastPointerPosRef.current = null;
         if (isSelecting && selectionStart && selectionEnd) {
             // Store final selection bounds
             const startRow = Math.min(selectionStart.row, selectionEnd.row);
@@ -1429,6 +1601,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         setIsRotationMode(false);
     }, []);
 
+    // Clear selection when switching away from selection tool
+    useEffect(() => {
+        if (activeTool !== 'selection') {
+            handleSelectionCancel();
+        }
+    }, [activeTool, handleSelectionCancel]);
+
     const rasterizeShape = (
         shape: 'circle' | 'square' | 'triangle' | 'star' | 'heart',
         mode: 'outline' | 'fill',
@@ -1544,14 +1723,20 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 cells.forEach(({ row, col }) => {
                     if (row >= 0 && row < gridSize.rows && col >= 0 && col < gridSize.cols) {
                         const prevCell = newData[row][col];
-                        const newSymbol = (selectedSymbol && selectedSymbol !== 'knit') ? selectedSymbol : null;
+                        let finalColor = prevCell.color;
+                        let finalSymbol = prevCell.symbolId;
 
-                        // User Request: If incoming shape has NO symbol (only color), preserve existing symbol.
-                        // If incoming has symbol, overwrite.
-                        const finalSymbol = newSymbol ? newSymbol : prevCell.symbolId;
+                        if (shapeApplyTarget === 'both') {
+                            finalColor = selectedColor;
+                            finalSymbol = selectedSymbol;
+                        } else if (shapeApplyTarget === 'color') {
+                            finalColor = selectedColor;
+                        } else if (shapeApplyTarget === 'symbol') {
+                            finalSymbol = selectedSymbol;
+                        }
 
                         newData[row][col] = {
-                            color: selectedColor,
+                            color: finalColor,
                             symbolId: finalSymbol
                         };
                     }
@@ -1601,6 +1786,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     const handleGlobalMouseUp = (e: MouseEvent) => {
         handleTypeRef.current = null;
+        lastPointerPosRef.current = null;
         if (rotationDragRef.current?.isActive) {
             rotationDragRef.current = null;
             // Keep rotation mode active as per user request
@@ -1835,6 +2021,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     const handleTouchEnd = () => {
         lastDistRef.current = 0;
+        lastPointerPosRef.current = null;
         handleMouseUp();
     };
 
@@ -1883,17 +2070,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     }, [clipboard, contextMenuPos, gridSize, gridData, position, scale, saveToHistory]);
 
     const handleDownload = async (format: 'png' | 'jpg' | 'pdf') => {
-        if (!user) {
-            handleAuthCheck();
-            return;
-        }
         if (!stageRef.current) return;
 
-
         try {
-            await deductCredits(user.id, 50, 'Pattern Editor Export');
-        } catch (e) {
-            alert(locale === 'ko' ? '크레딧이 부족합니다. (내보내기: 50 크레딧 필요)' : 'Insufficient credits (50 required for export).');
+            await deductCredits(user?.id!, 1, `Pattern Export (${format.toUpperCase()})`);
+        } catch (error) {
+            console.error('Download credit error:', error);
+            alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
 
@@ -1938,6 +2121,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Settings for Ruler
         const RULER_SIZE = 100;   // Increased for 5x font
         const FONT_SIZE = 50;    // Increased substantially (~5x original 12px)
+        const FONT_SIZE_X = 26;  // Smaller font size for horizontal numbers to prevent overlapping
         const SCALED_CELL = CELL_SIZE * PIXEL_RATIO; // 60px
 
         // Create a canvas that wraps the grid with rulers
@@ -1956,14 +2140,14 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         rCtx.drawImage(stageImg, 0, 0);
 
         // Draw Col Numbers (Bottom) - X Axis
-        rCtx.font = `bold ${FONT_SIZE}px sans-serif`;
+        rCtx.font = `bold ${FONT_SIZE_X}px sans-serif`;
         rCtx.fillStyle = '#666';
         rCtx.textAlign = 'center';
         rCtx.textBaseline = 'top';
 
         for (let c = 0; c < gridSize.cols; c++) {
             const num = c + 1;
-            // Draw every 5 if crowded (assuming 60px cell width, 50px font... tight)
+            // Draw every 5 if crowded (assuming 60px cell width)
             if (gridSize.cols > 40 && num % 5 !== 0) continue;
 
             const x = (c * SCALED_CELL) + (SCALED_CELL / 2);
@@ -1972,6 +2156,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
 
         // Draw Row Numbers (Right) - Y Axis
+        rCtx.font = `bold ${FONT_SIZE_X}px sans-serif`;
         rCtx.textAlign = 'left';
         rCtx.textBaseline = 'middle';
 
@@ -1991,15 +2176,48 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Legend Generation (Enhanced Size)
         // ---------------------------------------------------------
         const createLegendCanvas = () => {
+            // Scan gridData for used symbols and colors
+            const usedSymbolIds = new Set<string>();
+            const usedColorsSet = new Set<string>();
+
+            gridData.forEach(row => {
+                row.forEach(cell => {
+                    if (cell.symbolId) {
+                        usedSymbolIds.add(cell.symbolId);
+                    }
+                    if (cell.color && cell.color.toLowerCase() !== '#ffffff') {
+                        usedColorsSet.add(cell.color.toLowerCase());
+                    }
+                });
+            });
+
+            const symbolsUsed = allSymbols.filter(sym => usedSymbolIds.has(sym.id));
+            const colorsUsed = Array.from(usedColorsSet);
+
             const LEGEND_PADDING = 50;
             const ITEM_HEIGHT = 60;
-            const COLS = 2;
-            const rows = Math.ceil(allSymbols.length / COLS);
-
-            // Base size, min 600
+            const colWidth = 380; // Tight width per column
             const legendW = Math.max(finalPatternImage.width, 600);
+            
+            // Calculate how many columns can fit inside the legend width
+            const COLS = Math.max(1, Math.floor((legendW - (LEGEND_PADDING * 2)) / colWidth));
+            
+            const symbolRows = Math.ceil(symbolsUsed.length / COLS);
+            const colorRows = Math.ceil(colorsUsed.length / COLS);
+            
+            // Calculate height dynamically
+            let totalHeightNeeded = 50; // top padding
+            
+            const symbolTitleHeight = symbolsUsed.length > 0 ? 80 : 0;
+            const symbolItemsHeight = symbolRows * ITEM_HEIGHT;
+            
+            const colorTitleHeight = colorsUsed.length > 0 ? 80 : 0;
+            const colorItemsHeight = colorRows * ITEM_HEIGHT;
+            
+            const separatorHeight = (symbolsUsed.length > 0 && colorsUsed.length > 0) ? 40 : 0;
+            
             const META_HEIGHT = 160;
-            const legendH = (rows * ITEM_HEIGHT) + 120 + META_HEIGHT;
+            const legendH = totalHeightNeeded + symbolTitleHeight + symbolItemsHeight + separatorHeight + colorTitleHeight + colorItemsHeight + 50 + META_HEIGHT;
 
             const lCanvas = document.createElement('canvas');
             lCanvas.width = legendW;
@@ -2010,35 +2228,84 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, legendW, legendH);
 
-            const startY = 50;
-            ctx.fillStyle = '#333333';
-            ctx.font = 'bold 40px sans-serif';
-            ctx.fillText(tEditor('legend') || 'Stitch Key', LEGEND_PADDING, startY);
+            let drawY = 50;
 
-            ctx.font = '30px sans-serif';
-            const colWidth = (legendW - (LEGEND_PADDING * 2)) / COLS;
+            // 1. Draw Symbols Section
+            if (symbolsUsed.length > 0) {
+                ctx.fillStyle = '#333333';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.fillText(tEditor('legend') || 'Stitch Key', LEGEND_PADDING, drawY);
+                drawY += 60;
 
-            allSymbols.forEach((sym, i) => {
-                const col = i % COLS;
-                const row = Math.floor(i / COLS);
-                const x = LEGEND_PADDING + (col * colWidth);
-                const y = startY + 80 + (row * ITEM_HEIGHT);
+                symbolsUsed.forEach((sym, i) => {
+                    const col = i % COLS;
+                    const row = Math.floor(i / COLS);
+                    const x = LEGEND_PADDING + (col * colWidth);
+                    const y = drawY + (row * ITEM_HEIGHT);
 
-                // Symbol
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 40px monospace';
-                ctx.fillText(sym.label, x, y);
+                    // Symbol
+                    ctx.fillStyle = '#000000';
+                    ctx.font = 'bold 36px monospace';
+                    ctx.fillText(sym.label, x, y);
 
-                // Name
-                ctx.fillStyle = '#444';
-                ctx.font = '30px sans-serif';
-                ctx.fillText(sym.name || '', x + 60, y);
-            });
+                    // Name
+                    ctx.fillStyle = '#444444';
+                    ctx.font = '28px sans-serif';
+                    ctx.fillText(sym.name || '', x + 60, y);
+                });
 
-            // ---------------------------------------------------------
-            // Add Metadata Block
-            // ---------------------------------------------------------
-            const metaY = startY + 80 + (rows * ITEM_HEIGHT) + 50;
+                drawY += (symbolRows * ITEM_HEIGHT) + 40;
+            }
+
+            // 2. Draw Colors Section
+            if (colorsUsed.length > 0) {
+                // Add a small divider if symbols were also drawn
+                if (symbolsUsed.length > 0) {
+                    ctx.strokeStyle = '#f3f4f6';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(LEGEND_PADDING, drawY - 20);
+                    ctx.lineTo(legendW - LEGEND_PADDING, drawY - 20);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#333333';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.fillText(locale === 'ko' ? '사용된 색상' : 'Colors Used', LEGEND_PADDING, drawY);
+                drawY += 60;
+
+                colorsUsed.forEach((colorHex, i) => {
+                    const col = i % COLS;
+                    const row = Math.floor(i / COLS);
+                    const x = LEGEND_PADDING + (col * colWidth);
+                    const y = drawY + (row * ITEM_HEIGHT);
+
+                    // Draw Color Block
+                    ctx.fillStyle = colorHex;
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                        ctx.roundRect(x, y - 28, 32, 32, 6);
+                    } else {
+                        ctx.rect(x, y - 28, 32, 32);
+                    }
+                    ctx.fill();
+                    
+                    // Light border for visibility of light colors
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Draw Color Hex Name/Label
+                    ctx.fillStyle = '#444444';
+                    ctx.font = '28px sans-serif';
+                    ctx.fillText(colorHex.toUpperCase(), x + 60, y);
+                });
+
+                drawY += (colorRows * ITEM_HEIGHT) + 40;
+            }
+
+            // 3. Draw Metadata Block
+            const metaY = drawY + 10;
 
             // Separator Line
             ctx.strokeStyle = '#e5e7eb';
@@ -2048,7 +2315,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             ctx.lineTo(legendW - LEGEND_PADDING, metaY - 30);
             ctx.stroke();
 
-            ctx.fillStyle = '#666';
+            ctx.fillStyle = '#666666';
             ctx.font = 'bold 30px sans-serif';
             ctx.fillText('Project Info', LEGEND_PADDING, metaY + 10);
 
@@ -2232,10 +2499,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     };
 
     const handleSave = async () => {
-        if (!user) {
-            handleAuthCheck();
-            return;
-        }
         setIsSaving(true);
         try {
             // Generate thumbnail from grid data
@@ -2281,70 +2544,148 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
             const res = await saveGridProject(data);
             if (res.error) {
-                alert(`Save failed: ${res.error}`);
+                setCustomAlert({
+                    title: locale === 'ko' ? '저장 실패' : 'Save Failed',
+                    message: `${locale === 'ko' ? '도안 저장 중 오류가 발생했습니다: ' : 'Save failed: '}${res.error}`,
+                    onConfirm: () => {}
+                });
+                return false;
             } else {
-                setProjectId(res.project.id);
+                if (res.project) {
+                    setProjectId(res.project.id);
+                }
                 setIsDirty(false);
-                setShowSaveSuccess(true);
-                clearSession(); // Clear local backup session once safely stored in cloud database
-                setTimeout(() => setShowSaveSuccess(false), 2000);
+                setCustomAlert({
+                    title: locale === 'ko' ? '저장 완료' : 'Save Success',
+                    message: locale === 'ko' ? '도안이 성공적으로 저장되었습니다.' : 'The design has been successfully saved.',
+                    onConfirm: () => {}
+                });
+                return true;
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Save failed');
+            setCustomAlert({
+                title: locale === 'ko' ? '저장 실패' : 'Save Failed',
+                message: e.message || (locale === 'ko' ? '알 수 없는 오류가 발생했습니다.' : 'An unexpected error occurred.'),
+                onConfirm: () => {}
+            });
+            return false;
         } finally {
             setIsSaving(false);
         }
     };
 
     const handlePublish = async () => {
-        if (!projectId) {
-            alert('Please save the project first.');
+        // Compile unique needles from yarnParts dynamically
+        const compiledNeedles = publishMetadata.yarnParts
+            ? Array.from(new Set(publishMetadata.yarnParts.map(p => p.needle).filter(Boolean))).join(', ')
+            : '';
+
+        // Dynamic Validation with Anchor Scrolling
+        if (!publishMetadata.imageUrl) {
+            setCustomAlert({
+                title: locale === 'ko' ? '대표 이미지 필수' : 'Main Image Required',
+                message: locale === 'ko' ? '도안의 대표 이미지를 등록해 주세요.' : 'Please upload a main image for your pattern.',
+                onConfirm: () => {
+                    const el = document.getElementById('publish-image-field');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
             return;
         }
 
-        // Validate
-        if (!publishMetadata.imageUrl) {
-            alert(locale === 'ko' ? '대표 이미지를 업로드해주세요.' : 'Please upload a main image.');
-            document.getElementById('publish-image')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
         if (!publishMetadata.subcategory) {
-            alert(locale === 'ko' ? '세부 카테고리를 선택해주세요.' : 'Please select a subcategory.');
-            document.getElementById('publish-category')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setCustomAlert({
+                title: locale === 'ko' ? '카테고리 필수' : 'Category Required',
+                message: locale === 'ko' ? '도안의 세부 카테고리를 선택해 주세요.' : 'Please select a subcategory for your pattern.',
+                onConfirm: () => {
+                    const el = document.getElementById('publish-subcategory-field');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        el?.querySelector('select')?.focus();
+                    }, 500);
+                }
+            });
             return;
         }
-        if (!publishMetadata.briefDescription) {
-            alert(locale === 'ko' ? '도안에 대한 간단한 설명을 입력해주세요.' : 'Please enter a brief description.');
-            document.getElementById('publish-description')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const hasValidYarnParts = publishMetadata.yarnParts && publishMetadata.yarnParts.length > 0;
+        const allYarnPartsFilled = hasValidYarnParts && publishMetadata.yarnParts?.every(p => p.yarnName && p.needle);
+
+        if (!hasValidYarnParts || !allYarnPartsFilled) {
+            setCustomAlert({
+                title: locale === 'ko' ? '실/바늘 정보 입력 필요' : 'Yarn/Needle Info Required',
+                message: locale === 'ko'
+                    ? '실 정보 파트를 추가하고, 실 이름과 바늘 사이즈를 빠짐없이 입력해 주세요.'
+                    : 'Please add at least one yarn part, and fill out both the yarn name and needle size.',
+                onConfirm: () => {
+                    const el = document.getElementById('publish-yarn-parts-field');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
             return;
         }
-        if (publishMetadata.hashtags.length < 3) {
-            alert(locale === 'ko' ? '해시태그를 3개 이상 입력해주세요.' : 'Please enter at least 3 hashtags.');
-            document.getElementById('publish-hashtags')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        if (!publishMetadata.briefDescription || publishMetadata.briefDescription.trim() === '') {
+            setCustomAlert({
+                title: locale === 'ko' ? '간략 설명 필수' : 'Description Required',
+                message: locale === 'ko' ? '도안 상품 페이지에 표시할 간략 설명을 작성해 주세요.' : 'Please write a brief description for your pattern.',
+                onConfirm: () => {
+                    const el = document.getElementById('publish-brief-desc-field');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
             return;
         }
+
+        if (!publishMetadata.hashtags || publishMetadata.hashtags.length < 3) {
+            setCustomAlert({
+                title: locale === 'ko' ? '해시태그 부족' : 'Hashtags Required',
+                message: locale === 'ko' ? '구매자가 도안을 찾기 쉽도록 해시태그를 최소 3개 이상 등록해 주세요.' : 'Please add at least 3 hashtags.',
+                onConfirm: () => {
+                    const el = document.getElementById('publish-hashtags-field');
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        el?.querySelector('input')?.focus();
+                    }, 500);
+                }
+            });
+            return;
+        }
+
+        if (!projectId) return;
+
         setIsPublishing(true);
         try {
             const res = await publishPattern(projectId, {
                 ...publishMetadata,
+                needles: compiledNeedles || '3.5mm', // Auto-compiled needles
                 title: publishMetadata.title || projectTitle // Ensure title is set
             });
 
             if (res.error) {
-                alert(`Publish failed: ${res.error}`);
+                setCustomAlert({
+                    title: locale === 'ko' ? '출시 실패' : 'Publish Failed',
+                    message: `${locale === 'ko' ? '도안 출시 중 오류가 발생했습니다: ' : 'Publish failed: '}${res.error}`,
+                    onConfirm: () => {}
+                });
             } else {
-                setPublishedPatternId(res.patternId);
+                setPublishedPatternId(res.patternId || null);
                 setShowPublishSuccess(true);
                 setShowPublishModal(false);
+                setIsDirty(false); // Mark as clean so it doesn't trigger unload warnings!
                 // Redirect after showing success message
                 setTimeout(() => {
                     router.push(`/marketplace/${res.patternId}`);
                 }, 2000);
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Publish failed');
+            setCustomAlert({
+                title: locale === 'ko' ? '출시 실패' : 'Publish Failed',
+                message: e.message || (locale === 'ko' ? '알 수 없는 오류가 발생했습니다.' : 'An unexpected error occurred.'),
+                onConfirm: () => {}
+            });
         } finally {
             setIsPublishing(false);
         }
@@ -2713,11 +3054,30 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     if (!isMounted) return <div className="h-full flex items-center justify-center bg-cream-50">Loading Studio...</div>;
 
-    const hasOpenModal = showGridSizeModal || showPublishModal || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
+    const hasOpenModal = showGridSizeModal || showPublishModal || showOnboarding || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
 
     return (
         <div className="flex flex-col h-[85vh] bg-cream-50 font-sans select-none relative">
-            {/* Onboarding Modal - Removed as requested */}
+            {!user && (
+                <div
+                    className="absolute inset-0 z-[9999] cursor-pointer bg-transparent"
+                    onClick={handleAuthCheck}
+                />
+            )}
+            {/* Onboarding Modal */}
+            {showOnboarding && (
+                <div className="fixed inset-0 z-[10000]">
+                    <OnboardingOverlay
+                        t={tEditor}
+                        step={onboardingStep}
+                        setStep={setOnboardingStep}
+                        onClose={() => {
+                            setShowOnboarding(false);
+                            localStorage.setItem('hasSeenOnboarding', 'true');
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Top Toolbar */}
             <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
@@ -2758,14 +3118,114 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     </div>
 
                     <div className="h-8 w-px bg-tan-200" />
-                    <div id="tour-tools" className="flex bg-cream-100 p-1.5 rounded-2xl shadow-inner gap-1">
+                    <div id="tour-tools" className="flex bg-cream-100 p-1.5 rounded-2xl shadow-inner gap-1 animate-in fade-in duration-300">
                         <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'move' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('pan')}><Hand size={20} /></button>
                         <div className="w-px bg-tan-200 my-2 mx-1" />
-                        <button onClick={() => { setActiveTool('paint'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'paint' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('paint')}><PaintBucket size={20} /></button>
-                        <button onClick={() => { setActiveTool('symbol'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'symbol' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('symbol')}><MousePointer2 size={20} /></button>
+                        
+                        {/* Color (색상) */}
+                        <button
+                            onClick={() => { previousToolRef.current = 'paint'; setActiveTool('paint'); setIsSelectionMode(false); }}
+                            className={`p-2.5 rounded-xl transition-all duration-200 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            title={locale === 'ko' ? '색상' : 'Color'}
+                        >
+                            <Paintbrush size={20} />
+                        </button>
+                        
+                        {/* Symbol (기호) */}
+                        <button
+                            onClick={() => { previousToolRef.current = 'symbol'; setActiveTool('symbol'); setIsSelectionMode(false); }}
+                            className={`p-2.5 rounded-xl transition-all duration-200 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            title={locale === 'ko' ? '기호' : 'Symbol'}
+                        >
+                            <MousePointer2 size={20} />
+                        </button>
+                        
+                        {/* Fill (채우기) - with dropdown */}
+                        <div ref={bucketDropdownRef} className="relative group">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsBucketMenuOpen(!isBucketMenuOpen);
+                                    setActiveTool('bucket');
+                                    setIsSelectionMode(false);
+                                }}
+                                className={`p-2.5 rounded-xl transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'bucket' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                                title={locale === 'ko' ? '채우기' : 'Fill'}
+                            >
+                                <PaintBucket size={20} />
+                                <ChevronDown size={12} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
 
+                            {isBucketMenuOpen && (
+                                <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
+                                        {locale === 'ko' ? '채우기 옵션' : 'Fill Option'}
+                                    </div>
+                                    <div className="flex bg-stone-100 p-1 rounded-xl gap-1 mb-2">
+                                        <button
+                                            onClick={() => setBucketMode('both')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                bucketMode === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                            }`}
+                                        >
+                                            {locale === 'ko' ? '둘 다' : 'Both'}
+                                        </button>
+                                        <button
+                                            onClick={() => setBucketMode('color')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                bucketMode === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                            }`}
+                                        >
+                                            {locale === 'ko' ? '색상만' : 'Color'}
+                                        </button>
+                                        <button
+                                            onClick={() => setBucketMode('symbol')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                bucketMode === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                            }`}
+                                        >
+                                            {locale === 'ko' ? '기호만' : 'Symbol'}
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-stone-400 leading-normal px-1">
+                                        {bucketMode === 'both' && (locale === 'ko' ? '색상 & 기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching both.')}
+                                        {bucketMode === 'color' && (locale === 'ko' ? '색상이 일치하는 영역을 채웁니다.' : 'Fills regions matching color.')}
+                                        {bucketMode === 'symbol' && (locale === 'ko' ? '기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching symbol.')}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Eyedropper (Pipette) */}
+                        <button
+                            onClick={() => { previousToolRef.current = (activeTool === 'eyedropper' ? previousToolRef.current : activeTool); setActiveTool('eyedropper'); setIsSelectionMode(false); }}
+                            className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'eyedropper' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            title={locale === 'ko' ? '스포이드' : 'Eyedropper'}
+                        >
+                            <Pipette size={20} />
+                        </button>
+
+                        {/* Simultaneous Draw Toggle - visible when paint or symbol tool active */}
+                        {(activeTool === 'paint' || activeTool === 'symbol') && (
+                            <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-tan-200">
+                                <button
+                                    onClick={() => setIsSimultaneousDraw(!isSimultaneousDraw)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all duration-200 ${
+                                        isSimultaneousDraw
+                                            ? 'bg-sage-600 text-white shadow-md'
+                                            : 'bg-white/60 text-stone-400 hover:text-stone-600 hover:bg-white'
+                                    }`}
+                                    title={locale === 'ko' ? '동시 그리기 모드: 색상과 기호를 한 번에 칠합니다' : 'Simultaneous Draw: Apply color and symbol at once'}
+                                >
+                                    <span className={`w-2 h-2 rounded-full transition-colors ${isSimultaneousDraw ? 'bg-white animate-pulse' : 'bg-stone-300'}`} />
+                                    {locale === 'ko' ? '동시' : 'Dual'}
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="w-px bg-tan-200 my-2 mx-1" />
                         <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'eraser' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('eraser')}><Eraser size={20} /></button>
-                        <div className="relative group">
+                        <div ref={shapeDropdownRef} className="relative group">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -2796,7 +3256,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     </div>
 
                                     <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">{t('drawMode')}</div>
-                                    <div className="flex bg-stone-100 p-1 rounded-xl">
+                                    <div className="flex bg-stone-100 p-1 rounded-xl mb-3">
                                         <button
                                             onClick={() => setShapeMode('outline')}
                                             className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeMode === 'outline' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
@@ -2808,6 +3268,30 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeMode === 'fill' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {t('fill')}
+                                        </button>
+                                    </div>
+
+                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
+                                        {locale === 'ko' ? '적용 속성' : 'Apply Property'}
+                                    </div>
+                                    <div className="flex bg-stone-100 p-1 rounded-xl gap-1">
+                                        <button
+                                            onClick={() => setShapeApplyTarget('both')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                        >
+                                            {locale === 'ko' ? '둘 다' : 'Both'}
+                                        </button>
+                                        <button
+                                            onClick={() => setShapeApplyTarget('color')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                        >
+                                            {locale === 'ko' ? '색상만' : 'Color'}
+                                        </button>
+                                        <button
+                                            onClick={() => setShapeApplyTarget('symbol')}
+                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                        >
+                                            {locale === 'ko' ? '기호만' : 'Symbol'}
                                         </button>
                                     </div>
 
@@ -2860,10 +3344,15 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     <div className="h-8 w-px bg-tan-200" />
                     <button
                         onClick={() => {
-                            if (confirm('Clear all?')) {
-                                saveToHistory(gridData);
-                                setGridData(prev => prev.map(r => r.map(() => ({ color: '#ffffff', symbolId: null }))));
-                            }
+                            setCustomAlert({
+                                title: locale === 'ko' ? '전체 초기화' : 'Clear All',
+                                message: locale === 'ko' ? '정말로 캔버스의 모든 코를 지우시겠습니까? 이 작업은 실행 취소가 가능합니다.' : 'Are you sure you want to clear the canvas? You can undo this action.',
+                                onConfirm: () => {
+                                    saveToHistory(gridData);
+                                    setGridData(prev => prev.map(r => r.map(() => ({ color: '#ffffff', symbolId: null }))));
+                                },
+                                onCancel: () => {}
+                            });
                         }}
                         className="p-3 hover:bg-rose-50 text-rose-400 hover:text-rose-500 rounded-xl transition-colors"
                     >
@@ -2886,14 +3375,19 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     {/* Publish Button (New) */}
                     <button
                         onClick={() => {
-                            if (!user) {
-                                handleAuthCheck();
-                                return;
-                            }
                             if (!projectId) {
-                                if (confirm(tPublish('success.saveDesc'))) {
-                                    handleSave().then(() => setShowPublishModal(true));
-                                }
+                                setCustomAlert({
+                                    title: locale === 'ko' ? '도안 저장 필요' : 'Save Required',
+                                    message: locale === 'ko' ? '도안을 먼저 저장한 후 출시를 진행하시겠습니까?' : 'Would you like to save the project first to proceed with publishing?',
+                                    onConfirm: () => {
+                                        handleSave().then((success) => {
+                                            if (success) {
+                                                setShowPublishModal(true);
+                                            }
+                                        });
+                                    },
+                                    onCancel: () => {}
+                                });
                             } else {
                                 setShowPublishModal(true);
                             }
@@ -2973,9 +3467,16 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             </div >
 
             <div className="flex flex-1 overflow-hidden">
-                {/* Main Canvas Area */}
                 <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none ${hasOpenModal ? 'pointer-events-none' : ''}`}
-                    style={{ cursor: (activeTool === 'move' || isSpacePressed) ? 'grab' : 'crosshair' }}
+                    style={{
+                        cursor: (activeTool === 'move' || isSpacePressed)
+                            ? 'grab'
+                            : activeTool === 'eyedropper'
+                            ? 'copy'
+                            : activeTool === 'bucket'
+                            ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z'/%3E%3Cpath d='m5 2 5 5'/%3E%3Cpath d='M2 13h15'/%3E%3Cpath d='M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z'/%3E%3C/svg%3E") 2 22, crosshair`
+                            : 'crosshair'
+                    }}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                 >
@@ -2989,7 +3490,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 top: `${position.y + ((finalSelection?.startRow ?? shapePreview!.startRow) + (finalSelection?.endRow ?? shapePreview!.endRow) + 1) / 2 * 30 * scale}px`,
                                 transform: 'translate(-50%, -120px)',
                                 display: 'flex',
-                                justifyContent: 'center',
+                                flexDirection: 'column',
+                                alignItems: 'center',
                                 gap: '8px'
                             }}
                         >
@@ -2998,19 +3500,32 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{t('shapeToolHint')}</span>
                                 </div>
                             ) : (
-                                <div className="bg-white/90 backdrop-blur-sm shadow-xl border border-blue-200 rounded-full px-2 py-2 flex items-center gap-1 pointer-events-auto animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                    <button
-                                        onClick={handleShapeConfirm}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-1.5"
-                                    >
-                                        <Check size={14} /> {t('confirm')}
-                                    </button>
-                                    <button
-                                        onClick={handleShapeCancel}
-                                        className="bg-stone-100 hover:bg-stone-200 text-stone-600 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5"
-                                    >
-                                        <X size={14} /> {t('cancel')}
-                                    </button>
+                                <div className="flex flex-col items-center gap-2 pointer-events-auto">
+                                    <div className="bg-white/90 backdrop-blur-sm shadow-xl border border-blue-200 rounded-full px-2 py-2 flex items-center gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                        <button
+                                            onClick={handleShapeConfirm}
+                                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-1.5"
+                                        >
+                                            <Check size={14} /> {t('confirm')}
+                                        </button>
+                                        <button
+                                            onClick={handleShapeCancel}
+                                            className="bg-stone-100 hover:bg-stone-200 text-stone-600 px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5"
+                                        >
+                                            <X size={14} /> {t('cancel')}
+                                        </button>
+                                    </div>
+
+                                    {showTransformationHint && (
+                                        <div className="bg-stone-800/90 text-white text-[11px] font-bold px-3 py-2 rounded-xl shadow-lg border border-stone-700/50 flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
+                                            <Info size={12} className="text-blue-400" />
+                                            <span>
+                                                {locale === 'ko' 
+                                                    ? '꼭지점 드래그: 회전 | 테두리 드래그: 크기 조절' 
+                                                    : 'Drag corners to rotate | Drag edges to resize'}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -3070,6 +3585,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         finalSelection={finalSelection}
                         shapeRotation={shapeRotation}
                         isRotationMode={isRotationMode}
+                        shapeApplyTarget={shapeApplyTarget}
                     />
 
                     {/* Selection Context Menu */}
@@ -3124,6 +3640,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 <div className={`bg-white border-l border-tan-200 shadow-xl z-10 transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-80' : 'w-0 opacity-0'}`}>
                     <div className="p-6 overflow-y-auto flex-1 space-y-8">
 
+
+
+
                         {/* Grid Size Settings */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
@@ -3142,11 +3661,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         value={localCols}
                                         onChange={e => setLocalCols(e.target.value)}
                                         onBlur={() => {
-                                            if (!user) {
-                                                handleAuthCheck();
-                                                setLocalCols(gridSize.cols.toString());
-                                                return;
-                                            }
                                             const val = Math.max(5, Math.min(3000, parseInt(localCols) || 5));
                                             if (val !== gridSize.cols) {
                                                 const newData = Array(gridSize.rows).fill(null).map((_, r) =>
@@ -3178,11 +3692,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         value={localRows}
                                         onChange={e => setLocalRows(e.target.value)}
                                         onBlur={() => {
-                                            if (!user) {
-                                                handleAuthCheck();
-                                                setLocalRows(gridSize.rows.toString());
-                                                return;
-                                            }
                                             const val = Math.max(5, Math.min(3000, parseInt(localRows) || 5));
                                             if (val !== gridSize.rows) {
                                                 const newData = Array(val).fill(null).map((_, r) =>
@@ -3228,7 +3737,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             }}
                                             onClick={() => {
                                                 if (isDraggingRef.current) return;
-                                                setActiveTool('symbol');
+                                                // Only switch to symbol tool if not using bucket/eyedropper
+                                                if (activeTool !== 'bucket' && activeTool !== 'eyedropper') {
+                                                    setActiveTool('symbol');
+                                                }
                                                 setSelectedSymbol(sym.id);
                                                 setDeletingSymbol(null);
                                             }}
@@ -3239,13 +3751,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                 }
                                             }}
                                             className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm
-                                                ${selectedSymbol === sym.id && activeTool === 'symbol'
+                                                ${selectedSymbol === sym.id && (activeTool === 'symbol' || (activeTool === 'bucket' && (bucketMode === 'both' || bucketMode === 'symbol')) || isSimultaneousDraw)
                                                     ? 'bg-stone-800 border-stone-800 ring-4 ring-stone-100 transform scale-105'
                                                     : 'bg-white border-tan-100 hover:border-sage-300 hover:shadow-md border-2'
                                                 }`}
                                             title={sym.name}
                                         >
-                                            <div className={`w-6 h-6 flex items-center justify-center font-bold text-lg ${selectedSymbol === sym.id && activeTool === 'symbol' ? 'text-white' : 'text-stone-700'
+                                            <div className={`w-6 h-6 flex items-center justify-center font-bold text-lg ${selectedSymbol === sym.id && (activeTool === 'symbol' || (activeTool === 'bucket' && (bucketMode === 'both' || bucketMode === 'symbol')) || isSimultaneousDraw) ? 'text-white' : 'text-stone-700'
                                                 }`}>
                                                 {sym.label}
                                             </div>
@@ -3341,7 +3853,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             onClick={() => {
                                                 if (isDraggingRef.current) return;
 
-                                                setActiveTool('paint');
+                                                // Only switch to paint tool if not using bucket/eyedropper
+                                                if (activeTool !== 'bucket' && activeTool !== 'eyedropper') {
+                                                    setActiveTool('paint');
+                                                }
                                                 setSelectedColor(color);
                                                 setDeletingColor(null);
 
@@ -3372,7 +3887,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                 setDeletingColor(color === deletingColor ? null : color);
                                             }}
                                             className={`w-9 h-9 rounded-full shadow-sm transition-all duration-200 flex items-center justify-center ring-offset-1
-                                                ${selectedColor === color && activeTool === 'paint'
+                                                ${selectedColor === color && (activeTool === 'paint' || (activeTool === 'bucket' && (bucketMode === 'both' || bucketMode === 'color')) || isSimultaneousDraw)
                                                     ? 'ring-4 ring-sage-200 scale-110'
                                                     : 'hover:scale-110 hover:shadow-md ring-1 ring-black/5'}`}
                                             style={{ backgroundColor: color }}
@@ -3410,7 +3925,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                     setIsDirty(true);
                                                 }
                                                 setSelectedColor(newColor);
-                                                setActiveTool('paint');
+                                                if (activeTool !== 'bucket' && activeTool !== 'eyedropper') {
+                                                    setActiveTool('paint');
+                                                }
                                             }
                                         }}
                                         onInput={(e) => {
@@ -3594,7 +4111,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 ) : (
                                     <>
                                         {/* Main Image Section (REQUIRED) */}
-                                        <div className="space-y-4" id="publish-image">
+                                        <div id="publish-image-field" className="space-y-4">
                                             <div className="flex justify-between items-end">
                                                 <label className="text-base font-bold text-stone-800">{tPublish('fields.mainImage')} <span className="text-rose-500">*</span></label>
                                                 <span className="text-xs text-stone-400">{tPublish('fields.mainImageHint')}</span>
@@ -3697,13 +4214,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             {/* Price Row (Full Width) */}
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center px-1">
-                                                    <label className="text-base font-bold text-stone-800 flex items-center flex-wrap gap-2">
-                                                        <span>{tPublish('fields.price')} <span className="text-rose-500">*</span></span>
-                                                        <span className="text-xs font-normal text-stone-400">
+                                                    <label className="text-base font-bold text-stone-800">
+                                                        {tPublish('fields.price')} <span className="text-rose-500">*</span>
+                                                        <span className="text-xs font-normal text-stone-400 ml-1.5">
                                                             ({router.toString().includes('/ko') ? 'KRW' : 'USD'})
                                                         </span>
-                                                        <span className="text-[10px] sm:text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full whitespace-nowrap font-medium">
-                                                            {router.toString().includes('/ko') ? '현재는 베타서비스라 무료만 가능합니다' : 'Beta: Only free is available'}
+                                                        <span className="text-xs font-bold text-rose-500 ml-3 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100 animate-pulse-soft">
+                                                            {locale === 'ko' ? '베타 기간 동안 무료 등록만 가능합니다.' : 'Currently only free in beta service'}
                                                         </span>
                                                     </label>
                                                     <label className="flex items-center gap-2 cursor-pointer group bg-stone-50 px-3 py-1.5 rounded-full hover:bg-stone-100 transition-colors">
@@ -3771,7 +4288,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             </div>
 
                                             {/* Categories Row */}
-                                            <div className="grid grid-cols-2 gap-6" id="publish-category">
+                                            <div className="grid grid-cols-2 gap-6">
                                                 <div>
                                                     <label className="text-base font-bold text-stone-800 block mb-2">{tPublish('fields.category')} <span className="text-rose-500">*</span></label>
                                                     <select
@@ -3784,7 +4301,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                         ))}
                                                     </select>
                                                 </div>
-                                                <div>
+                                                <div id="publish-subcategory-field">
                                                     <label className="text-base font-bold text-stone-800 block mb-2">{tPublish('fields.subcategory')} <span className="text-rose-500">*</span></label>
                                                     <select
                                                         className="w-full border border-tan-200 rounded-2xl px-5 py-4 text-stone-800 font-bold text-lg focus:ring-4 focus:ring-rose-100 outline-none disabled:bg-stone-50 disabled:text-stone-400 bg-white appearance-none cursor-pointer transition-all"
@@ -3886,7 +4403,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             {/* Optional Details Row (Yarn Weight, Yardage) */}
                                             <div className="grid grid-cols-1 gap-6">
                                                 {/* Yarn Parts Repeater */}
-                                                <div className="space-y-3">
+                                                <div id="publish-yarn-parts-field" className="space-y-3">
                                                     <div className="flex justify-between items-center px-1">
                                                         <label className="text-base font-bold text-stone-800">{tPublish('fields.yarnParts')} <span className="text-rose-500">*</span></label>
                                                         <button
@@ -4071,8 +4588,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             )}
 
                                             {/* Descriptions */}
-                                            <div className="space-y-8 pt-8 border-t border-stone-100" id="publish-description">
-                                                <div>
+                                            <div className="space-y-8 pt-8 border-t border-stone-100">
+                                                <div id="publish-brief-desc-field">
                                                     <div className="flex justify-between items-baseline mb-3 px-1">
                                                         <label className="text-base font-bold text-stone-800">{tPublish('fields.briefDescription')} <span className="text-rose-500">*</span></label>
                                                         <span className="text-xs text-stone-400 font-medium">{tPublish('fields.briefDescriptionHint')}</span>
@@ -4106,7 +4623,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             </div>
 
                                             {/* Hashtags Section */}
-                                            <div id="publish-hashtags">
+                                            <div id="publish-hashtags-field">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <label className="text-sm font-bold text-stone-800">
                                                         {tPublish('fields.hashtags')} <span className="text-rose-500">*</span>
@@ -4169,7 +4686,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                             <button
                                                 onClick={handlePublish}
                                                 disabled={isPublishing}
-                                                className="w-full bg-rose-500 hover:bg-rose-600 disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-bold py-5 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95 text-xl mt-6 flex items-center justify-center gap-3"
+                                                className="w-full bg-rose-500 hover:bg-rose-600 disabled:bg-stone-300 disabled:cursor-not-allowed text-white font-bold py-5 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95 text-xl mt-6 flex items-center justify-center gap-3 cursor-pointer"
                                             >
                                                 {isPublishing ? (
                                                     <>
@@ -4181,41 +4698,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         </div>
                                     </>
                                 )}
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-            {
-                showRestoreDialog && (
-                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-brown-950/40 backdrop-blur-md animate-fade-in px-4">
-                        <div className="bg-white/95 border border-tan-100 rounded-[32px] p-8 max-w-md w-full shadow-[0_32px_64px_-16px_rgba(74,63,53,0.25)] text-center space-y-6 animate-zoom-in">
-                            <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto shadow-rose-sm text-rose-500">
-                                <FileText size={32} />
-                            </div>
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-extrabold text-brown-800 tracking-tight">
-                                    {locale === 'ko' ? '임시 도안 복구' : 'Restore Previous Work?'}
-                                </h2>
-                                <p className="text-stone-600 leading-relaxed text-sm">
-                                    {locale === 'ko' 
-                                        ? '이전에 작업 중이던 임시 저장 도안이 발견되었습니다. 이어서 그리시겠습니까?' 
-                                        : 'We found an unsaved pattern from your last session. Would you like to restore it and continue?'}
-                                </p>
-                            </div>
-                            <div className="flex gap-4 pt-2">
-                                <button
-                                    onClick={discardSession}
-                                    className="flex-1 px-6 py-4 rounded-full border-2 border-tan-200 text-stone-600 font-bold hover:bg-stone-50 active:scale-98 transition-all cursor-pointer"
-                                >
-                                    {locale === 'ko' ? '새로 시작' : 'Start Fresh'}
-                                </button>
-                                <button
-                                    onClick={restoreSession}
-                                    className="flex-1 px-6 py-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold hover:from-rose-600 hover:to-pink-600 hover:shadow-rose-md active:scale-98 transition-all cursor-pointer"
-                                >
-                                    {locale === 'ko' ? '이어서 그리기' : 'Restore'}
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -4247,6 +4729,42 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                             <p className="text-sm text-white/80 mt-1">
                                 {tPublish('success.publishDesc')}
                             </p>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                customAlert && (
+                    <div className="fixed inset-0 bg-black/45 backdrop-blur-sm z-[10001] flex items-center justify-center p-4">
+                        <div className="bg-white rounded-[32px] p-8 max-w-sm w-full mx-4 shadow-2xl border border-tan-100 transform scale-100 transition-all duration-200 animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                                <span>{customAlert.title}</span>
+                            </h3>
+                            <p className="text-stone-600 text-sm mb-6 leading-relaxed whitespace-pre-line">
+                                {customAlert.message}
+                            </p>
+                            <div className="flex gap-3 justify-end">
+                                {customAlert.onCancel && (
+                                    <button
+                                        onClick={() => {
+                                            customAlert.onCancel?.();
+                                            setCustomAlert(null);
+                                        }}
+                                        className="px-5 py-2.5 rounded-2xl border border-tan-200 text-stone-500 font-bold hover:bg-cream-50 hover:text-stone-700 transition-all text-sm cursor-pointer"
+                                    >
+                                        {locale === 'ko' ? '취소' : 'Cancel'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        customAlert.onConfirm();
+                                        setCustomAlert(null);
+                                    }}
+                                    className="px-6 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-soft hover:shadow-lg transition-all text-sm cursor-pointer"
+                                >
+                                    {locale === 'ko' ? '확인' : 'OK'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )
