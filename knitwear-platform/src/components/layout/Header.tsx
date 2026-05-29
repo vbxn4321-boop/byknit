@@ -84,7 +84,7 @@ export function Header({ locale, user }: HeaderProps) {
 
             {/* Mobile Menu */}
             {isMenuOpen && (
-                <div className="md:hidden border-t border-tan-200 bg-white">
+                <div className="md:hidden border-t border-tan-200 bg-white animate-in slide-in-from-top-2 fade-in duration-200">
                     <nav className="px-4 py-4 space-y-2">
                         {navItems.map((item) => (
                             <Link

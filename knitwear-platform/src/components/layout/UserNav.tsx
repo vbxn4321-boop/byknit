@@ -127,7 +127,7 @@ export function UserNav({ user }: { user: User | null }) {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-3xl shadow-2xl border border-tan-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 mt-3 w-64 bg-white rounded-3xl shadow-2xl border border-tan-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top md:origin-top-right">
                     <div className="p-4 border-b border-tan-100 bg-cream-50/50">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">My Account</p>

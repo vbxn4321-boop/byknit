@@ -1963,9 +1963,9 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
             </div>
 
             {/* 계산기 대시보드 레이아웃 */}
-            <div className="relative grid grid-cols-5 gap-4" style={{ height: '310px' }}>
+            <div className="relative flex overflow-x-auto scrollbar-hide gap-3 md:gap-4 snap-x snap-mandatory" style={{ height: '310px' }}>
                 {/* 1. 좌측 폼 입력 영역 (3/5 분할) */}
-                <div className="col-span-3 bg-white border border-[#EFE7DC] rounded-xl p-3.5 shadow-sm text-stone-600 flex flex-col justify-between relative select-none">
+                <div className="w-[85%] md:w-[60%] min-w-[200px] flex-shrink-0 bg-white border border-[#EFE7DC] rounded-xl p-3 md:p-3.5 shadow-sm text-stone-600 flex flex-col justify-between relative select-none snap-center">
                     {/* 게이지 상정 공통 영역 */}
                     {activeTab === 'basic' && (
                         <div className="space-y-3 flex-1 flex flex-col justify-between text-left animate-in fade-in duration-300">
@@ -2073,7 +2073,7 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
                     {activeTab === 'yarn' && (
                         <div className="space-y-3 flex-1 flex flex-col justify-between text-left animate-in fade-in duration-300">
                             <div>
-                                <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest block mb-2">{locale === 'ko' ? '원작 패턴의 실 메타 정보' : 'PATTERN YARN SPEC'}</span>
+                                <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest block mb-2 whitespace-nowrap truncate">{locale === 'ko' ? '원작 패턴의 실 메타 정보' : 'PATTERN YARN SPEC'}</span>
                                 <div className="grid grid-cols-3 gap-2 bg-[#FAF6F0] p-2 border border-[#EFE7DC] rounded-xl text-center">
                                     <div>
                                         <label className="text-[8px] font-black text-stone-400 block mb-0.5">볼 수</label>
@@ -2105,7 +2105,7 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[9px] font-black text-[#F28E9B] block mb-1">{locale === 'ko' ? '내가 사용할 대체 실 (m/볼)' : 'Your Yarn Meterage (m/ball)'}</label>
+                                <label className="text-[9px] font-black text-[#F28E9B] block mb-1 whitespace-nowrap truncate">{locale === 'ko' ? '내가 사용할 대체 실 (m/볼)' : 'Your Yarn Meterage (m/ball)'}</label>
                                 <input
                                     type="number"
                                     value={manualMyLength}
@@ -2202,7 +2202,14 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
                                             onChange={(e) => setManualSockGauge(Number(e.target.value))}
                                             className="w-20 bg-white border border-stone-150 rounded py-0.5 text-center text-[10px] font-bold font-mono outline-none"
                                         />
-                                    </div>
+                                <div className="flex justify-between items-center bg-[#FAF6F0] p-2 border border-[#EFE7DC] rounded-xl text-center">
+                                    <label className="text-[9px] font-black text-stone-400">양말 콧수 / 10cm</label>
+                                    <input
+                                        type="number"
+                                        value={manualSockGauge}
+                                        onChange={(e) => setManualSockGauge(Number(e.target.value))}
+                                        className="w-20 bg-white border border-stone-150 rounded py-0.5 text-center text-[10px] font-bold font-mono outline-none"
+                                    />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -2294,7 +2301,7 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
                 </div>
 
                 {/* 2. 우측 결과 시각화 영역 (2/5 분할) */}
-                <div className="col-span-2 bg-white border border-[#EFE7DC] rounded-xl p-3.5 shadow-sm relative overflow-hidden select-none">
+                <div className="w-[75%] md:w-[40%] min-w-[160px] flex-shrink-0 bg-white border border-[#EFE7DC] rounded-xl p-3 md:p-3.5 shadow-sm relative overflow-hidden select-none snap-center">
                     {renderRightVisualPanel()}
                 </div>
 

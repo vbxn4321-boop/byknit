@@ -129,11 +129,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                                 </div>
                                 
                                 {/* Content - Using actual app screenshot */}
-                                <div className="aspect-[16/9] relative overflow-hidden flex items-center justify-center bg-cream-50 rounded-b-2xl">
+                                <div className="relative overflow-hidden flex items-center justify-center bg-cream-50 rounded-b-xl md:rounded-b-2xl">
                                     <img 
                                         src="/images/tutorials/editor.png" 
                                         alt="byKnit Editor Interface"
-                                        className="w-full h-full object-cover object-top"
+                                        className="w-full h-auto object-contain"
                                     />
                                 </div>
 
