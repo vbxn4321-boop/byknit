@@ -117,3 +117,97 @@ export async function signout() {
     revalidatePath('/', 'layout')
     redirect('/login')
 }
+
+export async function completeOnboarding(formData: FormData) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return redirect('/login?error=' + encodeURIComponent('Authentication required.'));
+    }
+
+    const data = Object.fromEntries(formData)
+    const username = data.username as string;
+
+    const usernameRegex = /^[A-Za-z0-9._-]+$/;
+    if (!usernameRegex.test(username)) {
+        return redirect('/onboarding?error=' + encodeURIComponent('프로필 이름은 영문, 숫자, 특수문자(._-)만 가능합니다.'))
+    }
+
+    const privacyAgreed = data.privacy_policy_agreed === 'on';
+    const adAgreement = data.ad_agreement === 'on';
+    const marketingConsent = data.marketing_consent === 'on';
+    const ageVerification = data.age_verification === 'on';
+
+    if (!privacyAgreed || !adAgreement || !ageVerification) {
+        return redirect('/onboarding?error=' + encodeURIComponent('필수 약관에 동의해주세요.'))
+    }
+
+    const referrerName = data.referrer_name as string;
+
+    // Update raw_user_meta_data
+    await supabase.auth.updateUser({
+        data: {
+            username: username,
+            full_name: username,
+            privacy_policy_agreed: privacyAgreed,
+            ad_agreement: adAgreement,
+            marketing_consent: marketingConsent,
+            referrer_name: referrerName || null,
+        }
+    });
+
+    // Update profiles table explicitly
+    const { error: profileUpdateError } = await supabase.from('profiles').update({
+        display_name: username,
+        username: username,
+        privacy_policy_agreed: privacyAgreed
+    }).eq('id', user.id);
+
+    if (profileUpdateError) {
+        return redirect('/onboarding?error=' + encodeURIComponent(profileUpdateError.message));
+    }
+
+    // Process Referral Bonus if provided
+    if (referrerName) {
+        // Find referrer by username (display_name in profiles)
+        const { data: referrerData } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('display_name', referrerName)
+            .single();
+
+        if (referrerData && referrerData.id !== user.id) {
+            // Check if user already got a referral bonus
+            const { data: existingBonus } = await supabase
+                .from('credit_transactions')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('description', 'Referred Sign Up Bonus')
+                .single();
+                
+            if (!existingBonus) {
+                // Grant +100 to referrer
+                await supabase.from('credit_transactions').insert({
+                    user_id: referrerData.id,
+                    amount: 100,
+                    type: 'earning',
+                    description: `Referral Bonus (referred ${username})`
+                });
+
+                // Grant +100 to new user
+                await supabase.from('credit_transactions').insert({
+                    user_id: user.id,
+                    amount: 100,
+                    type: 'earning',
+                    description: 'Referred Sign Up Bonus'
+                });
+            }
+        }
+    }
+
+    // Success - Redirect to home
+    revalidatePath('/', 'layout');
+    redirect('/');
+}
+
