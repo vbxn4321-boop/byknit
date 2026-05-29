@@ -99,33 +99,33 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                         </p>
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
                             <Link
                                 href={`/${locale}/marketplace`}
-                                className="group btn-primary flex items-center gap-2 text-lg px-8 py-4"
+                                className="group btn-primary flex justify-center items-center gap-2 text-lg px-8 py-4 w-full sm:w-auto"
                             >
                                 {t('explorePatterns')}
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link
                                 href={`/${locale}/editor`}
-                                className="btn-secondary flex items-center gap-2 text-lg px-8 py-4"
+                                className="btn-secondary flex justify-center items-center gap-2 text-lg px-8 py-4 w-full sm:w-auto"
                             >
                                 {t('startCreating')}
                             </Link>
                         </div>
 
                         {/* Editor Preview Window (Static CSS Mockup) */}
-                        <div className="mt-20 mx-auto max-w-5xl relative">
+                        <div className="mt-12 md:mt-20 mx-auto max-w-5xl relative px-4 md:px-0">
                             {/* Decorative glow behind the mockup */}
-                            <div className="absolute -inset-4 bg-gradient-to-r from-rose-200 via-peach-200 to-sage-200 rounded-[2.5rem] blur-2xl opacity-40" />
+                            <div className="absolute -inset-2 md:-inset-4 bg-gradient-to-r from-rose-200 via-peach-200 to-sage-200 rounded-[2rem] md:rounded-[2.5rem] blur-xl md:blur-2xl opacity-40" />
                             
-                            <div className="relative rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl overflow-visible">
+                            <div className="relative rounded-xl md:rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl md:shadow-2xl overflow-visible">
                                 {/* Browser-like Header */}
-                                <div className="h-12 border-b border-gray-100/50 bg-white/40 flex items-center px-6 gap-2 rounded-t-2xl">
-                                    <div className="w-3 h-3 rounded-full bg-rose-400/80 shadow-sm" />
-                                    <div className="w-3 h-3 rounded-full bg-peach-400/80 shadow-sm" />
-                                    <div className="w-3 h-3 rounded-full bg-sage-400/80 shadow-sm" />
+                                <div className="h-8 md:h-12 border-b border-gray-100/50 bg-white/40 flex items-center px-4 md:px-6 gap-1.5 md:gap-2 rounded-t-xl md:rounded-t-2xl">
+                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-rose-400/80 shadow-sm" />
+                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-peach-400/80 shadow-sm" />
+                                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-sage-400/80 shadow-sm" />
                                 </div>
                                 
                                 {/* Content - Using actual app screenshot */}
