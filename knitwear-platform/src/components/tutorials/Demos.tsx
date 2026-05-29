@@ -272,40 +272,40 @@ export function VectorEditorDemo({ locale }: { locale: string }) {
 
     return (
         <div className="w-full relative bg-[#FAF6F0] rounded-2xl border border-[#EFE7DC] shadow-soft overflow-hidden p-4 md:p-6 flex flex-col justify-between" style={{ height: '480px' }}>
-            <div className="flex justify-between items-center mb-4 border-b border-[#EFE7DC] pb-3 select-none">
-                <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-red-400" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <span className="text-xs font-black text-stone-400 ml-2 font-mono uppercase tracking-wider">{locale === 'ko' ? '도안 에디터 플레이어 (실시간 60FPS)' : 'Pattern Editor Player (Live 60fps)'}</span>
+            <div className="flex justify-between items-center mb-4 border-b border-[#EFE7DC] pb-3 select-none overflow-x-auto scrollbar-hide gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-red-400" />
+                    <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-400" />
+                    <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-400" />
+                    <span className="text-[10px] md:text-xs font-black text-stone-400 ml-1 md:ml-2 font-mono uppercase tracking-wider whitespace-nowrap truncate">{locale === 'ko' ? '도안 에디터 플레이어' : 'Editor Player'}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-3 py-1 bg-white border border-[#EFE7DC] rounded-lg text-[10px] font-black text-stone-500 shadow-sm flex items-center gap-1.5">
-                        <Save className="w-3.5 h-3.5 text-[#F28E9B]" />
+                <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                    <div className="px-2 md:px-3 py-1 bg-white border border-[#EFE7DC] rounded-lg text-[9px] md:text-[10px] font-black text-stone-500 shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                        <Save className="w-3 md:w-3.5 h-3 md:h-3.5 text-[#F28E9B]" />
                         <span>{locale === 'ko' ? '임시 저장' : 'Save Draft'}</span>
                     </div>
-                    <div className="text-[10px] font-black text-rose-400 uppercase tracking-widest bg-rose-50 border border-rose-100 px-2 py-0.5 rounded flex items-center gap-1">
+                    <div className="text-[9px] md:text-[10px] font-black text-rose-400 uppercase tracking-widest bg-rose-50 border border-rose-100 px-1.5 md:px-2 py-0.5 rounded flex items-center gap-1 whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#F28E9B] animate-ping" /> PLAYING
                     </div>
                 </div>
             </div>
 
-            <div className="relative grid grid-cols-4 gap-4" style={{ height: '310px' }}>
-                <div className="col-span-1 bg-white border border-[#EFE7DC] rounded-xl p-3 flex flex-col justify-between shadow-sm select-none">
+            <div className="relative grid grid-cols-12 gap-2 md:gap-4 overflow-x-auto scrollbar-hide" style={{ height: '310px' }}>
+                <div className="col-span-4 md:col-span-3 bg-white border border-[#EFE7DC] rounded-xl p-2 md:p-3 flex flex-col justify-between shadow-sm select-none min-w-[90px]">
                     <div>
-                        <h4 className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{locale === 'ko' ? '뜨개 기호' : 'STITCHES'}</h4>
+                        <h4 className="text-[9px] md:text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{locale === 'ko' ? '뜨개 기호' : 'STITCHES'}</h4>
                         <div className="space-y-1.5">
-                            <div className={`p-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all ${activeSymbol === '|' ? 'bg-rose-50 border-[#F28E9B] text-rose-500 scale-[1.02]' : 'border-stone-100 bg-stone-50/50 text-stone-500'}`}>
+                            <div className={`p-1.5 md:p-2 rounded-lg border text-[9px] md:text-[11px] font-bold flex items-center justify-between transition-all whitespace-nowrap ${activeSymbol === '|' ? 'bg-rose-50 border-[#F28E9B] text-rose-500 scale-[1.02]' : 'border-stone-100 bg-stone-50/50 text-stone-500'}`}>
                                 <span>{locale === 'ko' ? '겉뜨기 (K)' : 'Knit (K)'}</span>
-                                <span className="font-mono px-1.5 py-0.2 bg-stone-200/50 rounded font-black text-[10px]">|</span>
+                                <span className="font-mono px-1 md:px-1.5 py-0.2 bg-stone-200/50 rounded font-black text-[9px] md:text-[10px]">|</span>
                             </div>
-                            <div className={`p-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all ${activeSymbol === '-' ? 'bg-rose-50 border-[#F28E9B] text-rose-500 scale-[1.02]' : 'border-stone-100 bg-stone-50/50 text-stone-500'}`}>
+                            <div className={`p-1.5 md:p-2 rounded-lg border text-[9px] md:text-[11px] font-bold flex items-center justify-between transition-all whitespace-nowrap ${activeSymbol === '-' ? 'bg-rose-50 border-[#F28E9B] text-rose-500 scale-[1.02]' : 'border-stone-100 bg-stone-50/50 text-stone-500'}`}>
                                 <span>{locale === 'ko' ? '안뜨기 (P)' : 'Purl (P)'}</span>
-                                <span className="font-mono px-1.5 py-0.2 bg-stone-200/50 rounded font-black text-[10px]">-</span>
+                                <span className="font-mono px-1 md:px-1.5 py-0.2 bg-stone-200/50 rounded font-black text-[9px] md:text-[10px]">-</span>
                             </div>
-                            <div className="p-2 rounded-lg border border-stone-100 bg-stone-50/50 text-stone-300 text-[11px] font-bold flex items-center justify-between opacity-50">
-                                <span>{locale === 'ko' ? '바늘비우기 (yo)' : 'Yarn Over'}</span>
-                                <span className="font-mono px-1 rounded font-black text-[9px]">o</span>
+                            <div className="p-1.5 md:p-2 rounded-lg border border-stone-100 bg-stone-50/50 text-stone-300 text-[9px] md:text-[11px] font-bold flex items-center justify-between opacity-50 whitespace-nowrap">
+                                <span>{locale === 'ko' ? '바늘비우기' : 'Yarn Over'}</span>
+                                <span className="font-mono px-1 rounded font-black text-[8px] md:text-[9px]">o</span>
                             </div>
                         </div>
                     </div>
@@ -321,7 +321,7 @@ export function VectorEditorDemo({ locale }: { locale: string }) {
                     </div>
                 </div>
 
-                <div className="col-span-3 bg-white border border-[#EFE7DC] rounded-xl flex items-center justify-center p-3 shadow-sm relative overflow-hidden">
+                <div className="col-span-8 md:col-span-9 bg-white border border-[#EFE7DC] rounded-xl flex items-center justify-center p-2 md:p-3 shadow-sm relative overflow-hidden">
                     <div className="grid grid-cols-12 gap-px bg-[#EFE7DC] p-px border border-[#EFE7DC] rounded-lg" style={{ width: '240px', height: '240px' }}>
                         {grid.map((row, rIdx) => 
                             row.map((cell, cIdx) => (
