@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Menu, X, ShoppingBag, PenTool, Calculator, Heart, Image as ImageIcon, Users, Sparkles } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import type { Locale } from '@/i18n/request';
@@ -20,6 +20,22 @@ export function Header({ locale, user }: HeaderProps) {
     const t = useTranslations('nav');
     const tCommon = useTranslations('common');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const headerRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isMenuOpen && headerRef.current && !headerRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside as any);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside as any);
+        };
+    }, [isMenuOpen]);
 
     const navItems = [
         { href: '/marketplace', label: t('marketplace'), icon: ShoppingBag },
@@ -30,7 +46,7 @@ export function Header({ locale, user }: HeaderProps) {
     ];
 
     return (
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-tan-200 shadow-soft">
+        <header ref={headerRef} className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-tan-200 shadow-soft">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
