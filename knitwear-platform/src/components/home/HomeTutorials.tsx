@@ -106,11 +106,13 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
                     </div>
 
                     {/* Right Column: Interactive Demo Visualization */}
-                    <div className="bg-gradient-to-br from-cream-100 to-rose-50 rounded-3xl p-6 md:p-10 shadow-inner flex flex-col items-center justify-between min-h-[500px] border border-tan-100 lg:col-span-3 h-full">
-                        <div className="w-full max-w-xl transition-opacity duration-500 flex-grow flex items-center justify-center">
-                            {activeTab === 'editor' && <VectorEditorDemo locale={locale} />}
-                            {activeTab === 'converter' && <VectorConverterDemo locale={locale} />}
-                            {activeTab === 'calculator' && <VectorCalculatorDemo locale={locale} />}
+                    <div className="bg-gradient-to-br from-cream-100 to-rose-50 rounded-3xl p-3 sm:p-6 md:p-10 shadow-inner flex flex-col items-center justify-between min-h-[400px] sm:min-h-[500px] border border-tan-100 lg:col-span-3 h-full overflow-hidden w-full">
+                        <div className="w-full transition-opacity duration-500 flex-grow flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
+                            <div className="min-w-[340px] sm:min-w-0 w-full max-w-xl mx-auto flex items-center justify-center">
+                                {activeTab === 'editor' && <VectorEditorDemo locale={locale} />}
+                                {activeTab === 'converter' && <VectorConverterDemo locale={locale} />}
+                                {activeTab === 'calculator' && <VectorCalculatorDemo locale={locale} />}
+                            </div>
                         </div>
                         
                         {/* Tabs Navigation */}
