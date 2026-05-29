@@ -115,26 +115,48 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                             </Link>
                         </div>
 
-                        {/* Concept A: Editorial Photo Cards */}
-                        <div className="mt-20 max-w-5xl mx-auto grid grid-cols-3 gap-4 sm:gap-6 md:gap-10 relative">
-                            {/* Card 1 (Left - staggered down) */}
-                            <div className="flex flex-col mt-16 transform transition-transform hover:-translate-y-2 duration-500">
-                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-tan-200/50">
-                                    <img src="/seed/pattern1.png" alt="Knitting Pattern" className="w-full h-full object-cover" />
-                                </div>
-                            </div>
+                        {/* Editor Preview Window (Static CSS Mockup) */}
+                        <div className="mt-20 mx-auto max-w-5xl relative">
+                            {/* Decorative glow behind the mockup */}
+                            <div className="absolute -inset-4 bg-gradient-to-r from-rose-200 via-peach-200 to-sage-200 rounded-[2.5rem] blur-2xl opacity-40" />
                             
-                            {/* Card 2 (Center - higher) */}
-                            <div className="flex flex-col -mt-8 transform transition-transform hover:-translate-y-2 duration-500">
-                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-tan-200/50">
-                                    <img src="/seed/post2.png" alt="Knitting Project" className="w-full h-full object-cover" />
+                            <div className="relative rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl overflow-visible">
+                                {/* Browser-like Header */}
+                                <div className="h-12 border-b border-gray-100/50 bg-white/40 flex items-center px-6 gap-2 rounded-t-2xl">
+                                    <div className="w-3 h-3 rounded-full bg-rose-400/80 shadow-sm" />
+                                    <div className="w-3 h-3 rounded-full bg-peach-400/80 shadow-sm" />
+                                    <div className="w-3 h-3 rounded-full bg-sage-400/80 shadow-sm" />
                                 </div>
-                            </div>
-                            
-                            {/* Card 3 (Right - staggered further down) */}
-                            <div className="flex flex-col mt-24 transform transition-transform hover:-translate-y-2 duration-500">
-                                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-tan-200/50">
-                                    <img src="/seed/post1.png" alt="Finished Knitwear" className="w-full h-full object-cover" />
+                                
+                                {/* Content - Using actual app screenshot */}
+                                <div className="aspect-[16/9] relative overflow-hidden flex items-center justify-center bg-cream-50 rounded-b-2xl">
+                                    <img 
+                                        src="/images/tutorials/editor.png" 
+                                        alt="byKnit Editor Interface"
+                                        className="w-full h-full object-cover object-top"
+                                    />
+                                </div>
+
+                                {/* Floating Stat Card 1 (Left) */}
+                                <div className="absolute -left-8 top-1/4 bg-white/95 backdrop-blur-md px-5 py-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-4 transform -rotate-3 z-10 transition-transform hover:rotate-0 hover:scale-105 duration-300 hidden md:flex">
+                                    <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shadow-inner">
+                                        <Heart className="w-5 h-5 text-rose-500" />
+                                    </div>
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Loved by</span>
+                                        <span className="text-base font-black text-brown-800">50,000+ Knitters</span>
+                                    </div>
+                                </div>
+
+                                {/* Floating Stat Card 2 (Right) */}
+                                <div className="absolute -right-8 bottom-1/4 bg-white/95 backdrop-blur-md px-5 py-4 rounded-2xl shadow-xl border border-white/60 flex items-center gap-4 transform rotate-3 z-10 transition-transform hover:rotate-0 hover:scale-105 duration-300 hidden md:flex">
+                                    <div className="w-10 h-10 rounded-full bg-sage-100 flex items-center justify-center shadow-inner">
+                                        <ShoppingBag className="w-5 h-5 text-sage-600" />
+                                    </div>
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Marketplace</span>
+                                        <span className="text-base font-black text-brown-800">10,000+ Patterns</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
