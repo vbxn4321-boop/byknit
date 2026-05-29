@@ -230,7 +230,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
                 <div className="grid lg:grid-cols-[1fr_320px] gap-6">
                     {/* ===== Main: Board-style List ===== */}
-                    <div>
+                    <div className="min-w-0">
                         {/* 검색바 */}
                         <div className="mb-4 flex gap-2">
                             <div className="relative flex-1">
@@ -300,9 +300,83 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                             )}
                         </div>
 
-                        {/* Board Table */}
+                        {/* Board Table & Mobile Cards */}
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft overflow-hidden">
-                            <div className="w-full overflow-x-auto">
+                            {/* Mobile Card List */}
+                            <div className="md:hidden flex flex-col divide-y divide-stone-100">
+                                {displayPosts.length > 0 ? (
+                                    displayPosts.map((post) => (
+                                        <div key={post.id} className="p-4 hover:bg-cream-50/50 transition-colors">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                                                    <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-bold ${getCategoryColor(post.category)}`}>
+                                                        {getCategoryLabel(post.category)}
+                                                    </span>
+                                                    <span className="text-xs text-stone-500 truncate">
+                                                        {post.profiles?.display_name || 'Anonymous'}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[11px] text-stone-400 flex-shrink-0">{formatDate(post.created_at)}</span>
+                                            </div>
+                                            <div className="flex gap-3 mb-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <Link href={`/community/${post.id}`} className="font-bold text-stone-800 text-sm hover:text-rose-500 transition-colors block mb-1 truncate">
+                                                        {post.title}
+                                                    </Link>
+                                                    {post.pattern && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-600 text-[9px] font-black">
+                                                                <Coins className="w-2.5 h-2.5" /> +50
+                                                            </span>
+                                                            <p className="text-[10px] text-stone-400 truncate">
+                                                                📎 {getPatternTitle(post.pattern.title)}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {post.pattern && getPatternImage(post.pattern) && (
+                                                    <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-stone-100">
+                                                        <img src={getPatternImage(post.pattern)!} alt="" className="w-full h-full object-cover" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <div className="flex items-center gap-4">
+                                                    <button onClick={() => handleLike(post.id)} className={`flex items-center gap-1.5 transition-colors ${likedSet.has(post.id) ? 'text-rose-500' : 'text-stone-400 hover:text-rose-500'}`}>
+                                                        <Heart className={`w-3.5 h-3.5 ${likedSet.has(post.id) ? 'fill-rose-500' : ''}`} />
+                                                        <span className="text-[11px] font-bold">{post.likes?.[0]?.count || 0}</span>
+                                                    </button>
+                                                    <div className="flex items-center gap-1.5 text-stone-400">
+                                                        <MessageSquare className="w-3.5 h-3.5" />
+                                                        <span className="text-[11px] font-bold">{post.comments?.[0]?.count || 0}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-stone-400">
+                                                        <Eye className="w-3.5 h-3.5" />
+                                                        <span className="text-[11px] font-bold">{post.views || 0}</span>
+                                                    </div>
+                                                </div>
+                                                {user && (
+                                                    <button onClick={async (e) => { e.stopPropagation(); await toggleBookmark(post.id); setBookmarkSet(prev => { const next = new Set(prev); if (next.has(post.id)) next.delete(post.id); else next.add(post.id); return next; }); }} className="text-stone-300 hover:text-amber-500 transition-colors p-1">
+                                                        {bookmarkSet.has(post.id) ? <Bookmark className="w-4 h-4 text-amber-500 fill-amber-500" /> : <Bookmark className="w-4 h-4" />}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="py-16 text-center">
+                                        <div className="w-12 h-12 rounded-2xl bg-cream-100 flex items-center justify-center mx-auto mb-3">
+                                            <MessageSquare className="w-5 h-5 text-rose-300" />
+                                        </div>
+                                        <p className="font-bold text-stone-700 text-sm mb-1">
+                                            {activeTab === 'ko' ? '게시글이 없습니다' : 'No posts found'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Desktop Table */}
+                            <div className="hidden md:block w-full overflow-x-auto">
                                 <div className="min-w-[700px]">
                                     {/* Table Header */}
                                     <div className="grid grid-cols-[70px_1fr_90px_70px_50px_50px_50px_40px] items-center px-4 py-3 bg-stone-50 border-b border-stone-100 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
