@@ -7,8 +7,7 @@ import { Grid, Image as ImageIcon, Calculator, Languages, ArrowRight } from 'luc
 import { 
     VectorEditorDemo, 
     VectorConverterDemo, 
-    VectorCalculatorDemo, 
-    VectorTranslatorDemo 
+    VectorCalculatorDemo 
 } from '@/components/tutorials/Demos';
 
 interface HomeTutorialsProps {
@@ -24,7 +23,6 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
         { id: 'editor', label: tTut('tabs.editor'), icon: Grid },
         { id: 'converter', label: tTut('tabs.converter'), icon: ImageIcon },
         { id: 'calculator', label: tTut('tabs.calculator'), icon: Calculator },
-        { id: 'translator', label: tTut('tabs.translator'), icon: Languages },
     ];
 
     const content = {
@@ -53,15 +51,6 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
                 { title: tTut('calculator.step1Title'), desc: tTut('calculator.step1Desc') },
                 { title: tTut('calculator.step2Title'), desc: tTut('calculator.step2Desc') },
                 { title: tTut('calculator.step3Title'), desc: tTut('calculator.step3Desc') }
-            ]
-        },
-        translator: {
-            title: tTut('translator.title'),
-            desc: tTut('translator.desc'),
-            steps: [
-                { title: tTut('translator.step1Title'), desc: tTut('translator.step1Desc') },
-                { title: tTut('translator.step2Title'), desc: tTut('translator.step2Desc') },
-                { title: tTut('translator.step3Title'), desc: tTut('translator.step3Desc') }
             ]
         }
     };
@@ -122,7 +111,6 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
                             {activeTab === 'editor' && <VectorEditorDemo locale={locale} />}
                             {activeTab === 'converter' && <VectorConverterDemo locale={locale} />}
                             {activeTab === 'calculator' && <VectorCalculatorDemo locale={locale} />}
-                            {activeTab === 'translator' && <VectorTranslatorDemo locale={locale} />}
                         </div>
                         
                         {/* Tabs Navigation */}

@@ -47,13 +47,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             color: 'bg-peach-200',
             href: 'ai',
         },
-        {
-            icon: Languages,
-            titleKey: 'aiTranslator',
-            descKey: 'translatorDesc',
-            color: 'bg-indigo-300',
-            href: 'translator',
-        },
+
         {
             icon: Calculator,
             titleKey: 'smartCalculator',
