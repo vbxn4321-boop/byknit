@@ -80,7 +80,7 @@
     "myPatterns": "도안 스튜디오",
     "myMarketplace": "내 마켓플레이스",
     "community": "커뮤니티",
-    "aiGenerator": "AI 생성기",
+    "aiGenerator": "AI 차트 변환기",
     "aiTranslator": "AI 도안 번역기",
     "purchases": "주문 내역"
   },
@@ -596,7 +596,7 @@
     "platform": "플랫폼",
     "marketplace": "마켓플레이스",
     "patternEditor": "도안 에디터",
-    "aiGenerator": "AI 생성기",
+    "aiGenerator": "AI 차트 변환기",
     "smartCalculator": "스마트계산기",
     "resources": "리소스",
     "helpCenter": "고객센터",

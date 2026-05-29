@@ -80,7 +80,7 @@
     "myPatterns": "Pattern Studio",
     "myMarketplace": "My Marketplace",
     "community": "Community",
-    "aiGenerator": "AI Generator",
+    "aiGenerator": "AI Chart Converter",
     "aiTranslator": "AI Translator",
     "purchases": "Order History"
   },
@@ -595,7 +595,7 @@
     "platform": "Platform",
     "marketplace": "Marketplace",
     "patternEditor": "Pattern Editor",
-    "aiGenerator": "AI Generator",
+    "aiGenerator": "AI Chart Converter",
     "smartCalculator": "Smart Calculator",
     "resources": "Resources",
     "helpCenter": "Help Center",
