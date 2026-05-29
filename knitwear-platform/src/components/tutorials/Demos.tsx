@@ -2202,14 +2202,7 @@ export function VectorCalculatorDemo({ locale }: { locale: string }) {
                                             onChange={(e) => setManualSockGauge(Number(e.target.value))}
                                             className="w-20 bg-white border border-stone-150 rounded py-0.5 text-center text-[10px] font-bold font-mono outline-none"
                                         />
-                                <div className="flex justify-between items-center bg-[#FAF6F0] p-2 border border-[#EFE7DC] rounded-xl text-center">
-                                    <label className="text-[9px] font-black text-stone-400">양말 콧수 / 10cm</label>
-                                    <input
-                                        type="number"
-                                        value={manualSockGauge}
-                                        onChange={(e) => setManualSockGauge(Number(e.target.value))}
-                                        className="w-20 bg-white border border-stone-150 rounded py-0.5 text-center text-[10px] font-bold font-mono outline-none"
-                                    />
+                                    </div>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
