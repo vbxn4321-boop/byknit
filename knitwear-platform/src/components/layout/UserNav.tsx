@@ -127,13 +127,8 @@ export function UserNav({ user }: { user: User | null }) {
             </button>
 
             {isOpen && (
-                <>
-                    {/* Mobile Backdrop */}
-                    <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden animate-in fade-in duration-200" onClick={() => setIsOpen(false)} />
-                    
-                    {/* Dropdown Menu */}
-                    <div className="fixed bottom-4 left-4 right-4 z-50 md:absolute md:bottom-auto md:top-full md:left-auto md:right-0 md:mt-3 md:w-64 bg-white rounded-3xl shadow-2xl border border-tan-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 md:slide-in-from-top-2 zoom-in-95 md:zoom-in-95 duration-200 origin-bottom md:origin-top-right">
-                        <div className="p-4 border-b border-tan-100 bg-cream-50/50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 mt-3 w-64 bg-white rounded-3xl shadow-2xl border border-tan-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top md:origin-top-right">
+                    <div className="p-4 border-b border-tan-100 bg-cream-50/50">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">My Account</p>
                             <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -192,7 +187,7 @@ export function UserNav({ user }: { user: User | null }) {
                             <span>{t('signOut')}</span>
                         </button>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

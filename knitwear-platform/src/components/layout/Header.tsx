@@ -102,6 +102,9 @@ export function Header({ locale, user }: HeaderProps) {
             {isMenuOpen && (
                 <div className="md:hidden border-t border-tan-200 bg-white animate-in slide-in-from-top-2 fade-in duration-200">
                     <nav className="px-4 py-4 space-y-2">
+                        <div className="flex justify-center py-2 mb-2 pb-4 border-b border-tan-200">
+                            <UserNav user={user} />
+                        </div>
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
@@ -126,9 +129,6 @@ export function Header({ locale, user }: HeaderProps) {
                                 <NotificationBell user={user} />
                             </div>
                             <LanguageSwitcher locale={locale} />
-                            <div className="flex justify-center py-2">
-                                <UserNav user={user} />
-                            </div>
                         </div>
                     </nav>
                 </div>
