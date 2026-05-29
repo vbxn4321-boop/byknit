@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Calculator, ArrowRightLeft, Sparkles, Shirt, Footprints, Maximize2, Scale, Languages } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
-import { TranslatorClient } from '@/components/translator/TranslatorClient';
 import { StickyGaugeBar } from '@/components/calculator/StickyGaugeBar';
 import { BasicConverterTab } from '@/components/calculator/tabs/BasicConverterTab';
 import { YarnSubstituteTab } from '@/components/calculator/tabs/YarnSubstituteTab';
@@ -13,7 +12,7 @@ import { SockPlannerTab } from '@/components/calculator/tabs/SockPlannerTab';
 import { PatternGraderTab } from '@/components/calculator/tabs/PatternGraderTab';
 import { GaugeConverterTab } from '@/components/calculator/tabs/GaugeConverterTab';
 
-type TabId = 'basic' | 'converter' | 'yarn' | 'raglan' | 'sock' | 'grading' | 'translator';
+type TabId = 'basic' | 'converter' | 'yarn' | 'raglan' | 'sock' | 'grading';
 
 interface CalculatorClientProps {
     locale: string;
@@ -27,7 +26,6 @@ const TABS: { id: TabId; icon: typeof Calculator; labelKey: string }[] = [
     { id: 'raglan', icon: Shirt, labelKey: 'tabs.raglan' },
     { id: 'sock', icon: Footprints, labelKey: 'tabs.sock' },
     { id: 'grading', icon: Maximize2, labelKey: 'tabs.grading' },
-    { id: 'translator', icon: Languages, labelKey: 'tabs.translator' },
 ];
 
 export default function CalculatorClient({ locale, user }: CalculatorClientProps) {
@@ -73,18 +71,14 @@ export default function CalculatorClient({ locale, user }: CalculatorClientProps
 
             {/* Tab Content */}
             <div className="max-w-6xl mx-auto px-4 pb-20">
-                {activeTab === 'translator' ? (
-                    <TranslatorClient locale={locale} user={user} isTabMode={true} />
-                ) : (
-                    <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-tan-200 shadow-soft p-6 sm:p-8">
-                        {activeTab === 'basic' && <BasicConverterTab />}
-                        {activeTab === 'converter' && <GaugeConverterTab />}
-                        {activeTab === 'yarn' && <YarnSubstituteTab />}
-                        {activeTab === 'raglan' && <RaglanWizardTab />}
-                        {activeTab === 'sock' && <SockPlannerTab />}
-                        {activeTab === 'grading' && <PatternGraderTab />}
-                    </div>
-                )}
+                <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-tan-200 shadow-soft p-6 sm:p-8">
+                    {activeTab === 'basic' && <BasicConverterTab />}
+                    {activeTab === 'converter' && <GaugeConverterTab />}
+                    {activeTab === 'yarn' && <YarnSubstituteTab />}
+                    {activeTab === 'raglan' && <RaglanWizardTab />}
+                    {activeTab === 'sock' && <SockPlannerTab />}
+                    {activeTab === 'grading' && <PatternGraderTab />}
+                </div>
             </div>
         </div>
     );
