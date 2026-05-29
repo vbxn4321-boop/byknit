@@ -876,7 +876,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
 
         // 2. Left Click (Button 0): Check Selection for "Content Move" (Cut & Move) & Context Menu Check
-        if (e.evt.button === 0) {
+        if (e.evt.button === 0 || !('button' in e.evt) || e.evt.pointerType === 'touch') {
             const stage = e.target.getStage();
             const pos = getPointerGridPos(stage);
 
@@ -919,7 +919,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             }
         }
 
-        if (e.evt.button === 0) {
+        if (e.evt.button === 0 || !('button' in e.evt) || e.evt.pointerType === 'touch') {
             if (isSelectionMode) {
                 setIsSelecting(true);
                 setSelectionStart(pos);
@@ -952,19 +952,45 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 const hasColor = cellColor && cellColor !== '#ffffff';
                 const hasSymbol = !!cellSymbol;
 
-                // Auto-detect: extract what the cell actually has
-                if (hasColor) setSelectedColor(cellColor);
-                if (hasSymbol) setSelectedSymbol(cellSymbol);
-
-                // Restore previous active tool (fallback to symbol if invalid)
-                const prevTool = previousToolRef.current;
-                if (prevTool === 'selection') {
-                    setActiveTool('selection' as any);
-                    setIsSelectionMode(true);
-                } else if (['paint', 'symbol', 'eraser', 'move', 'shape', 'bucket'].includes(prevTool)) {
-                    setActiveTool(prevTool as any);
+                if (!hasColor && !hasSymbol) {
+                    // Empty cell: Just restore previous tool
+                    const prevTool = previousToolRef.current;
+                    if (prevTool === 'selection') {
+                        setActiveTool('selection');
+                        setIsSelectionMode(true);
+                    } else if (['paint', 'symbol', 'eraser', 'move', 'shape', 'bucket'].includes(prevTool)) {
+                        setActiveTool(prevTool as any);
+                    } else {
+                        setActiveTool('symbol');
+                    }
                 } else {
-                    setActiveTool('symbol');
+                    if (hasColor) setSelectedColor(cellColor);
+                    if (hasSymbol) setSelectedSymbol(cellSymbol);
+
+                    const prevTool = previousToolRef.current;
+                    let nextTool = prevTool;
+
+                    if (hasColor && hasSymbol) {
+                        setIsSimultaneousDraw(true);
+                        if (!['paint', 'symbol', 'bucket'].includes(nextTool)) {
+                            nextTool = 'paint';
+                        }
+                        if (nextTool === 'bucket') setBucketMode('both');
+                    } else if (hasColor && !hasSymbol) {
+                        setIsSimultaneousDraw(false);
+                        if (nextTool === 'symbol' || !['paint', 'symbol', 'bucket'].includes(nextTool)) {
+                            nextTool = 'paint';
+                        }
+                        if (nextTool === 'bucket') setBucketMode('color');
+                    } else if (!hasColor && hasSymbol) {
+                        setIsSimultaneousDraw(false);
+                        if (nextTool === 'paint' || !['paint', 'symbol', 'bucket'].includes(nextTool)) {
+                            nextTool = 'symbol';
+                        }
+                        if (nextTool === 'bucket') setBucketMode('symbol');
+                    }
+
+                    setActiveTool(nextTool as any);
                 }
             } else {
                 setIsDragging(true);
