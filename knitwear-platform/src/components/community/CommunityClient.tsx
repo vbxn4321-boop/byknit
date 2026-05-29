@@ -302,8 +302,10 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
 
                         {/* Board Table */}
                         <div className="bg-white rounded-2xl border border-tan-200 shadow-soft overflow-hidden">
-                            {/* Table Header */}
-                            <div className="grid grid-cols-[70px_1fr_90px_70px_50px_50px_50px_40px] items-center px-4 py-3 bg-stone-50 border-b border-stone-100 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                            <div className="w-full overflow-x-auto">
+                                <div className="min-w-[700px]">
+                                    {/* Table Header */}
+                                    <div className="grid grid-cols-[70px_1fr_90px_70px_50px_50px_50px_40px] items-center px-4 py-3 bg-stone-50 border-b border-stone-100 text-[11px] font-bold text-stone-400 uppercase tracking-wider">
                                 <span className="text-center">{t('table.category')}</span>
                                 <span>{t('table.title')}</span>
                                 <span>{t('table.author')}</span>
@@ -465,8 +467,10 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             ? (activeTab === 'ko' ? '커뮤니티 글을 작성하거나, 좋아요/북마크를 남겨보세요!' : 'Write community posts or leave likes/bookmarks!')
                                             : (activeTab === 'ko' ? '첫 번째 이야기를 들려주세요!' : 'Be the first to share a story!')}
                                     </p>
+                                    </div>
+                                )}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
 

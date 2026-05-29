@@ -3110,8 +3110,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             )}
 
             {/* Top Toolbar */}
-            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
-                <div className="flex items-center gap-4">
+            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm z-20 gap-3 sm:gap-0">
+                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto overflow-x-auto scrollbar-hide">
                     {/* Project Title Input */}
                     <input
                         type="text"
@@ -3667,7 +3667,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 </div>
 
                 {/* Right Sidebar */}
-                <div className={`bg-white border-l border-tan-200 shadow-xl z-10 transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-80' : 'w-0 opacity-0'}`}>
+                <div className={`bg-white border-l border-tan-200 shadow-xl z-10 transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-[85%] sm:w-80 opacity-100 absolute sm:relative right-0 top-0 bottom-0' : 'w-0 opacity-0 absolute sm:relative right-0 top-0 bottom-0'}`}>
                     <div className="p-6 overflow-y-auto flex-1 space-y-8">
 
 

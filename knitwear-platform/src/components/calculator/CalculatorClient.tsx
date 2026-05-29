@@ -48,7 +48,7 @@ export default function CalculatorClient({ locale, user }: CalculatorClientProps
 
             {/* Tab Navigation */}
             <div className="max-w-4xl mx-auto px-4 py-6">
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                     {TABS.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
