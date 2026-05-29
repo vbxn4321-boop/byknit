@@ -109,8 +109,7 @@ const YARN_WEIGHTS = [
 ];
 
 import { StitchSymbolDef, GridCell, GridCellData, GridSize, YarnPart } from './types';
-import { useOnboarding } from '@/hooks/useOnboarding';
-import { OnboardingOverlay } from './OnboardingOverlay';
+
 import { useEditorPersistence } from '@/hooks/useEditorPersistence';
 import { NeedleSelector } from '../common/NeedleSelector';
 import { UnitInput } from '../common/UnitInput';
@@ -338,9 +337,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         pivotCol: number;
     } | null>(null);
 
-    // Onboarding
-    const { showOnboarding, onCloseOnboarding, setShowOnboarding } = useOnboarding();
-    const [onboardingStep, setOnboardingStep] = useState(1);
+    // Onboarding Removed
 
     // Persistence for AI Import
     const { hasAIImport, loadAIImport } = useEditorPersistence();
@@ -562,9 +559,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     useEffect(() => {
         setIsMounted(true);
-        const hasSeen = localStorage.getItem('hasSeenOnboarding');
-        if (!hasSeen) setShowOnboarding(true);
-    }, [setShowOnboarding]);
+    }, []);
 
     // Center grid on mount
     useEffect(() => {
@@ -3084,7 +3079,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     if (!isMounted) return <div className="h-full flex items-center justify-center bg-cream-50">Loading Studio...</div>;
 
-    const hasOpenModal = showGridSizeModal || showPublishModal || showOnboarding || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
+    const hasOpenModal = showGridSizeModal || showPublishModal || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
 
     return (
         <div className="flex flex-col h-[85vh] bg-cream-50 font-sans select-none relative">
@@ -3093,20 +3088,6 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     className="absolute inset-0 z-[9999] cursor-pointer bg-transparent"
                     onClick={handleAuthCheck}
                 />
-            )}
-            {/* Onboarding Modal */}
-            {showOnboarding && (
-                <div className="fixed inset-0 z-[10000]">
-                    <OnboardingOverlay
-                        t={tEditor}
-                        step={onboardingStep}
-                        setStep={setOnboardingStep}
-                        onClose={() => {
-                            setShowOnboarding(false);
-                            localStorage.setItem('hasSeenOnboarding', 'true');
-                        }}
-                    />
-                </div>
             )}
 
             {/* Top Toolbar */}
