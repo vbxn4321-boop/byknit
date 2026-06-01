@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ChevronLeft, Heart, MessageSquare, Send,
@@ -8,7 +8,7 @@ import {
     Package, Trash2, CornerDownRight, Coins,
     Bookmark, Edit3, X, Save
 } from 'lucide-react';
-import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, updatePost, toggleBookmark } from '@/app/actions/community';
+import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, updatePost, toggleBookmark, getMyLikes } from '@/app/actions/community';
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -68,6 +68,18 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
     const [editTitle, setEditTitle] = useState(post.title);
     const [editContent, setEditContent] = useState(post.content);
     const [editCategory, setEditCategory] = useState(post.category);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(post.likes?.[0]?.count || 0);
+
+    useEffect(() => {
+        if (user) {
+            getMyLikes().then(likes => {
+                if (likes.includes(post.id)) {
+                    setIsLiked(true);
+                }
+            });
+        }
+    }, [user, post.id]);
 
     // 🌐 AI 원클릭 번역 상태
     const [translatedPost, setTranslatedPost] = useState<{ title: string; content: string } | null>(null);
@@ -250,6 +262,18 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
         } catch (e) { /* ignore */ }
     };
 
+    const handleLike = async () => {
+        if (!user) return;
+        try {
+            const newIsLiked = !isLiked;
+            setIsLiked(newIsLiked);
+            setLikeCount(prev => newIsLiked ? prev + 1 : Math.max(0, prev - 1));
+            await toggleLike(post.id);
+        } catch (error) {
+            console.error('Like error:', error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-cream-50 pb-20">
             {/* Header */}
@@ -368,11 +392,15 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
 
                                 {/* Like */}
                                 <button
-                                    onClick={() => toggleLike(post.id)}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 text-stone-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all font-bold"
+                                    onClick={handleLike}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all font-bold ${
+                                        isLiked 
+                                            ? 'border-rose-200 bg-rose-50 text-rose-500' 
+                                            : 'border-stone-200 text-stone-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50'
+                                    }`}
                                 >
-                                    <Heart className="w-5 h-5" />
-                                    <span>{post.likes?.[0]?.count || 0}</span>
+                                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-rose-500' : ''}`} />
+                                    <span>{likeCount}</span>
                                 </button>
 
                                 {/* Edit/Delete (owner only) */}

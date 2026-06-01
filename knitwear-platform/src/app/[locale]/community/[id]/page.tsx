@@ -3,6 +3,9 @@ import { createClient } from '@/utils/supabase/server';
 import { PostDetailClient } from '@/components/community/PostDetailClient';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function PostDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const { locale, id } = await params;
     

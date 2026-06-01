@@ -1,7 +1,7 @@
 
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { addCredits } from './credits';
 import { sendNotification } from './notifications';
@@ -18,7 +18,7 @@ export async function getPosts(locale: string = 'ko') {
             profiles:user_id (id, display_name, email),
             likes:post_likes(count),
             comments:post_comments(count),
-            pattern:pattern_id (id, title, thumbnail_url, images, price_usd, difficulty)
+            pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
         `)
         .order('created_at', { ascending: false });
 
@@ -74,6 +74,7 @@ export async function getPopularPosts(limit: number = 5) {
 // ============================================
 export async function createPost(formData: FormData) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -152,7 +153,7 @@ export async function createPost(formData: FormData) {
             .select('follower_id')
             .eq('following_id', user.id);
         if (followers) {
-            const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
+            const { data: profile } = await adminClient.from('profiles').select('display_name').eq('id', user.id).single();
             const senderName = profile?.display_name || '누군가';
             for (const f of followers) {
                 await sendNotification(f.follower_id, user.id, 'new_post', user.id, `${senderName}님이 새 글을 작성했습니다: "${title}"`);
@@ -160,7 +161,7 @@ export async function createPost(formData: FormData) {
         }
     } catch (e) { /* 알림 실패해도 무시 */ }
 
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -168,6 +169,7 @@ export async function createPost(formData: FormData) {
 // ============================================
 export async function toggleLike(postId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -191,16 +193,16 @@ export async function toggleLike(postId: string) {
 
         // 🔔 게시글 작성자에게 좋아요 알림
         try {
-            const { data: post } = await supabase.from('posts').select('user_id, title').eq('id', postId).single();
+            const { data: post } = await adminClient.from('posts').select('user_id, title').eq('id', postId).single();
             if (post && post.user_id !== user.id) {
-                const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
+                const { data: profile } = await adminClient.from('profiles').select('display_name').eq('id', user.id).single();
                 const senderName = profile?.display_name || '누군가';
                 await sendNotification(post.user_id, user.id, 'like', postId, `${senderName}님이 "${post.title}" 글을 좋아합니다 ♥`);
                 
                 // 인기 게시물 보상 (+50)
-                const { count } = await supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId);
+                const { count } = await adminClient.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId);
                 if (count === 10) {
-                    const { data: existingReward } = await supabase.from('credit_transactions')
+                    const { data: existingReward } = await adminClient.from('credit_transactions')
                         .select('id').eq('user_id', post.user_id).like('description', `%Popular Post%${postId}%`).maybeSingle();
                     
                     if (!existingReward) {
@@ -211,7 +213,7 @@ export async function toggleLike(postId: string) {
         } catch (e) { /* 알림 실패 무시 */ }
     }
 
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -219,6 +221,7 @@ export async function toggleLike(postId: string) {
 // ============================================
 export async function toggleFollow(targetUserId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -248,13 +251,13 @@ export async function toggleFollow(targetUserId: string) {
 
         // 🔔 팔로우 알림
         try {
-            const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
+            const { data: profile } = await adminClient.from('profiles').select('display_name').eq('id', user.id).single();
             const senderName = profile?.display_name || '누군가';
             await sendNotification(targetUserId, user.id, 'follow', user.id, `${senderName}님이 회원님을 팔로우합니다`);
         } catch (e) { /* 알림 실패 무시 */ }
     }
 
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -331,7 +334,7 @@ export async function getPost(postId: string) {
             profiles:user_id (id, display_name, email),
             likes:post_likes(count),
             comments:post_comments(count),
-            pattern:pattern_id (id, title, thumbnail_url, images, price_usd, difficulty)
+            pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
         `)
         .eq('id', postId)
         .single();
@@ -372,6 +375,7 @@ export async function getComments(postId: string) {
 // ============================================
 export async function createComment(postId: string, content: string, parentId?: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -397,18 +401,18 @@ export async function createComment(postId: string, content: string, parentId?: 
 
     // 🔔 댓글/답글 알림
     try {
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
+        const { data: profile } = await adminClient.from('profiles').select('display_name').eq('id', user.id).single();
         const senderName = profile?.display_name || '누군가';
 
         if (parentId) {
             // 답글 → 원댓글 작성자에게 알림
-            const { data: parentComment } = await supabase.from('post_comments').select('user_id').eq('id', parentId).single();
+            const { data: parentComment } = await adminClient.from('post_comments').select('user_id').eq('id', parentId).single();
             if (parentComment && parentComment.user_id !== user.id) {
                 await sendNotification(parentComment.user_id, user.id, 'reply', postId, `${senderName}님이 답글을 달았습니다: "${content.slice(0, 30)}"`);
             }
         } else {
             // 댓글 → 게시글 작성자에게 알림
-            const { data: post } = await supabase.from('posts').select('user_id, title').eq('id', postId).single();
+            const { data: post } = await adminClient.from('posts').select('user_id, title').eq('id', postId).single();
             if (post && post.user_id !== user.id) {
                 await sendNotification(post.user_id, user.id, 'comment', postId, `${senderName}님이 "${post.title}" 글에 댓글을 달았습니다`);
             }
@@ -416,7 +420,7 @@ export async function createComment(postId: string, content: string, parentId?: 
     } catch (e) { /* 알림 실패 무시 */ }
 
     revalidatePath(`/community/${postId}`);
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -424,6 +428,7 @@ export async function createComment(postId: string, content: string, parentId?: 
 // ============================================
 export async function deleteComment(commentId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -449,7 +454,7 @@ export async function deleteComment(commentId: string) {
     if (comment?.post_id) {
         revalidatePath(`/community/${comment.post_id}`);
     }
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -457,6 +462,7 @@ export async function deleteComment(commentId: string) {
 // ============================================
 export async function toggleBookmark(postId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
@@ -468,10 +474,10 @@ export async function toggleBookmark(postId: string) {
         .single();
 
     if (existing) {
-        await supabase.from('post_bookmarks').delete().eq('id', existing.id);
+        await adminClient.from('post_bookmarks').delete().eq('id', existing.id);
         return { bookmarked: false };
     } else {
-        await supabase.from('post_bookmarks').insert({ post_id: postId, user_id: user.id });
+        await adminClient.from('post_bookmarks').insert({ post_id: postId, user_id: user.id });
         return { bookmarked: true };
     }
 }
@@ -571,7 +577,7 @@ export async function searchPosts(query: string, locale: string) {
             profiles:user_id (id, display_name, email),
             likes:post_likes(count),
             comments:post_comments(count),
-            pattern:pattern_id (id, title, thumbnail_url, images, price_usd, difficulty)
+            pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
         `)
         .or(`title.ilike.${searchTerm},content.ilike.${searchTerm}`)
         .order('created_at', { ascending: false })
@@ -590,6 +596,7 @@ export async function searchPosts(query: string, locale: string) {
 // ============================================
 export async function updatePost(postId: string, formData: FormData) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
@@ -618,7 +625,7 @@ export async function updatePost(postId: string, formData: FormData) {
         throw new Error('Failed to update post');
     }
 
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
@@ -626,6 +633,7 @@ export async function updatePost(postId: string, formData: FormData) {
 // ============================================
 export async function deletePost(postId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
@@ -650,32 +658,20 @@ export async function deletePost(postId: string) {
         throw new Error('Failed to delete post');
     }
 
-    revalidatePath('/[locale]/community', 'page');
+    revalidatePath('/', 'layout');
 }
 
 // ============================================
 // 📈 조회수 증가 (RPC 또는 직접 UPDATE 안전장치 포함)
 // ============================================
 export async function incrementPostViews(postId: string) {
-    const supabase = await createClient();
-    
-    // RPC 호출로 조회수를 1 증가시킵니다.
+    const supabase = await createAdminClient();
     const { error } = await supabase.rpc('increment_post_views', { post_id: postId });
-    
-    // 만약 RPC가 아직 등록되지 않은 경우의 Fallback 처리
     if (error) {
-        const { data: post } = await supabase
-            .from('posts')
-            .select('views')
-            .eq('id', postId)
-            .single();
-            
+        const { data: post } = await supabase.from('posts').select('views').eq('id', postId).single();
         if (post) {
-            const currentViews = post.views || 0;
-            await supabase
-                .from('posts')
-                .update({ views: currentViews + 1 })
-                .eq('id', postId);
+            await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
         }
     }
 }
+

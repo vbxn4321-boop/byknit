@@ -65,7 +65,7 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
     };
 
     return (
-        <div className="max-w-md w-full mx-auto p-8 bg-white rounded-2xl shadow-xl border border-stone-100">
+        <div className="max-w-md w-full mx-auto p-6 sm:p-8 bg-white rounded-2xl shadow-xl border border-stone-100">
             <h2 className="text-3xl font-bold mb-8 text-center text-stone-800">
                 {title}
             </h2>
@@ -77,7 +77,7 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
             )}
 
             {error && (
-                <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg text-sm whitespace-nowrap text-center">
+                <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg text-sm break-words text-center">
                     {(() => {
                         if (locale === 'ko') {
                             if (error.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일을 확인해주세요.';

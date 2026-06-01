@@ -60,6 +60,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const [bookmarkSet, setBookmarkSet] = useState<Set<string>>(new Set());
     const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
     const [myStats, setMyStats] = useState({ postCount: 0, likeCount: 0, followerCount: 0 });
+    const [isCreditsExpanded, setIsCreditsExpanded] = useState(false);
 
     // Sync initialPosts to state when it changes
     useEffect(() => {
@@ -129,8 +130,13 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
         }
     };
 
-    const handleLike = async (postId: string) => {
-        if (!user) return;
+    const handleLike = async (e: React.MouseEvent, postId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!user) {
+            alert(locale === 'ko' ? '로그인이 필요합니다.' : 'Login required.');
+            return;
+        }
         try {
             const isLiking = !likedSet.has(postId);
             
@@ -231,6 +237,73 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                 <div className="grid lg:grid-cols-[1fr_320px] gap-6">
                     {/* ===== Main: Board-style List ===== */}
                     <div className="min-w-0">
+                        {/* Mobile Credit Reward Guide */}
+                        <div className="lg:hidden mb-6">
+                            <div id="credit-rewards-mobile" className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden transition-all duration-300 shadow-soft">
+                                <div className="relative z-10 text-left">
+                                    <div 
+                                        onClick={() => setIsCreditsExpanded(!isCreditsExpanded)}
+                                        className="flex items-center justify-between mb-3 cursor-pointer group/title select-none"
+                                    >
+                                        <h3 className="font-black text-sm flex items-center gap-2 group-hover/title:text-amber-300 transition-colors">
+                                            <Coins className="w-4 h-4 text-amber-400 animate-pulse" /> {t('sidebar.coinRewardInfo', { defaultValue: locale === 'ko' ? '크레딧 보상 안내' : 'Credit Rewards' })}
+                                        </h3>
+                                        <button 
+                                            type="button"
+                                            className="text-stone-400 group-hover/title:text-white transition-all p-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-90"
+                                            aria-label={isCreditsExpanded ? (locale === 'ko' ? '접기' : 'Collapse') : (locale === 'ko' ? '펼치기' : 'Expand')}
+                                        >
+                                            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCreditsExpanded ? 'rotate-90 text-amber-300' : ''}`} />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2 text-xs text-stone-300">
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                            <span>{locale === 'ko' ? '가입 축하 적립' : 'Sign Up Bonus'}</span>
+                                            <span className="font-black text-amber-400">+1000</span>
+                                        </div>
+                                        
+                                        {isCreditsExpanded && (
+                                            <>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '추천인 가입자 보너스' : 'Referral Bonus'}</span>
+                                                    <span className="font-black text-amber-400">+100</span>
+                                                </div>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '마켓플레이스 도안 다운로드' : 'Marketplace Download'}</span>
+                                                    <span className="font-black text-amber-400">+10</span>
+                                                </div>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '마켓플레이스 도안 좋아요' : 'Marketplace Like'}</span>
+                                                    <span className="font-black text-amber-400">+1</span>
+                                                </div>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '커뮤니티 인기게시물 선정' : 'Popular Community Post'}</span>
+                                                    <span className="font-black text-amber-400">+50</span>
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                            <span>{locale === 'ko' ? '도안 업로드 보너스' : 'Pattern Upload Bonus'}</span>
+                                            <span className="font-black text-amber-400">+100</span>
+                                        </div>
+                                        {isCreditsExpanded && (
+                                            <>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '차트변환기 파일 내보내기' : 'Chart Export'}</span>
+                                                    <span className="font-black text-rose-400">-50</span>
+                                                </div>
+                                                <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    <span>{locale === 'ko' ? '도안에디터 파일 내보내기' : 'Editor Export'}</span>
+                                                    <span className="font-black text-rose-400">-50</span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
+                            </div>
+                        </div>
+
                         {/* 검색바 */}
                         <div className="mb-4 flex gap-2">
                             <div className="relative flex-1">
@@ -342,7 +415,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             </div>
                                             <div className="flex items-center justify-between mt-1">
                                                 <div className="flex items-center gap-4">
-                                                    <button onClick={() => handleLike(post.id)} className={`flex items-center gap-1.5 transition-colors ${likedSet.has(post.id) ? 'text-rose-500' : 'text-stone-400 hover:text-rose-500'}`}>
+                                                    <button onClick={(e) => handleLike(e, post.id)} className={`flex items-center gap-1.5 transition-colors ${likedSet.has(post.id) ? 'text-rose-500' : 'text-stone-400 hover:text-rose-500'}`}>
                                                         <Heart className={`w-3.5 h-3.5 ${likedSet.has(post.id) ? 'fill-rose-500' : ''}`} />
                                                         <span className="text-[11px] font-bold">{post.likes?.[0]?.count || 0}</span>
                                                     </button>
@@ -468,7 +541,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                         {/* Likes */}
                                         <div className="flex justify-center">
                                             <button 
-                                                onClick={() => handleLike(post.id)}
+                                                onClick={(e) => handleLike(e, post.id)}
                                                 className={`flex items-center gap-1 transition-colors ${
                                                     likedSet.has(post.id) ? 'text-rose-500' : 'text-stone-400 hover:text-rose-500'
                                                 }`}
@@ -550,6 +623,71 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
 
                     {/* ===== Sidebar ===== */}
                     <div className="space-y-5">
+                        {/* Desktop Credit Reward Guide */}
+                        <div className="hidden lg:block bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-5 text-white relative overflow-hidden transition-all duration-300 shadow-soft">
+                            <div className="relative z-10 text-left">
+                                <div 
+                                    onClick={() => setIsCreditsExpanded(!isCreditsExpanded)}
+                                    className="flex items-center justify-between mb-3 cursor-pointer group/title select-none"
+                                >
+                                    <h3 className="font-black text-sm flex items-center gap-2 group-hover/title:text-amber-300 transition-colors">
+                                        <Coins className="w-4 h-4 text-amber-400 animate-pulse" /> {t('sidebar.coinRewardInfo', { defaultValue: locale === 'ko' ? '크레딧 보상 안내' : 'Credit Rewards' })}
+                                    </h3>
+                                    <button 
+                                        type="button"
+                                        className="text-stone-400 group-hover/title:text-white transition-all p-1 rounded-lg bg-white/5 hover:bg-white/10 active:scale-90"
+                                        aria-label={isCreditsExpanded ? (locale === 'ko' ? '접기' : 'Collapse') : (locale === 'ko' ? '펼치기' : 'Expand')}
+                                    >
+                                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCreditsExpanded ? 'rotate-90 text-amber-300' : ''}`} />
+                                    </button>
+                                </div>
+                                <div className="space-y-2 text-xs text-stone-300">
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{locale === 'ko' ? '가입 축하 적립' : 'Sign Up Bonus'}</span>
+                                        <span className="font-black text-amber-400">+1000</span>
+                                    </div>
+                                    
+                                    {isCreditsExpanded && (
+                                        <>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '추천인 가입자 보너스' : 'Referral Bonus'}</span>
+                                                <span className="font-black text-amber-400">+100</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '마켓플레이스 도안 다운로드' : 'Marketplace Download'}</span>
+                                                <span className="font-black text-amber-400">+10</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '마켓플레이스 도안 좋아요' : 'Marketplace Like'}</span>
+                                                <span className="font-black text-amber-400">+1</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '커뮤니티 인기게시물 선정' : 'Popular Community Post'}</span>
+                                                <span className="font-black text-amber-400">+50</span>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors">
+                                        <span>{locale === 'ko' ? '도안 업로드 보너스' : 'Pattern Upload Bonus'}</span>
+                                        <span className="font-black text-amber-400">+100</span>
+                                    </div>
+                                    {isCreditsExpanded && (
+                                        <>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '차트변환기 파일 내보내기' : 'Chart Export'}</span>
+                                                <span className="font-black text-rose-400">-50</span>
+                                            </div>
+                                            <div className="flex items-center justify-between bg-white/5 rounded-lg p-2.5 hover:bg-white/10 transition-colors animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <span>{locale === 'ko' ? '도안에디터 파일 내보내기' : 'Editor Export'}</span>
+                                                <span className="font-black text-rose-400">-50</span>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
+                        </div>
+
                         {/* 인기 게시글 (언어 통합) */}
                         {popularPosts.length > 0 && (
                             <div className="bg-white rounded-2xl border border-tan-200 shadow-soft p-5">

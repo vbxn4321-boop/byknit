@@ -3,6 +3,9 @@ import { getPosts, getPopularPosts } from '@/app/actions/community';
 import { CommunityClient } from '@/components/community/CommunityClient';
 import { createClient } from '@/utils/supabase/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function CommunityPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const [posts, popularPosts] = await Promise.all([
