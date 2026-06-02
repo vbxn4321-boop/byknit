@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Grid, Image as ImageIcon, Calculator, Languages, ArrowRight } from 'lucide-react';
@@ -24,6 +24,19 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
         { id: 'converter', label: tTut('tabs.converter'), icon: ImageIcon },
         { id: 'calculator', label: tTut('tabs.calculator'), icon: Calculator },
     ];
+
+    // 자동 재생 로직 추가
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTab((currentTab) => {
+                const currentIndex = tabs.findIndex(t => t.id === currentTab);
+                const nextIndex = (currentIndex + 1) % tabs.length;
+                return tabs[nextIndex].id;
+            });
+        }, 4000); // 4초마다 자동 전환
+
+        return () => clearInterval(interval);
+    }, [tabs]);
 
     const content = {
         editor: {
