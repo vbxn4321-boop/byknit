@@ -1,6 +1,6 @@
 
 import { AuthForm } from '@/components/auth/AuthForm';
-import { signup } from '@/app/actions/auth';
+import { sendSignupOtp } from '@/app/actions/auth';
 
 export default async function SignupPage({
     searchParams,
@@ -13,7 +13,7 @@ export default async function SignupPage({
         <div className="min-h-[80vh] flex items-center justify-center bg-[#FDFBF7]">
             <AuthForm
                 type="signup"
-                action={signup}
+                action={sendSignupOtp}
                 message={message}
                 error={error}
             />

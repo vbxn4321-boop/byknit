@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/utils/supabase/client';
+import { verifySignupOtp } from '@/app/actions/auth';
 
 const SAVED_EMAIL_KEY = 'byknit_saved_email';
 const REMEMBER_EMAIL_KEY = 'byknit_remember_email';
 
 interface AuthFormProps {
     type: 'login' | 'signup';
-    action: (formData: FormData) => Promise<void>;
+    action: (formData: FormData) => Promise<any>;
     message?: string;
     error?: string;
 }
@@ -23,6 +24,12 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
     const [savedEmail, setSavedEmail] = useState('');
     const emailInputRef = useRef<HTMLInputElement>(null);
 
+    // OTP and Form State
+    const [step, setStep] = useState<'form' | 'otp'>('form');
+    const [formDataObj, setFormDataObj] = useState<Record<string, string>>({});
+    const [formError, setFormError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         if (type === 'login') {
             const remembered = localStorage.getItem(REMEMBER_EMAIL_KEY) === 'true';
@@ -35,6 +42,9 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
     }, [type]);
 
     const handleFormAction = async (formData: FormData) => {
+        setIsLoading(true);
+        setFormError(null);
+
         if (type === 'login') {
             const email = formData.get('email') as string;
             if (rememberEmail && email) {
@@ -44,8 +54,47 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                 localStorage.removeItem(SAVED_EMAIL_KEY);
                 localStorage.removeItem(REMEMBER_EMAIL_KEY);
             }
+            await action(formData);
+            setIsLoading(false);
+            return;
         }
-        await action(formData);
+
+        if (type === 'signup' && step === 'form') {
+            const result = await action(formData);
+            setIsLoading(false);
+            
+            if (result?.error) {
+                setFormError(result.error);
+                return;
+            }
+            
+            if (result?.success) {
+                const entries = Object.fromEntries(formData);
+                const stringEntries: Record<string, string> = {};
+                for (const [k, v] of Object.entries(entries)) {
+                    if (typeof v === 'string') stringEntries[k] = v;
+                }
+                setFormDataObj(stringEntries);
+                setStep('otp');
+            }
+        }
+    };
+
+    const handleOtpAction = async (formData: FormData) => {
+        setIsLoading(true);
+        setFormError(null);
+        
+        const result = await verifySignupOtp(formData);
+        
+        if (result?.error) {
+            setFormError(result.error);
+            setIsLoading(false);
+            return;
+        }
+        
+        if (result?.success) {
+            window.location.href = '/';
+        }
     };
 
     // Fallback translations if not loaded yet (for speed)
@@ -76,18 +125,64 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                 </div>
             )}
 
-            {error && (
+            {(error || formError) && (
                 <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg text-sm break-words text-center">
                     {(() => {
+                        const currentError = formError || error;
+                        if (!currentError) return null;
+                        
                         if (locale === 'ko') {
-                            if (error.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일을 확인해주세요.';
-                            if (error.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
-                            if (error.includes('User already registered')) return '이미 가입된 사용자입니다.';
+                            if (currentError.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일을 확인해주세요.';
+                            if (currentError.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
+                            if (currentError.includes('User already registered')) return '이미 가입된 사용자입니다.';
                         }
-                        return error;
+                        return currentError;
                     })()}
                 </div>
             )}
+
+            {step === 'otp' ? (
+                <form action={handleOtpAction} className="space-y-6">
+                    {Object.entries(formDataObj).map(([key, value]) => (
+                        <input type="hidden" key={key} name={key} value={value} />
+                    ))}
+                    <div className="text-center mb-6">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-50 mb-4">
+                            <span className="text-2xl">✉️</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-stone-800 mb-2">인증번호를 입력해주세요</h3>
+                        <p className="text-sm text-stone-500">
+                            <span className="font-medium text-rose-500">{formDataObj.email}</span>(으)로<br />
+                            6자리 인증번호를 발송했습니다.
+                        </p>
+                    </div>
+                    <div>
+                        <input
+                            name="otp_code"
+                            type="text"
+                            required
+                            maxLength={6}
+                            className="w-full px-4 py-4 text-center text-2xl tracking-[0.5em] font-mono rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
+                            placeholder="000000"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-4 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center"
+                    >
+                        {isLoading ? '확인 중...' : '인증 완료'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setStep('form')}
+                        className="w-full py-3 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+                    >
+                        이메일 주소 다시 입력하기
+                    </button>
+                </form>
+            ) : (
+                <>
 
             <button
                 type="button"
@@ -291,11 +386,14 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
 
                 <button
                     type="submit"
-                    className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95"
+                    disabled={isLoading}
+                    className="w-full py-4 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center"
                 >
-                    {btnText}
+                    {isLoading ? (type === 'login' ? '로그인 중...' : '처리 중...') : btnText}
                 </button>
             </form>
+            </>
+            )}
 
             <div className="mt-6 text-center">
                 <a href={altLinkHref} className="text-stone-500 hover:text-rose-500 text-sm font-medium transition-colors">
