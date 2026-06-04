@@ -665,13 +665,17 @@ export async function deletePost(postId: string) {
 // 📈 조회수 증가 (RPC 또는 직접 UPDATE 안전장치 포함)
 // ============================================
 export async function incrementPostViews(postId: string) {
-    const supabase = await createAdminClient();
-    const { error } = await supabase.rpc('increment_post_views', { post_id: postId });
-    if (error) {
-        const { data: post } = await supabase.from('posts').select('views').eq('id', postId).single();
-        if (post) {
-            await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
+    try {
+        const supabase = await createAdminClient();
+        const { error } = await supabase.rpc('increment_post_views', { post_id: postId });
+        if (error) {
+            const { data: post } = await supabase.from('posts').select('views').eq('id', postId).single();
+            if (post) {
+                await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
+            }
         }
+    } catch (e) {
+        console.error('Error incrementing post views:', e);
     }
 }
 
