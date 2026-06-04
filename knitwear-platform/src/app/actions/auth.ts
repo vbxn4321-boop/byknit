@@ -198,7 +198,7 @@ export async function verifySignupOtp(formData: FormData) {
                 user_id: referrerData.id,
                 amount: 100,
                 type: 'earning',
-                description: \`Referral Bonus (referred \${username})\`
+                description: `Referral Bonus (referred ${username})`
             });
 
             await adminClient.from('credit_transactions').insert({
