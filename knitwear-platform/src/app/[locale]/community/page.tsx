@@ -1,5 +1,5 @@
 
-import { getPosts, getPopularPosts } from '@/app/actions/community';
+import { getPosts, getPopularPosts } from '@/utils/community-queries';
 import { CommunityClient } from '@/components/community/CommunityClient';
 import { createClient } from '@/utils/supabase/server';
 

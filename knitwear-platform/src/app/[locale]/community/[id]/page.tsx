@@ -1,4 +1,4 @@
-import { getPost, getComments, incrementPostViews } from '@/app/actions/community';
+import { getPost, getComments, incrementPostViews } from '@/utils/community-queries';
 import { createClient } from '@/utils/supabase/server';
 import { PostDetailClient } from '@/components/community/PostDetailClient';
 import { notFound } from 'next/navigation';
