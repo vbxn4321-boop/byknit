@@ -27,7 +27,6 @@ export default function TutorialsPage() {
         { id: 'editor', label: t('tabs.editor'), icon: Grid },
         { id: 'converter', label: t('tabs.converter'), icon: ImageIcon },
         { id: 'calculator', label: t('tabs.calculator'), icon: Calculator },
-        { id: 'translator', label: t('tabs.translator'), icon: Languages },
     ];
 
     const content = {
@@ -115,10 +114,8 @@ export default function TutorialsPage() {
                             <VectorEditorDemo locale="ko" />
                         ) : activeTab === 'converter' ? (
                             <VectorConverterDemo locale="ko" />
-                        ) : activeTab === 'calculator' ? (
-                            <VectorCalculatorDemo locale="ko" />
                         ) : (
-                            <VectorTranslatorDemo locale="ko" />
+                            <VectorCalculatorDemo locale="ko" />
                         )}
                     </div>
 

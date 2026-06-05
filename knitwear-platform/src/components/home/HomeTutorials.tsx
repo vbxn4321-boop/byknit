@@ -25,19 +25,6 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
         { id: 'calculator', label: tTut('tabs.calculator'), icon: Calculator },
     ];
 
-    // 자동 재생 로직 추가
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setActiveTab((currentTab) => {
-                const currentIndex = tabs.findIndex(t => t.id === currentTab);
-                const nextIndex = (currentIndex + 1) % tabs.length;
-                return tabs[nextIndex].id;
-            });
-        }, 4000); // 4초마다 자동 전환
-
-        return () => clearInterval(interval);
-    }, [tabs]);
-
     const content = {
         editor: {
             title: tTut('editor.title'),
@@ -119,13 +106,11 @@ export default function HomeTutorials({ locale }: HomeTutorialsProps) {
                     </div>
 
                     {/* Right Column: Interactive Demo Visualization */}
-                    <div className="bg-gradient-to-br from-cream-100 to-rose-50 rounded-3xl p-3 sm:p-6 md:p-10 shadow-inner flex flex-col items-center justify-between h-[540px] sm:h-[600px] lg:h-auto lg:min-h-[600px] border border-tan-100 lg:col-span-3 overflow-hidden w-full">
-                        <div className="w-full transition-opacity duration-500 flex-grow flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
-                            <div className="min-w-[340px] sm:min-w-0 w-full max-w-xl mx-auto flex items-center justify-center">
-                                {activeTab === 'editor' && <VectorEditorDemo locale={locale} />}
-                                {activeTab === 'converter' && <VectorConverterDemo locale={locale} />}
-                                {activeTab === 'calculator' && <VectorCalculatorDemo locale={locale} />}
-                            </div>
+                    <div className="bg-gradient-to-br from-cream-100 to-rose-50 rounded-3xl p-6 md:p-10 shadow-inner flex flex-col items-center justify-between min-h-[500px] border border-tan-100 lg:col-span-3 h-full">
+                        <div className="w-full max-w-xl transition-opacity duration-500 flex-grow flex items-center justify-center">
+                            {activeTab === 'editor' && <VectorEditorDemo locale={locale} />}
+                            {activeTab === 'converter' && <VectorConverterDemo locale={locale} />}
+                            {activeTab === 'calculator' && <VectorCalculatorDemo locale={locale} />}
                         </div>
                         
                         {/* Tabs Navigation */}
