@@ -50,9 +50,13 @@ export function Header({ locale, user }: HeaderProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link
-                        href="/"
-                        className="flex items-center gap-1.5 group"
+                    <a
+                        href={`/${locale}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.location.href = `/${locale}`;
+                        }}
+                        className="flex items-center gap-1.5 group cursor-pointer"
                     >
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-300 to-peach-200 flex items-center justify-center group-hover:scale-110 transition-transform shadow-soft">
                             <Heart className="w-5 h-5 text-white fill-white" />
@@ -60,7 +64,7 @@ export function Header({ locale, user }: HeaderProps) {
                         <span className="text-xl font-bold text-brown-700 tracking-tight">
                             {tCommon('appName')}
                         </span>
-                    </Link>
+                    </a>
 
                     {/* Navigation - Natural Flow (Equal Gap) */}
                     <nav className="hidden md:flex items-center gap-1">
