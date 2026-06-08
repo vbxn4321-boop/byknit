@@ -319,6 +319,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     // Viewport
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
+
+    const scaleRef = useRef(scale);
+    const positionRef = useRef(position);
+    const gridSizeRef = useRef(gridSize);
+    const gridDataRef = useRef(gridData);
+
+    useEffect(() => { scaleRef.current = scale; }, [scale]);
+    useEffect(() => { positionRef.current = position; }, [position]);
+    useEffect(() => { gridSizeRef.current = gridSize; }, [gridSize]);
+    useEffect(() => { gridDataRef.current = gridData; }, [gridData]);
+    const [isDemoRunning, setIsDemoRunning] = useState(false);
+    const [demoCursorPos, setDemoCursorPos] = useState({ x: -100, y: -100 });
     const stageRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const lastDistRef = useRef<number>(0);
@@ -351,6 +363,12 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     // UI State
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            setIsSidebarOpen(false);
+        }
+    }, []);
 
     // Sync project title to publish metadata when modal opens
     useEffect(() => {
@@ -402,8 +420,20 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     // Disable body scroll when editor is mounted
     useEffect(() => {
         document.body.style.overflow = 'hidden';
+        
+        // Prevent iOS rubber-banding entirely for the editor
+        const preventTouchMove = (e: TouchEvent) => {
+            // Allow touch move for scrollable areas (like modals) if needed, 
+            // but block it for the main body/canvas
+            if (e.target instanceof Element && !e.target.closest('.overflow-y-auto') && !e.target.closest('canvas')) {
+                e.preventDefault();
+            }
+        };
+        document.addEventListener('touchmove', preventTouchMove, { passive: false });
+
         return () => {
             document.body.style.overflow = '';
+            document.removeEventListener('touchmove', preventTouchMove);
         };
     }, []);
 
@@ -1912,6 +1942,605 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         };
     };
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window as any).injectDemoPattern = () => {
+                const newGrid = Array(gridSize.rows).fill(null).map(() => Array(gridSize.cols).fill(null).map(() => ({ color: '#ffffff', symbolId: null as string | null })));
+                setGridData(newGrid);
+            };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window as any).startInstagramDemo = startInstagramDemo;
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (window as any).startPerfectDemo = () => {
+                (window as any).isDemoActive = true;
+                
+                // Remove any old overlay and custom cursor if they exist
+                const oldOverlay = document.getElementById('demo-overlay-canvas');
+                if (oldOverlay) oldOverlay.remove();
+                const oldCursor = document.getElementById('demo-fake-cursor');
+                if (oldCursor) oldCursor.remove();
+                const oldSubtitle = document.getElementById('demo-subtitle');
+                if (oldSubtitle) oldSubtitle.remove();
+
+                const container = document.querySelector('.konvajs-content') as HTMLElement;
+                if (!container) return;
+
+                // Set palette colors to brown, pink, gray, cream, sage
+                setCustomColors(['#8B5A2B', '#F3A3B0', '#4A4A4A', '#FDF6EC', '#A4C3B2']);
+
+                // Create overlay canvas
+                const overlayCanvas = document.createElement('canvas');
+                overlayCanvas.id = 'demo-overlay-canvas';
+                overlayCanvas.style.position = 'absolute';
+                overlayCanvas.style.top = '0';
+                overlayCanvas.style.left = '0';
+                overlayCanvas.style.pointerEvents = 'none';
+                overlayCanvas.style.zIndex = '999';
+                
+                // Setup canvas sizing with DPR support
+                const dpr = window.devicePixelRatio || 1;
+                overlayCanvas.width = container.clientWidth * dpr;
+                overlayCanvas.height = container.clientHeight * dpr;
+                overlayCanvas.style.width = container.clientWidth + 'px';
+                overlayCanvas.style.height = container.clientHeight + 'px';
+                container.appendChild(overlayCanvas);
+                
+                const ctx = overlayCanvas.getContext('2d');
+                if (ctx) {
+                    ctx.scale(dpr, dpr);
+                }
+
+                // Subtitle UI
+                const subtitle = document.createElement('div');
+                subtitle.id = 'demo-subtitle';
+                subtitle.style.position = 'fixed';
+                subtitle.style.bottom = '40px';
+                subtitle.style.left = '50%';
+                subtitle.style.transform = 'translateX(-50%)';
+                subtitle.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
+                subtitle.style.color = 'white';
+                subtitle.style.padding = '16px 32px';
+                subtitle.style.borderRadius = '32px';
+                subtitle.style.fontSize = '32px';
+                subtitle.style.fontWeight = 'bold';
+                subtitle.style.zIndex = '99999';
+                subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+                subtitle.innerText = "원하는 도구와 색상을 선택하세요";
+                document.body.appendChild(subtitle);
+
+                // Fake Cursor
+                const cursor = document.createElement('div');
+                cursor.id = 'demo-fake-cursor';
+                cursor.style.position = 'fixed';
+                cursor.style.width = '36px';
+                cursor.style.height = '36px';
+                cursor.style.zIndex = '100000';
+                cursor.style.pointerEvents = 'none';
+                cursor.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.04c.45 0 .67-.54.35-.85L5.85 3.21a.5.5 0 0 0-.35-.15.5.5 0 0 0-.5.5z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>`;
+                document.body.appendChild(cursor);
+
+                // Position cursor in center initially
+                const startX = window.innerWidth / 2;
+                const startY = window.innerHeight / 2;
+                cursor.style.left = startX + 'px';
+                cursor.style.top = startY + 'px';
+
+                const moveCursor = (x: number, y: number, duration: number = 150) => {
+                    return new Promise<void>(resolve => {
+                        cursor.style.transition = `left ${duration}ms linear, top ${duration}ms linear`;
+                        cursor.style.left = x + 'px';
+                        cursor.style.top = y + 'px';
+                        setTimeout(resolve, duration);
+                    });
+                };
+
+                const clickCursor = () => {
+                    return new Promise<void>(resolve => {
+                        cursor.style.transform = 'scale(0.8)';
+                        
+                        // Create visual ripple animation
+                        const ripple = document.createElement('div');
+                        ripple.style.position = 'fixed';
+                        ripple.style.left = cursor.style.left;
+                        ripple.style.top = cursor.style.top;
+                        ripple.style.width = '40px';
+                        ripple.style.height = '40px';
+                        ripple.style.marginLeft = '-20px';
+                        ripple.style.marginTop = '-20px';
+                        ripple.style.borderRadius = '50%';
+                        ripple.style.backgroundColor = 'rgba(139, 90, 43, 0.3)';
+                        ripple.style.border = '2px solid rgba(139, 90, 43, 0.7)';
+                        ripple.style.zIndex = '100001';
+                        ripple.style.pointerEvents = 'none';
+                        ripple.style.transition = 'transform 250ms cubic-bezier(0.1, 0.8, 0.3, 1), opacity 250ms ease-out';
+                        ripple.style.transform = 'scale(0.1)';
+                        document.body.appendChild(ripple);
+                        
+                        // Force reflow
+                        ripple.offsetHeight;
+                        
+                        // Animate ripple out
+                        ripple.style.transform = 'scale(2)';
+                        ripple.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 250);
+
+                        setTimeout(() => {
+                            cursor.style.transform = 'scale(1)';
+                            setTimeout(resolve, 100);
+                        }, 100);
+                    });
+                };
+
+                const drawOverlayGridExtras = () => {
+                    if (!ctx) return;
+                    const scale = scaleRef.current;
+                    const pos = positionRef.current;
+                    const rows = gridSizeRef.current.rows;
+                    const cols = gridSizeRef.current.cols;
+                    const cellSize = 30 * scale;
+                    const totalWidth = cols * cellSize;
+                    const totalHeight = rows * cellSize;
+
+                    // 1. Draw 5-unit vertical lines
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 1.5 * scale;
+                    for (let c = 5; c < cols; c += 5) {
+                        ctx.beginPath();
+                        ctx.moveTo(pos.x + c * cellSize, pos.y);
+                        ctx.lineTo(pos.x + c * cellSize, pos.y + totalHeight);
+                        ctx.stroke();
+                    }
+
+                    // 2. Draw 5-unit horizontal lines
+                    for (let r = 5; r < rows; r += 5) {
+                        ctx.beginPath();
+                        ctx.moveTo(pos.x, pos.y + r * cellSize);
+                        ctx.lineTo(pos.x + totalWidth, pos.y + r * cellSize);
+                        ctx.stroke();
+                    }
+
+                    // 3. Draw outer border
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2 * scale;
+                    ctx.strokeRect(pos.x, pos.y, totalWidth, totalHeight);
+                };
+
+                const drawOverlaySymbol = (cellX: number, cellY: number, cellSize: number, symbolId: string) => {
+                    if (!ctx) return;
+                    ctx.strokeStyle = '#333333';
+                    ctx.fillStyle = '#333333';
+                    ctx.lineWidth = 1.5 * scaleRef.current;
+                    
+                    if (symbolId === 'knit') {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX + cellSize / 2, cellY + cellSize * 0.2);
+                        ctx.lineTo(cellX + cellSize / 2, cellY + cellSize * 0.8);
+                        ctx.stroke();
+                    } else if (symbolId === 'purl') {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX + cellSize * 0.2, cellY + cellSize / 2);
+                        ctx.lineTo(cellX + cellSize * 0.8, cellY + cellSize / 2);
+                        ctx.stroke();
+                    } else if (symbolId === 'yo') {
+                        ctx.beginPath();
+                        ctx.arc(cellX + cellSize / 2, cellY + cellSize / 2, cellSize * 0.3, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    } else if (symbolId === 'cable') {
+                        ctx.beginPath();
+                        ctx.moveTo(cellX + cellSize * 0.2, cellY + cellSize * 0.2);
+                        ctx.lineTo(cellX + cellSize * 0.8, cellY + cellSize * 0.8);
+                        ctx.moveTo(cellX + cellSize * 0.8, cellY + cellSize * 0.2);
+                        ctx.lineTo(cellX + cellSize * 0.2, cellY + cellSize * 0.8);
+                        ctx.stroke();
+                    } else if (symbolId === 'tbl') {
+                        ctx.font = `bold ${cellSize * 0.7}px system-ui, -apple-system, sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('Ω', cellX + cellSize / 2, cellY + cellSize / 2 + 1);
+                    }
+                };
+
+                const drawOverlayCell = (r: number, c: number, color: string, symbolId: string) => {
+                    if (!ctx) return;
+                    const scale = scaleRef.current;
+                    const pos = positionRef.current;
+                    const cellSize = 30 * scale;
+
+                    const cellX = pos.x + c * cellSize;
+                    const cellY = pos.y + r * cellSize;
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(cellX, cellY, cellSize, cellSize);
+
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(cellX, cellY, cellSize, cellSize);
+
+                    if (symbolId) {
+                        drawOverlaySymbol(cellX, cellY, cellSize, symbolId);
+                    }
+                    
+                    // Draw outer border and 5-unit grid lines on top of drawn cell
+                    drawOverlayGridExtras();
+                };
+
+                const sortZigZag = (cells: {r: number, c: number}[]) => {
+                    return [...cells].sort((a, b) => {
+                        if (a.r !== b.r) return a.r - b.r;
+                        return (a.r % 2 === 0) ? (a.c - b.c) : (b.c - a.c);
+                    });
+                };
+
+                // Run Demo Sequence
+                setTimeout(async () => {
+                    // 0. Select Paint tool
+                    const paintBtn = document.querySelector('button[title*="그리기"], button[title*="Paint"], button[title*="paint"]') as HTMLElement;
+                    if (paintBtn) {
+                        const btnRect = paintBtn.getBoundingClientRect();
+                        await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 400);
+                        await clickCursor();
+                        paintBtn.click();
+                    } else {
+                        setActiveTool('paint');
+                    }
+
+                    // 0.5. Select Simultaneous Draw (Dual Mode) button in the toolbar
+                    const activateSimultaneousDraw = async () => {
+                        const btn = Array.from(document.querySelectorAll('button')).find(b => 
+                            b.title && (b.title.includes('동시') || b.title.includes('Simultaneous'))
+                        ) as HTMLElement;
+                        if (btn) {
+                            const isActive = btn.classList.contains('bg-sage-600') || btn.className.includes('bg-sage-600');
+                            if (isActive) {
+                                // Already active, just move cursor there and do click animation
+                                const btnRect = btn.getBoundingClientRect();
+                                await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 300);
+                                await clickCursor();
+                            } else {
+                                // Inactive, click to activate
+                                const btnRect = btn.getBoundingClientRect();
+                                await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 300);
+                                await clickCursor();
+                                btn.click();
+                            }
+                        } else {
+                            setIsSimultaneousDraw(true);
+                        }
+                    };
+
+                    await activateSimultaneousDraw();
+
+                    // 1. Select Color helper
+                    const selectColor = async (hexColor: string) => {
+                        const btns = Array.from(document.querySelectorAll('button'));
+                        const btn = btns.find(b => {
+                            const bg = b.style.backgroundColor;
+                            if (!bg) return false;
+                            if (hexColor === '#8B5A2B' && (bg.includes('rgb(139, 90, 43)') || bg.includes('#8b5a2b'))) return true;
+                            if (hexColor === '#F3A3B0' && (bg.includes('rgb(243, 163, 176)') || bg.includes('#f3a3b0'))) return true;
+                            if (hexColor === '#4A4A4A' && (bg.includes('rgb(74, 74, 74)') || bg.includes('#4a4a4a'))) return true;
+                            if (hexColor === '#FDF6EC' && (bg.includes('rgb(253, 246, 236)') || bg.includes('#fdf6ec'))) return true;
+                            return false;
+                        }) as HTMLElement;
+
+                        if (btn) {
+                            const btnRect = btn.getBoundingClientRect();
+                            await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 300);
+                            await clickCursor();
+                            btn.click();
+                        } else {
+                            setSelectedColor(hexColor);
+                        }
+                    };
+
+                    // 1.5. Select Symbol helper
+                    const selectSymbol = async (symbolId: string) => {
+                        const labels = {
+                            'knit': '|',
+                            'purl': '-',
+                            'yo': '○',
+                            'cable': 'X',
+                            'tbl': 'Ω'
+                        } as Record<string, string>;
+                        const targetLabel = labels[symbolId];
+                        if (!targetLabel) return;
+
+                        const btns = Array.from(document.querySelectorAll('button'));
+                        const btn = btns.find(b => {
+                            const text = (b.textContent || '').trim();
+                            return text === targetLabel;
+                        }) as HTMLElement;
+
+                        if (btn) {
+                            const btnRect = btn.getBoundingClientRect();
+                            await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 300);
+                            await clickCursor();
+                            btn.click();
+                        } else {
+                            setSelectedSymbol(symbolId);
+                        }
+                    };
+
+                    await selectColor('#8B5A2B');
+                    await selectSymbol('knit');
+
+                    subtitle.innerText = "곰돌이 패턴도 뚝딱! 나만의 디자인 완성";
+
+                    // Bear Pattern Mapping
+                    const bearPattern = [
+                        "  BBB         BBB  ", // Row 0
+                        " BBBBB       BBBBB ", // Row 1
+                        " BPPPB       BPPPB ", // Row 2
+                        " BBBBBBBBBBBBBBBBB ", // Row 3
+                        " BBBBKBBBBBBBKBBBB ", // Row 4 (Eyes K)
+                        " BBBBBBBBBBBBBBBBB ", // Row 5
+                        "BBBBBBBWWNWWBBBBBBB", // Row 6 (Muzzle top & Nose N)
+                        "BBBBBBWWNWNWWBBBBBB", // Row 7 (Muzzle mid & Mouth N)
+                        "BBBBBBBWWWWWBBBBBBB", // Row 8 (Muzzle bottom)
+                        "  BBBBBBBBBBBBBBB  "  // Row 9 (Chin)
+                    ];
+
+                    const startR = Math.max(0, Math.floor(gridSizeRef.current.rows / 2) - 5);
+                    const startC = Math.max(0, Math.floor(gridSizeRef.current.cols / 2) - 9);
+
+                    const brownCells: {r: number, c: number}[] = [];
+                    const pinkCells: {r: number, c: number}[] = [];
+                    const creamCells: {r: number, c: number}[] = [];
+                    const eyeCells: {r: number, c: number}[] = [];
+                    const noseCells: {r: number, c: number}[] = [];
+
+                    for (let r = 0; r < bearPattern.length; r++) {
+                        for (let c = 0; c < bearPattern[r].length; c++) {
+                            const char = bearPattern[r][c];
+                            if (char === 'B') brownCells.push({ r: startR + r, c: startC + c });
+                            else if (char === 'P') pinkCells.push({ r: startR + r, c: startC + c });
+                            else if (char === 'W') creamCells.push({ r: startR + r, c: startC + c });
+                            else if (char === 'K') eyeCells.push({ r: startR + r, c: startC + c });
+                            else if (char === 'N') noseCells.push({ r: startR + r, c: startC + c });
+                        }
+                    }
+
+                    const sortedBrown = sortZigZag(brownCells);
+                    const sortedPink = sortZigZag(pinkCells);
+                    const sortedCream = sortZigZag(creamCells);
+                    const sortedEyes = sortZigZag(eyeCells);
+                    const sortedNose = sortZigZag(noseCells);
+
+                    // Draw Brown Head (2.1s to 7.0s -> ~4.9s)
+                    const brownStepTime = Math.floor(4900 / sortedBrown.length); 
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    for (let i = 0; i < sortedBrown.length; i++) {
+                        const cell = sortedBrown[i];
+                        const scale = scaleRef.current;
+                        const pos = positionRef.current;
+                        const cellSize = 30 * scale;
+
+                        const screenX = containerRect.left + pos.x + cell.c * cellSize + cellSize / 2;
+                        const screenY = containerRect.top + pos.y + cell.r * cellSize + cellSize / 2;
+
+                        await moveCursor(screenX, screenY, brownStepTime);
+                        drawOverlayCell(cell.r, cell.c, '#8B5A2B', 'knit');
+                    }
+
+                    // Move to Palette & Select Pink and Purl (7.0s to 7.8s)
+                    await selectColor('#F3A3B0');
+                    await selectSymbol('purl');
+
+                    // Draw Pink Ears (7.8s to 9.5s -> 1.7s)
+                    const pinkStepTime = Math.floor(1700 / sortedPink.length); 
+                    for (let i = 0; i < sortedPink.length; i++) {
+                        const cell = sortedPink[i];
+                        const scale = scaleRef.current;
+                        const pos = positionRef.current;
+                        const cellSize = 30 * scale;
+
+                        const screenX = containerRect.left + pos.x + cell.c * cellSize + cellSize / 2;
+                        const screenY = containerRect.top + pos.y + cell.r * cellSize + cellSize / 2;
+
+                        await moveCursor(screenX, screenY, pinkStepTime);
+                        drawOverlayCell(cell.r, cell.c, '#F3A3B0', 'purl');
+                    }
+
+                    // Move to Palette & Select Cream and Yo (9.5s to 10.3s)
+                    await selectColor('#FDF6EC');
+                    await selectSymbol('yo');
+
+                    // Draw Cream Snout (10.3s to 12.0s -> 1.7s)
+                    const creamStepTime = Math.floor(1700 / sortedCream.length); 
+                    for (let i = 0; i < sortedCream.length; i++) {
+                        const cell = sortedCream[i];
+                        const scale = scaleRef.current;
+                        const pos = positionRef.current;
+                        const cellSize = 30 * scale;
+
+                        const screenX = containerRect.left + pos.x + cell.c * cellSize + cellSize / 2;
+                        const screenY = containerRect.top + pos.y + cell.r * cellSize + cellSize / 2;
+
+                        await moveCursor(screenX, screenY, creamStepTime);
+                        drawOverlayCell(cell.r, cell.c, '#FDF6EC', 'yo');
+                    }
+
+                    // Move to Palette & Select Gray and Cable (12.0s to 12.8s)
+                    await selectColor('#4A4A4A');
+                    await selectSymbol('cable');
+
+                    // Draw Gray Eyes (12.8s to 14.0s -> 1.2s)
+                    const eyeStepTime = Math.floor(1200 / sortedEyes.length); 
+                    for (let i = 0; i < sortedEyes.length; i++) {
+                        const cell = sortedEyes[i];
+                        const scale = scaleRef.current;
+                        const pos = positionRef.current;
+                        const cellSize = 30 * scale;
+
+                        const screenX = containerRect.left + pos.x + cell.c * cellSize + cellSize / 2;
+                        const screenY = containerRect.top + pos.y + cell.r * cellSize + cellSize / 2;
+
+                        await moveCursor(screenX, screenY, eyeStepTime);
+                        drawOverlayCell(cell.r, cell.c, '#4A4A4A', 'cable');
+                    }
+
+                    // Move to Symbol Select and select Tbl (14.0s to 14.4s)
+                    await selectSymbol('tbl');
+
+                    // Draw Gray Nose (14.4s to 15.2s -> 0.8s)
+                    const noseStepTime = Math.floor(800 / sortedNose.length);
+                    for (let i = 0; i < sortedNose.length; i++) {
+                        const cell = sortedNose[i];
+                        const scale = scaleRef.current;
+                        const pos = positionRef.current;
+                        const cellSize = 30 * scale;
+
+                        const screenX = containerRect.left + pos.x + cell.c * cellSize + cellSize / 2;
+                        const screenY = containerRect.top + pos.y + cell.r * cellSize + cellSize / 2;
+
+                        await moveCursor(screenX, screenY, noseStepTime);
+                        drawOverlayCell(cell.r, cell.c, '#4A4A4A', 'tbl');
+                    }
+
+                    // Final Phase synchronization (15.2s)
+                    setGridData(prev => {
+                        const next = prev.map(row => row.map(cell => ({ ...cell })));
+                        brownCells.forEach(cell => { next[cell.r][cell.c] = { color: '#8B5A2B', symbolId: 'knit' }; });
+                        pinkCells.forEach(cell => { next[cell.r][cell.c] = { color: '#F3A3B0', symbolId: 'purl' }; });
+                        creamCells.forEach(cell => { next[cell.r][cell.c] = { color: '#FDF6EC', symbolId: 'yo' }; });
+                        eyeCells.forEach(cell => { next[cell.r][cell.c] = { color: '#4A4A4A', symbolId: 'cable' }; });
+                        noseCells.forEach(cell => { next[cell.r][cell.c] = { color: '#4A4A4A', symbolId: 'tbl' }; });
+                        return next;
+                    });
+                    
+                    // Wait 500ms for React state rendering to finish under overlay canvas
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                    // Now safely clean up overlay canvas (15.7s)
+                    ctx?.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                    overlayCanvas.remove();
+
+                    // 15.7s: Change subtitle and move to Save
+                    subtitle.innerText = "도안 저장 완료!";
+
+                    const saveBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('저장') || b.innerText.includes('Save')) as HTMLElement;
+                    if (saveBtn) {
+                        const btnRect = saveBtn.getBoundingClientRect();
+                        await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 500);
+                        await clickCursor();
+                        saveBtn.click();
+                    }
+
+                    // Wait 1.0s, move to Export (17.2s)
+                    await new Promise(r => setTimeout(r, 1000));
+                    const exportBtn = (document.getElementById('tour-export') || Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('내보내기') || b.innerText.includes('Export'))) as HTMLElement;
+                    if (exportBtn) {
+                        const btnRect = exportBtn.getBoundingClientRect();
+                        await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 500);
+                        await clickCursor();
+                        exportBtn.click();
+                    }
+
+                    // Wait 1.0s, move to PNG (18.2s)
+                    await new Promise(r => setTimeout(r, 1000));
+                    const pngBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('PNG')) as HTMLElement;
+                    if (pngBtn) {
+                        const btnRect = pngBtn.getBoundingClientRect();
+                        await moveCursor(btnRect.left + btnRect.width / 2, btnRect.top + btnRect.height / 2, 500);
+                        await clickCursor();
+                        pngBtn.click();
+                    }
+
+                    // Let it display for the remaining 1.8s
+                    await new Promise(r => setTimeout(r, 1800));
+                    
+                    // Cleanup demo mode
+                    (window as any).isDemoActive = false;
+                    cursor.remove();
+                    subtitle.remove();
+                }, 500);
+            };
+        }
+    });
+
+    const startInstagramDemo = () => {
+        if (isDemoRunning) return;
+        
+        const cellsToDraw: { r: number, c: number, cell: any }[] = [];
+        gridData.forEach((row, r) => {
+            row.forEach((cell, c) => {
+                if (cell.color !== '#ffffff' || cell.symbolId !== null) {
+                    cellsToDraw.push({ r, c, cell });
+                }
+            });
+        });
+
+        if (cellsToDraw.length === 0) {
+            alert('먼저 캔버스에 도안을 그려주세요!');
+            return;
+        }
+
+        const oldTool = activeTool;
+        setActiveTool('paint');
+        
+        const emptyGrid = Array(gridSize.rows).fill(null).map(() => Array(gridSize.cols).fill(null).map(() => ({ color: '#ffffff', symbolId: null })));
+        setGridData(emptyGrid);
+        setIsDemoRunning(true);
+        
+        cellsToDraw.sort((a, b) => {
+            if (a.r === b.r) return a.c - b.c;
+            return a.r - b.r;
+        });
+
+        let currentIndex = 0;
+        const totalDuration = 3000; // 3 seconds
+        const tickRate = 20; // 20ms per tick (50fps)
+        const totalTicks = totalDuration / tickRate;
+        const cellsPerTick = Math.max(1, Math.ceil(cellsToDraw.length / totalTicks));
+        
+        // Start after a 1 second pause to let the user get ready
+        setTimeout(() => {
+            const drawInterval = setInterval(() => {
+                if (currentIndex >= cellsToDraw.length) {
+                    clearInterval(drawInterval);
+                    setTimeout(() => {
+                        setIsDemoRunning(false);
+                        setDemoCursorPos({ x: -100, y: -100 });
+                        setActiveTool(oldTool);
+                    }, 1000); // 1초 뒤에 커서 사라짐
+                    return;
+                }
+
+                // Draw multiple cells at once to keep up with the 3-second deadline
+                const cellsBatch = cellsToDraw.slice(currentIndex, currentIndex + cellsPerTick);
+                const lastTarget = cellsBatch[cellsBatch.length - 1];
+                
+                // Move cursor to the last cell in this batch
+                setDemoCursorPos({ 
+                    x: lastTarget.c * 30 * scale + position.x + 15, 
+                    y: lastTarget.r * 30 * scale + position.y + 15 
+                });
+
+                // Update all cells in the batch at once
+                setGridData(prev => {
+                    const next = [...prev];
+                    cellsBatch.forEach(target => {
+                        if (next[target.r] === prev[target.r]) {
+                            next[target.r] = [...next[target.r]];
+                        }
+                        next[target.r][target.c] = target.cell;
+                    });
+                    return next;
+                });
+                
+                currentIndex += cellsPerTick;
+            }, tickRate);
+        }, 1000);
+    };
+
     const handleWheel = (e: any) => {
         e.evt.preventDefault();
         const stage = e.target.getStage();
@@ -1919,8 +2548,12 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
         const scaleBy = 1.1;
         const oldScale = stage.scaleX();
-        const pointer = stage.getPointerPosition();
-        if (!pointer) return;
+        
+        // 좌우 대칭으로 중앙 기준 확대/축소를 위해 마우스 위치 대신 화면 중앙 좌표를 사용합니다.
+        const pointer = {
+            x: stage.width() / 2,
+            y: stage.height() / 2
+        };
 
         const mousePointTo = {
             x: (pointer.x - stage.x()) / oldScale,
@@ -2094,7 +2727,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         if (!stageRef.current) return;
 
         try {
-            await deductCredits(user?.id!, 50, `Pattern Export (${format.toUpperCase()})`);
+            if (!(typeof window !== 'undefined' && (window as any).isDemoActive)) {
+                await deductCredits(user?.id!, 50, `Pattern Export (${format.toUpperCase()})`);
+            }
         } catch (error) {
             console.error('Download credit error:', error);
             setCustomAlert({
@@ -2566,6 +3201,14 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 originalImage: hasAIImport() ? null : undefined,
                 thumbnailUrl: thumbnailUrl
             };
+
+            if (typeof window !== 'undefined' && (window as any).isDemoActive) {
+                setIsDirty(false);
+                setShowSaveSuccess(true);
+                setTimeout(() => setShowSaveSuccess(false), 2500);
+                setIsSaving(false);
+                return true;
+            }
 
             const res = await saveGridProject(data);
             if (res.error) {
@@ -3082,17 +3725,27 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const hasOpenModal = showGridSizeModal || showPublishModal || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
 
     return (
-        <div className="flex flex-col h-[85vh] bg-cream-50 font-sans select-none relative">
-            {!user && (
-                <div
-                    className="absolute inset-0 z-[9999] cursor-pointer bg-transparent"
-                    onClick={handleAuthCheck}
-                />
+        <div className="flex flex-col h-[calc(100dvh-64px)] min-h-[600px] bg-cream-50 font-sans select-none relative">
+            
+            {/* 시연 모드 가짜 마우스 커서 */}
+            {isDemoRunning && (
+                <div 
+                    className="absolute z-[9999] pointer-events-none transition-all duration-75 ease-linear"
+                    style={{
+                        left: demoCursorPos.x,
+                        top: demoCursorPos.y,
+                        transform: 'translate(-20%, -20%)'
+                    }}
+                >
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg">
+                        <path d="M5.5 3.21V20.8C5.5 21.46 6.27 21.82 6.77 21.39L11.45 17.38C11.66 17.2 11.92 17.1 12.2 17.1H18.5C19.19 17.1 19.56 16.29 19.11 15.77L5.5 3.21Z" fill="white" stroke="#333" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                </div>
             )}
 
             {/* Top Toolbar */}
-            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm z-20 gap-3 sm:gap-0">
-                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto overflow-x-auto scrollbar-hide">
+            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-between shadow-sm z-20 gap-3">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
                     {/* Project Title Input */}
                     <input
                         type="text"
@@ -3110,7 +3763,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     <div className="inline-flex p-1 rounded-full bg-cream-100 border border-tan-200">
                         <button
                             onClick={() => setEditorMode('knitting')}
-                            className={`px-3 py-1.5 rounded-full font-medium text-sm transition-all flex items-center gap-1.5 ${editorMode === 'knitting'
+                            className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'knitting'
                                 ? 'bg-white text-brown-700 shadow-soft'
                                 : 'text-stone-500 hover:text-stone-700'
                                 }`}
@@ -3119,7 +3772,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         </button>
                         <button
                             onClick={() => setEditorMode('crochet')}
-                            className={`px-3 py-1.5 rounded-full font-medium text-sm transition-all flex items-center gap-1.5 ${editorMode === 'crochet'
+                            className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'crochet'
                                 ? 'bg-white text-brown-700 shadow-soft'
                                 : 'text-stone-500 hover:text-stone-700'
                                 }`}
@@ -3129,30 +3782,32 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     </div>
 
                     <div className="h-8 w-px bg-tan-200" />
-                    <div id="tour-tools" className="flex bg-cream-100 p-1.5 rounded-2xl shadow-inner gap-1 animate-in fade-in duration-300">
-                        <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'move' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('pan')}><Hand size={20} /></button>
+                    <div id="tour-tools" className="flex bg-cream-100 p-1 rounded-xl shadow-inner gap-0.5 animate-in fade-in duration-300">
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-lg transition-all duration-200 sm:hidden ${isSidebarOpen ? 'bg-rose-100 text-rose-600 shadow-inner ring-1 ring-rose-200' : 'text-stone-400 hover:text-stone-600'}`} title="Toggle Palette"><Settings size={18} /></button>
+                        <div className="w-px bg-tan-200 my-2 mx-1 sm:hidden" />
+                        <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'move' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('pan')}><Hand size={18} /></button>
                         <div className="w-px bg-tan-200 my-2 mx-1" />
                         
                         {/* Color (색상) */}
                         <button
                             onClick={() => { previousToolRef.current = 'paint'; setActiveTool('paint'); setIsSelectionMode(false); }}
-                            className={`p-2.5 rounded-xl transition-all duration-200 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2 rounded-lg transition-all duration-200 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
                             title={locale === 'ko' ? '색상' : 'Color'}
                         >
-                            <Paintbrush size={20} />
+                            <Paintbrush size={18} />
                         </button>
                         
                         {/* Symbol (기호) */}
                         <button
                             onClick={() => { previousToolRef.current = 'symbol'; setActiveTool('symbol'); setIsSelectionMode(false); }}
-                            className={`p-2.5 rounded-xl transition-all duration-200 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2 rounded-lg transition-all duration-200 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
                             title={locale === 'ko' ? '기호' : 'Symbol'}
                         >
-                            <MousePointer2 size={20} />
+                            <MousePointer2 size={18} />
                         </button>
                         
                         {/* Fill (채우기) - with dropdown */}
-                        <div ref={bucketDropdownRef} className="relative group">
+                        <div ref={bucketDropdownRef} className="relative group flex items-center">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -3160,22 +3815,22 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     setActiveTool('bucket');
                                     setIsSelectionMode(false);
                                 }}
-                                className={`p-2.5 rounded-xl transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'bucket' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                                className={`p-2 rounded-lg transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'bucket' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
                                 title={locale === 'ko' ? '채우기' : 'Fill'}
                             >
-                                <PaintBucket size={20} />
-                                <ChevronDown size={12} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
+                                <PaintBucket size={18} />
+                                <ChevronDown size={10} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {isBucketMenuOpen && (
-                                <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
                                         {locale === 'ko' ? '채우기 옵션' : 'Fill Option'}
                                     </div>
                                     <div className="flex bg-stone-100 p-1 rounded-xl gap-1 mb-2">
                                         <button
                                             onClick={() => setBucketMode('both')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
                                                 bucketMode === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
                                             }`}
                                         >
@@ -3183,7 +3838,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         </button>
                                         <button
                                             onClick={() => setBucketMode('color')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
                                                 bucketMode === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
                                             }`}
                                         >
@@ -3191,7 +3846,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                         </button>
                                         <button
                                             onClick={() => setBucketMode('symbol')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
                                                 bucketMode === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
                                             }`}
                                         >
@@ -3210,33 +3865,33 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         {/* Eyedropper (Pipette) */}
                         <button
                             onClick={() => { previousToolRef.current = (activeTool === 'eyedropper' ? previousToolRef.current : activeTool); setActiveTool('eyedropper'); setIsSelectionMode(false); }}
-                            className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'eyedropper' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'eyedropper' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
                             title={locale === 'ko' ? '스포이드' : 'Eyedropper'}
                         >
-                            <Pipette size={20} />
+                            <Pipette size={18} />
                         </button>
 
-                        {/* Simultaneous Draw Toggle - visible when paint or symbol tool active */}
+                        {/* Simultaneous Draw Toggle */}
                         {(activeTool === 'paint' || activeTool === 'symbol') && (
-                            <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-tan-200">
+                            <div className="flex items-center gap-1 ml-1 pl-1.5 border-l border-tan-200">
                                 <button
                                     onClick={() => setIsSimultaneousDraw(!isSimultaneousDraw)}
-                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all duration-200 ${
+                                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all duration-200 ${
                                         isSimultaneousDraw
                                             ? 'bg-sage-600 text-white shadow-md'
                                             : 'bg-white/60 text-stone-400 hover:text-stone-600 hover:bg-white'
                                     }`}
-                                    title={locale === 'ko' ? '동시 그리기 모드: 색상과 기호를 한 번에 칠합니다' : 'Simultaneous Draw: Apply color and symbol at once'}
+                                    title={locale === 'ko' ? '동시 그리기 모드' : 'Simultaneous Draw'}
                                 >
-                                    <span className={`w-2 h-2 rounded-full transition-colors ${isSimultaneousDraw ? 'bg-white animate-pulse' : 'bg-stone-300'}`} />
+                                    <span className={`w-1.5 h-1.5 rounded-full ${isSimultaneousDraw ? 'bg-white animate-pulse' : 'bg-stone-300'}`} />
                                     {locale === 'ko' ? '동시' : 'Dual'}
                                 </button>
                             </div>
                         )}
 
                         <div className="w-px bg-tan-200 my-2 mx-1" />
-                        <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-2.5 rounded-xl transition-all duration-200 ${activeTool === 'eraser' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('eraser')}><Eraser size={20} /></button>
-                        <div ref={shapeDropdownRef} className="relative group">
+                        <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'eraser' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('eraser')}><Eraser size={18} /></button>
+                        <div ref={shapeDropdownRef} className="relative group flex items-center">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -3244,25 +3899,25 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     setActiveTool('shape');
                                     setIsSelectionMode(false);
                                 }}
-                                className={`p-2.5 rounded-xl transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'shape' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                                className={`p-2 rounded-lg transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'shape' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
                                 title={t('shapeTool')}
                             >
-                                <Shapes size={20} />
-                                <ChevronDown size={12} className={`opacity-50 transition-transform ${isShapeMenuOpen ? 'rotate-180' : ''}`} />
+                                <Shapes size={18} />
+                                <ChevronDown size={10} className={`opacity-50 transition-transform ${isShapeMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {isShapeMenuOpen && (
-                                <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">{t('shapeType')}</div>
                                     <div className="grid grid-cols-5 gap-2 mb-4">
-                                        <button onClick={() => { setActiveShape('circle'); setActiveTool('shape'); }} className={`p-2 rounded-lg transition-colors ${activeShape === 'circle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.circle')}><CircleIcon size={18} /></button>
-                                        <button onClick={() => { setActiveShape('square'); setActiveTool('shape'); }} className={`p-2 rounded-lg transition-colors ${activeShape === 'square' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.square')}><Square size={18} /></button>
-                                        <button onClick={() => { setActiveShape('triangle'); setActiveTool('shape'); }} className={`p-2 rounded-lg transition-colors ${activeShape === 'triangle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.triangle')}><Triangle size={18} /></button>
-                                        <button onClick={() => { setActiveShape('star'); setActiveTool('shape'); }} className={`p-2 rounded-lg transition-colors ${activeShape === 'star' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.star')}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                        <button onClick={() => { setActiveShape('circle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'circle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.circle')}><CircleIcon size={16} /></button>
+                                        <button onClick={() => { setActiveShape('square'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'square' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.square')}><Square size={16} /></button>
+                                        <button onClick={() => { setActiveShape('triangle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'triangle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.triangle')}><Triangle size={16} /></button>
+                                        <button onClick={() => { setActiveShape('star'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'star' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.star')}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                                         </button>
-                                        <button onClick={() => { setActiveShape('heart'); setActiveTool('shape'); }} className={`p-2 rounded-lg transition-colors ${activeShape === 'heart' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.heart')}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z" /></svg>
+                                        <button onClick={() => { setActiveShape('heart'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'heart' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.heart')}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z" /></svg>
                                         </button>
                                     </div>
 
@@ -3270,13 +3925,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     <div className="flex bg-stone-100 p-1 rounded-xl mb-3">
                                         <button
                                             onClick={() => setShapeMode('outline')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeMode === 'outline' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'outline' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {t('outline')}
                                         </button>
                                         <button
                                             onClick={() => setShapeMode('fill')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeMode === 'fill' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'fill' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {t('fill')}
                                         </button>
@@ -3288,19 +3943,19 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     <div className="flex bg-stone-100 p-1 rounded-xl gap-1">
                                         <button
                                             onClick={() => setShapeApplyTarget('both')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {locale === 'ko' ? '둘 다' : 'Both'}
                                         </button>
                                         <button
                                             onClick={() => setShapeApplyTarget('color')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {locale === 'ko' ? '색상만' : 'Color'}
                                         </button>
                                         <button
                                             onClick={() => setShapeApplyTarget('symbol')}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
                                         >
                                             {locale === 'ko' ? '기호만' : 'Symbol'}
                                         </button>
@@ -3328,10 +3983,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     setIsShapeMenuOpen(false);
                                 }
                             }}
-                            className={`p-2.5 rounded-xl transition-all duration-200 ${isSelectionMode ? 'bg-rose-100 text-rose-600 shadow-inner ring-1 ring-rose-200' : 'text-stone-400 hover:text-stone-600 hover:bg-white/50'}`}
+                            className={`p-2 rounded-lg transition-all duration-200 ${isSelectionMode ? 'bg-rose-100 text-rose-600 shadow-inner ring-1 ring-rose-200' : 'text-stone-400 hover:text-stone-600 hover:bg-white/50'}`}
                             title={t('areaSelectMode')}
                         >
-                            <BoxSelect size={20} />
+                            <BoxSelect size={18} />
                         </button>
                     </div>
                     <div className="h-8 w-px bg-tan-200" />
@@ -3339,18 +3994,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         id="tour-undo"
                         onClick={handleUndo}
                         disabled={historyIndex <= 0}
-                        className="p-2.5 rounded-xl hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         title="Undo (Ctrl+Z)"
                     >
-                        <Undo size={20} />
+                        <Undo size={18} />
                     </button>
                     <button
                         onClick={handleRedo}
                         disabled={historyIndex >= history.length - 1}
-                        className="p-2.5 rounded-xl hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         title="Redo (Ctrl+Y)"
                     >
-                        <Redo size={20} />
+                        <Redo size={18} />
                     </button>
                     <div className="h-8 w-px bg-tan-200" />
                     <button
@@ -3365,21 +4020,20 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 onCancel: () => {}
                             });
                         }}
-                        className="p-3 hover:bg-rose-50 text-rose-400 hover:text-rose-500 rounded-xl transition-colors"
+                        className="p-2 hover:bg-rose-50 text-rose-400 hover:text-rose-500 rounded-lg transition-colors"
                     >
-                        <Trash2 size={20} />
+                        <Trash2 size={18} />
                     </button>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    {/* Save Button */}
+                <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0">
                     {/* Save Button */}
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-2 px-6 py-3 rounded-2xl font-bold disabled:opacity-50"
+                        className="bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
                     >
-                        <Save size={18} />
+                        <Save size={16} />
                         <span>{isSaving ? tPublish('saving') : tPublish('save')}</span>
                     </button>
 
@@ -3403,25 +4057,25 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 setShowPublishModal(true);
                             }
                         }}
-                        className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-2 px-6 py-3 rounded-2xl font-bold ml-2"
+                        className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm ml-1 sm:ml-2"
                     >
-                        <ShoppingBag size={18} />
+                        <ShoppingBag size={16} />
                         <span>{tPublish('publish')}</span>
                     </button>
-                    <div className="flex items-center bg-cream-100 px-4 py-2 rounded-2xl shadow-inner">
-                        <button onClick={() => setScale(s => s / 1.2)}><ZoomOut size={18} className="text-stone-400 hover:text-stone-600" /></button>
-                        <span className="w-16 text-center text-xs font-bold text-stone-500">{Math.round(scale * 100)}%</span>
-                        <button onClick={() => setScale(s => s * 1.2)}><ZoomIn size={18} className="text-stone-400 hover:text-stone-600" /></button>
+                    <div className="flex items-center bg-cream-100 px-3 py-1.5 rounded-xl shadow-inner gap-1">
+                        <button onClick={() => setScale(s => s / 1.2)}><ZoomOut size={16} className="text-stone-400 hover:text-stone-600" /></button>
+                        <span className="w-12 text-center text-xs font-bold text-stone-500">{Math.round(scale * 100)}%</span>
+                        <button onClick={() => setScale(s => s * 1.2)}><ZoomIn size={16} className="text-stone-400 hover:text-stone-600" /></button>
                     </div>
                     <div className="relative">
                         <button
                             id="tour-export"
                             onClick={() => setShowExportMenu(!showExportMenu)}
-                            className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-2 px-6 py-3 rounded-2xl font-bold"
+                            className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm"
                         >
-                            <Download size={18} />
+                            <Download size={16} />
                             <span>{tEditor('export.title')}</span>
-                            <ChevronDown size={14} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={12} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
                         </button>
 
                         {/* Export Menu Dropdown */}
@@ -3580,6 +4234,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        onDragEnd={(e) => {
+                            if (e.target === e.target.getStage()) {
+                                setPosition({ x: e.target.x(), y: e.target.y() });
+                            }
+                        }}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
@@ -3660,6 +4319,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 <h3 className="text-sm font-bold text-stone-400 uppercase tracking-wider flex items-center gap-2">
                                     <Settings size={14} /> {t('gridSize')}
                                 </h3>
+                                <button onClick={() => setIsSidebarOpen(false)} className="sm:hidden p-2 text-stone-400 hover:text-rose-500 absolute right-4 top-4 bg-white/80 rounded-full shadow-sm">
+                                    <X size={20} />
+                                </button>
                             </div>
                             <div className="flex items-center gap-2 bg-cream-50 p-3 rounded-xl border border-tan-100">
                                 <div className="flex-1">

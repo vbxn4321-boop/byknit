@@ -74,33 +74,7 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                {!user ? (
-                    <div className="max-w-md mx-auto my-8 p-8 rounded-3xl bg-white border border-tan-200 shadow-soft text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto shadow-rose-sm">
-                            <Lock className="w-8 h-8 text-rose-400 animate-pulse" />
-                        </div>
-                        <div className="space-y-2">
-                            <h2 className="text-xl font-extrabold text-brown-800">
-                                {locale === 'ko' ? '🔒 로그인이 필요한 장치입니다' : '🔒 Login Required'}
-                            </h2>
-                            <p className="text-sm text-brown-600 leading-relaxed">
-                                {locale === 'ko' 
-                                    ? '이 도구(차트 변환기)를 사용하시려면 먼저 로그인을 완료해 주세요.' 
-                                    : 'Please log in to your account to unlock and use the AI Chart Converter.'}
-                            </p>
-                        </div>
-                        <div className="pt-2">
-                            <button
-                                onClick={() => router.push(`/${locale}/login`)}
-                                className="inline-flex items-center justify-center w-full px-6 py-3 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold hover:shadow-rose-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                            >
-                                {locale === 'ko' ? '로그인 하러 가기' : 'Go to Login'}
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <ImageToChartTab locale={locale} credits={credits} user={user} />
-                )}
+                <ImageToChartTab locale={locale} credits={credits} user={user} />
             </div>
         </div>
     );

@@ -27,6 +27,7 @@ interface GridCanvasProps {
     selectionEnd?: { row: number; col: number } | null;
     stageRef?: React.RefObject<any>;
     disabled?: boolean;
+    onDragEnd?: (e: any) => void;
     floatingBuffer?: {
         data: GridCell[][];
         startRow: number;
@@ -76,6 +77,7 @@ export default function GridCanvas({
     selectionEnd,
     stageRef,
     disabled,
+    onDragEnd,
     floatingBuffer,
     onContextMenu,
     hiddenZone,
@@ -295,6 +297,7 @@ export default function GridCanvas({
                 if (onTouchMove) onTouchMove(e);
             }}
             onTouchEnd={onTouchEnd}
+            onDragEnd={disabled ? undefined : onDragEnd}
             scaleX={scale}
             scaleY={scale}
             x={position.x}
