@@ -248,13 +248,17 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
 
     const handleEditInEditor = async () => {
         if (!result) return;
-        if (credits < 10) {
+        
+        const isDemo = typeof window !== 'undefined' && (window as any).isDemoActive;
+        if (!isDemo && credits < 10) {
             alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
 
         try {
-            await deductCredits(user?.id!, 50, 'AI Editor Import');
+            if (!isDemo) {
+                await deductCredits(user?.id!, 50, 'AI Editor Import');
+            }
             saveAIImport(result);
             router.push(`/${locale}/editor?import=ai`);
         } catch (error) {
@@ -327,7 +331,9 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
 
     const handleDownload = async () => {
         if (!result) return;
-        if (credits < 10) {
+        
+        const isDemo = typeof window !== 'undefined' && (window as any).isDemoActive;
+        if (!isDemo && credits < 10) {
             alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
@@ -336,7 +342,9 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         if (!canvas) return;
 
         try {
-            await deductCredits(user?.id!, 50, `AI Export (${exportFormat.toUpperCase()})`);
+            if (!isDemo) {
+                await deductCredits(user?.id!, 50, `AI Export (${exportFormat.toUpperCase()})`);
+            }
             if (exportFormat === 'pdf') {
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 const pdf = new jsPDF({
@@ -357,6 +365,400 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
             alert(locale === 'ko' ? '크레딧 차감 중 오류가 발생했습니다.' : 'Error deducting credits.');
         }
     };
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            (window as any).startConverterDemo = () => {
+                (window as any).isDemoActive = true;
+                
+                // Cleanup old overlays/cursors
+                const oldCursor = document.getElementById('demo-fake-cursor');
+                if (oldCursor) oldCursor.remove();
+                const oldSubtitle = document.getElementById('demo-subtitle');
+                if (oldSubtitle) oldSubtitle.remove();
+
+                // Create subtitle
+                const subtitle = document.createElement('div');
+                subtitle.id = 'demo-subtitle';
+                subtitle.style.position = 'fixed';
+                subtitle.style.bottom = '40px';
+                subtitle.style.left = '50%';
+                subtitle.style.transform = 'translateX(-50%)';
+                subtitle.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
+                subtitle.style.color = 'white';
+                subtitle.style.padding = '16px 32px';
+                subtitle.style.borderRadius = '32px';
+                subtitle.style.fontSize = '32px';
+                subtitle.style.fontWeight = 'bold';
+                subtitle.style.zIndex = '99999';
+                subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+                subtitle.innerText = "원하는 이미지를 업로드하세요";
+                document.body.appendChild(subtitle);
+
+                // Create fake cursor
+                const cursor = document.createElement('div');
+                cursor.id = 'demo-fake-cursor';
+                cursor.style.position = 'fixed';
+                cursor.style.width = '36px';
+                cursor.style.height = '36px';
+                cursor.style.zIndex = '100000';
+                cursor.style.pointerEvents = 'none';
+                cursor.innerHTML = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.04c.45 0 .67-.54.35-.85L5.85 3.21a.5.5 0 0 0-.35-.15.5.5 0 0 0-.5.5z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>`;
+                document.body.appendChild(cursor);
+
+                // Start position
+                const startX = window.innerWidth / 2;
+                const startY = window.innerHeight / 2;
+                cursor.style.left = startX + 'px';
+                cursor.style.top = startY + 'px';
+
+                const moveCursor = (x: number, y: number, duration: number = 150) => {
+                    return new Promise<void>(resolve => {
+                        cursor.style.transition = `left ${duration}ms linear, top ${duration}ms linear`;
+                        cursor.style.left = x + 'px';
+                        cursor.style.top = y + 'px';
+                        setTimeout(resolve, duration);
+                    });
+                };
+
+                const clickCursor = () => {
+                    return new Promise<void>(resolve => {
+                        cursor.style.transform = 'scale(0.8)';
+                        
+                        // Ripple animation
+                        const ripple = document.createElement('div');
+                        ripple.style.position = 'fixed';
+                        ripple.style.left = cursor.style.left;
+                        ripple.style.top = cursor.style.top;
+                        ripple.style.width = '40px';
+                        ripple.style.height = '40px';
+                        ripple.style.marginLeft = '-20px';
+                        ripple.style.marginTop = '-20px';
+                        ripple.style.borderRadius = '50%';
+                        ripple.style.backgroundColor = 'rgba(139, 90, 43, 0.3)';
+                        ripple.style.border = '2px solid rgba(139, 90, 43, 0.7)';
+                        ripple.style.zIndex = '100001';
+                        ripple.style.pointerEvents = 'none';
+                        ripple.style.transition = 'transform 250ms cubic-bezier(0.1, 0.8, 0.3, 1), opacity 250ms ease-out';
+                        ripple.style.transform = 'scale(0.1)';
+                        document.body.appendChild(ripple);
+                        
+                        ripple.offsetHeight;
+                        
+                        ripple.style.transform = 'scale(2)';
+                        ripple.style.opacity = '0';
+                        
+                        setTimeout(() => ripple.remove(), 250);
+
+                        setTimeout(() => {
+                            cursor.style.transform = 'scale(1)';
+                            setTimeout(resolve, 100);
+                        }, 100);
+                    });
+                };
+
+                // Helper to draw the cute bear face dynamically
+                const drawSampleImage = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 120;
+                    canvas.height = 120;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return '';
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, 120, 120);
+
+                    // Ears
+                    ctx.fillStyle = '#8B5A2B';
+                    ctx.beginPath();
+                    ctx.arc(30, 40, 18, 0, Math.PI * 2);
+                    ctx.arc(90, 40, 18, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Inner Ears
+                    ctx.fillStyle = '#F3A3B0';
+                    ctx.beginPath();
+                    ctx.arc(30, 40, 10, 0, Math.PI * 2);
+                    ctx.arc(90, 40, 10, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Head
+                    ctx.fillStyle = '#8B5A2B';
+                    ctx.beginPath();
+                    ctx.arc(60, 70, 36, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Muzzle
+                    ctx.fillStyle = '#FDF6EC';
+                    ctx.beginPath();
+                    ctx.arc(60, 80, 16, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Eyes
+                    ctx.fillStyle = '#4A4A4A';
+                    ctx.beginPath();
+                    ctx.arc(45, 65, 4, 0, Math.PI * 2);
+                    ctx.arc(75, 65, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Nose
+                    ctx.beginPath();
+                    ctx.arc(60, 76, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    return canvas.toDataURL();
+                };
+
+                // Run sequence
+                setTimeout(async () => {
+                    // 1. Move to Upload Dropzone (0.5s to 2.5s)
+                    const dropzone = document.querySelector('div[class*="aspect-square"][class*="border-dashed"]') as HTMLElement;
+                    if (dropzone) {
+                        const dzRect = dropzone.getBoundingClientRect();
+                        await moveCursor(dzRect.left + dzRect.width / 2, dzRect.top + dzRect.height / 2, 800);
+                        await clickCursor();
+                        
+                        // Inject sample bear image
+                        const dataUrl = drawSampleImage();
+                        setImage(dataUrl);
+                        setResult(null);
+
+                        // Extract image and set aspect ratio
+                        const img = new Image();
+                        img.onload = () => {
+                            const ratio = img.width / img.height;
+                            setImageAspectRatio(ratio);
+                            setSettings(prev => ({
+                                ...prev,
+                                targetHeight: Math.round(prev.targetWidth / ratio)
+                            }));
+                        };
+                        img.src = dataUrl;
+                    }
+
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    // 2. Adjust targetWidth (2.5s to 4.5s)
+                    subtitle.innerText = "격자 크기와 실의 색상 수를 자유롭게 조절";
+                    
+                    const inputs = Array.from(document.querySelectorAll('input[type="range"]'));
+                    const widthSlider = inputs[0] as HTMLInputElement;
+                    const colorSlider = inputs[2] as HTMLInputElement;
+
+                    if (widthSlider) {
+                        const wsRect = widthSlider.getBoundingClientRect();
+                        // Move cursor to start of slider
+                        await moveCursor(wsRect.left + 20, wsRect.top + wsRect.height / 2, 600);
+                        
+                        // Drag simulation: move to 45 (approx 35% of the way)
+                        const dragWidth = Math.floor(wsRect.width * 0.35);
+                        await moveCursor(wsRect.left + dragWidth, wsRect.top + wsRect.height / 2, 800);
+                        
+                        setSettings(prev => {
+                            const ratio = imageAspectRatio || 1;
+                            return {
+                                ...prev,
+                                targetWidth: 45,
+                                targetHeight: Math.round(45 / ratio)
+                            };
+                        });
+                    }
+
+                    await new Promise(r => setTimeout(r, 500));
+
+                    // 3. Adjust maxColors (4.5s to 6.5s)
+                    if (colorSlider) {
+                        const csRect = colorSlider.getBoundingClientRect();
+                        await moveCursor(csRect.left + 20, csRect.top + csRect.height / 2, 600);
+                        
+                        // Drag simulation: move to 6 colors (approx 25% of the way)
+                        const dragWidth = Math.floor(csRect.width * 0.25);
+                        await moveCursor(csRect.left + dragWidth, csRect.top + csRect.height / 2, 800);
+                        
+                        setSettings(prev => ({
+                            ...prev,
+                            maxColors: 6
+                        }));
+                    }
+
+                    await new Promise(r => setTimeout(r, 800));
+
+                    // 4. Click Convert Button (6.5s to 9.0s)
+                    subtitle.innerText = "클릭 한 번으로 뜨개 도안 차트 자동 변환 완료!";
+                    
+                    const convertBtn = Array.from(document.querySelectorAll('button')).find(b => 
+                        b.textContent?.includes('변환') || b.textContent?.includes('Convert')
+                    ) as HTMLElement;
+
+                    if (convertBtn) {
+                        const cbRect = convertBtn.getBoundingClientRect();
+                        await moveCursor(cbRect.left + cbRect.width / 2, cbRect.top + cbRect.height / 2, 500);
+                        await clickCursor();
+                        
+                        // Programmatic convert call
+                        setIsConverting(true);
+                        setTimeout(() => {
+                            // Create grid mapping representing a bear
+                            const targetWidth = 45;
+                            const targetHeight = 45;
+                            
+                            // Sample palette of 5 colors
+                            const palette = ['#FFFFFF', '#8B5A2B', '#F3A3B0', '#FDF6EC', '#4A4A4A'];
+                            
+                            // Create a simple bear head pattern inside the grid
+                            const grid = Array(targetHeight).fill(null).map(() => Array(targetWidth).fill(0));
+                            
+                            // Drawing shapes mathematically inside the grid
+                            const centerC = Math.floor(targetWidth / 2);
+                            const centerR = Math.floor(targetHeight / 2) + 2;
+                            const headRadius = 13;
+                            
+                            // Fill bear head
+                            for (let r = 0; r < targetHeight; r++) {
+                                for (let c = 0; c < targetWidth; c++) {
+                                    // Distance from head center
+                                    const distHead = Math.sqrt((r - centerR) ** 2 + (c - centerC) ** 2);
+                                    if (distHead < headRadius) {
+                                        grid[r][c] = 1; // Brown
+                                    }
+                                    
+                                    // Left Ear
+                                    const distLeftEar = Math.sqrt((r - (centerR - 11)) ** 2 + (c - (centerC - 10)) ** 2);
+                                    if (distLeftEar < 6) {
+                                        grid[r][c] = distLeftEar < 3 ? 2 : 1; // Pink inner, Brown outer
+                                    }
+                                    
+                                    // Right Ear
+                                    const distRightEar = Math.sqrt((r - (centerR - 11)) ** 2 + (c - (centerC + 10)) ** 2);
+                                    if (distRightEar < 6) {
+                                        grid[r][c] = distRightEar < 3 ? 2 : 1; // Pink inner, Brown outer
+                                    }
+                                    
+                                    // Muzzle
+                                    const distMuzzle = Math.sqrt(((r - (centerR + 3)) * 1.3) ** 2 + (c - centerC) ** 2);
+                                    if (distMuzzle < 5.5) {
+                                        grid[r][c] = 3; // Cream
+                                    }
+                                    
+                                    // Left Eye
+                                    const distLeftEye = Math.sqrt((r - (centerR - 2)) ** 2 + (c - (centerC - 5)) ** 2);
+                                    if (distLeftEye < 1.2) {
+                                        grid[r][c] = 4; // Gray
+                                    }
+                                    
+                                    // Right Eye
+                                    const distRightEye = Math.sqrt((r - (centerR - 2)) ** 2 + (c - (centerC + 5)) ** 2);
+                                    if (distRightEye < 1.2) {
+                                        grid[r][c] = 4; // Gray
+                                    }
+                                    
+                                    // Nose
+                                    const distNose = Math.sqrt(((r - centerR) * 1.5) ** 2 + (c - centerC) ** 2);
+                                    if (distNose < 1.6) {
+                                        grid[r][c] = 4; // Gray
+                                    }
+                                }
+                            }
+                            
+                            setResult({
+                                width: targetWidth,
+                                height: targetHeight,
+                                palette,
+                                grid
+                            });
+                            setIsConverting(false);
+                        }, 1200);
+                    }
+
+                    // Wait for conversion preview to show (loader: 1.2s + cushion: 1.3s = 2.5s)
+                    await new Promise(r => setTimeout(r, 2500));
+
+                    // 5. Click Edit in Editor Button (9.0s to 12.0s)
+                    subtitle.innerText = "도안 에디터로 바로 연동하여 상세 편집 시작";
+                    
+                    const editBtn = Array.from(document.querySelectorAll('button')).find(b => 
+                        b.textContent?.includes('에디터') || b.textContent?.includes('Editor')
+                    ) as HTMLElement;
+
+                    if (editBtn) {
+                        const ebRect = editBtn.getBoundingClientRect();
+                        await moveCursor(ebRect.left + ebRect.width / 2, ebRect.top + ebRect.height / 2, 600);
+                        await clickCursor();
+                        
+                        // Store result and trigger routing
+                        saveAIImport({
+                            width: 45,
+                            height: 45,
+                            palette: ['#FFFFFF', '#8B5A2B', '#F3A3B0', '#FDF6EC', '#4A4A4A'],
+                            grid: result?.grid || Array(45).fill(null).map(() => Array(45).fill(0)) // fallback
+                        });
+                        
+                        router.push(`/${locale}/editor?import=ai`);
+                        
+                        // Let page transition, then start Editor saving sequence
+                        setTimeout(() => {
+                            // Check if editor demo is ready
+                            const checkAndStartEditorSave = () => {
+                                const saveBtn = Array.from(document.querySelectorAll('button')).find(b => 
+                                    b.innerText.includes('저장') || b.innerText.includes('Save')
+                                ) as HTMLElement;
+                                
+                                if (saveBtn) {
+                                    // Custom visual sequence in the editor (13s to 24s)
+                                    (async () => {
+                                        // Update subtitle in editor
+                                        const editSubtitle = document.getElementById('demo-subtitle');
+                                        if (editSubtitle) editSubtitle.innerText = "나만의 맞춤형 뜨개 차트 완성!";
+                                        
+                                        // Move cursor to Save
+                                        const sbRect = saveBtn.getBoundingClientRect();
+                                        await moveCursor(sbRect.left + sbRect.width / 2, sbRect.top + sbRect.height / 2, 800);
+                                        await clickCursor();
+                                        saveBtn.click();
+                                        
+                                        // Move to Export
+                                        await new Promise(r => setTimeout(r, 1200));
+                                        const exportBtn = (document.getElementById('tour-export') || Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('내보내기') || b.innerText.includes('Export'))) as HTMLElement;
+                                        if (exportBtn) {
+                                            const ebRect2 = exportBtn.getBoundingClientRect();
+                                            await moveCursor(ebRect2.left + ebRect2.width / 2, ebRect2.top + ebRect2.height / 2, 600);
+                                            await clickCursor();
+                                            exportBtn.click();
+                                        }
+                                        
+                                        // Move to PNG
+                                        await new Promise(r => setTimeout(r, 1200));
+                                        const pngBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('PNG')) as HTMLElement;
+                                        if (pngBtn) {
+                                            const pbRect = pngBtn.getBoundingClientRect();
+                                            await moveCursor(pbRect.left + pbRect.width / 2, pbRect.top + pbRect.height / 2, 600);
+                                            await clickCursor();
+                                            pngBtn.click();
+                                        }
+
+                                        // Keep showing for 3 seconds
+                                        await new Promise(r => setTimeout(r, 3000));
+                                        
+                                        // Clean up editor demo
+                                        const editorCursor = document.getElementById('demo-fake-cursor');
+                                        if (editorCursor) editorCursor.remove();
+                                        if (editSubtitle) editSubtitle.remove();
+                                        (window as any).isDemoActive = false;
+                                    })();
+                                } else {
+                                    // Retry in 200ms
+                                    setTimeout(checkAndStartEditorSave, 200);
+                                }
+                            };
+                            checkAndStartEditorSave();
+                        }, 1000);
+                    }
+                }, 500);
+            };
+        }
+    }, [setImage, setResult, setSettings, setImageAspectRatio, imageAspectRatio, result, saveAIImport, router, locale]);
 
     return (
         <div className="space-y-6">
