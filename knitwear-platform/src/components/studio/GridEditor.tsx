@@ -333,6 +333,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const [demoCursorPos, setDemoCursorPos] = useState({ x: -100, y: -100 });
     const stageRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const lastDistRef = useRef<number>(0);
 
     // Custom Symbols
@@ -435,6 +436,23 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             document.body.style.overflow = '';
             document.removeEventListener('touchmove', preventTouchMove);
         };
+    }, []);
+
+    // Track container dimensions using ResizeObserver to prevent layout collapse on mount
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        const observer = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                const { width, height } = entry.contentRect;
+                if (width > 0 && height > 0) {
+                    setContainerDimensions({ width, height });
+                }
+            }
+        });
+
+        observer.observe(containerRef.current);
+        return () => observer.disconnect();
     }, []);
 
     // Handle clicks outside of dropdown menus to close them
@@ -593,18 +611,17 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     // Center grid on mount
     useEffect(() => {
-        if (isMounted && !hasCentered.current && containerRef.current) {
-            const { offsetWidth, offsetHeight } = containerRef.current;
+        if (isMounted && !hasCentered.current && containerDimensions.width > 0 && containerDimensions.height > 0) {
             const gridWidth = gridSize.cols * CELL_SIZE;
             const gridHeight = gridSize.rows * CELL_SIZE;
 
-            const x = (offsetWidth - gridWidth) / 2;
-            const y = (offsetHeight - gridHeight) / 2;
+            const x = (containerDimensions.width - gridWidth) / 2;
+            const y = (containerDimensions.height - gridHeight) / 2;
 
             setPosition({ x, y });
             hasCentered.current = true;
         }
-    }, [isMounted, gridSize]);
+    }, [isMounted, containerDimensions, gridSize]);
 
     // History Management
     const saveToHistory = (newData: GridCellData[][]) => {
@@ -4240,8 +4257,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
                     <GridCanvas
                         stageRef={stageRef}
-                        width={containerRef.current ? containerRef.current.offsetWidth : 800}
-                        height={containerRef.current ? containerRef.current.offsetHeight : 600}
+                        width={containerDimensions.width || 800}
+                        height={containerDimensions.height || 600}
                         gridData={gridData}
                         gridSize={gridSize}
                         scale={scale}
