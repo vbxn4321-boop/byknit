@@ -13,7 +13,8 @@ import {
     ShoppingBag,
     BoxSelect, SquareDashed,
     Loader2,
-    Shapes, Hexagon, Circle as CircleIcon, Triangle, Square, Star as StarIcon, Heart, Coins
+    Shapes, Hexagon, Circle as CircleIcon, Triangle, Square, Star as StarIcon, Heart, Coins,
+    Pencil, Eye
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import jsPDF from 'jspdf';
@@ -365,11 +366,24 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     // UI State
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isEditMode, setIsEditMode] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.innerWidth < 640) {
-            setIsSidebarOpen(false);
-        }
+        const checkMobile = () => {
+            const mobile = window.innerWidth < 640;
+            setIsMobile(mobile);
+            if (mobile) {
+                setIsEditMode(false);
+                setIsSidebarOpen(false);
+            } else {
+                setIsEditMode(true);
+                setIsSidebarOpen(true);
+            }
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Sync project title to publish metadata when modal opens
@@ -849,6 +863,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const isDraggingRef = useRef(false);
 
     const handleMouseDown = (e: any) => {
+        if (!isEditMode) return;
         if (activeTool === 'move' || isSpacePressed) return;
         if (isShapeMenuOpen) setIsShapeMenuOpen(false);
         if (isBucketMenuOpen) setIsBucketMenuOpen(false);
@@ -1059,6 +1074,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     };
 
     const handleMouseMove = (e: any) => {
+        if (!isEditMode) return;
         const stage = e.target.getStage();
         // Handle Move Tool & Space Panning via built-in draggable or logic (handled by Stage draggable prop mostly)
         // But if standard drag-paint:
@@ -2631,6 +2647,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
         // Single-touch: Paint/Select
         else if (e.evt.touches.length === 1) {
+            if (!isEditMode) return;
             // Check if we started on the stage - prevent scrolling if so
             const stage = e.target.getStage();
             if (activeTool !== 'move' && !isSpacePressed) {
@@ -2715,6 +2732,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
         // Single-touch: Paint
         else if (e.evt.touches.length === 1) {
+            if (!isEditMode) return;
             if (activeTool !== 'move' && !isSpacePressed) {
                 e.evt.preventDefault(); // Stop scrolling while painting
                 handleMouseMove(e);
@@ -3781,6 +3799,251 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     const hasOpenModal = showGridSizeModal || showPublishModal || showExportMenu || showSaveSuccess || showPublishSuccess || isAddingSymbol;
 
+    const renderToolsMenu = () => {
+        const menuContent = (
+            <div id="tour-tools" className="fixed sm:static bottom-6 left-4 right-4 sm:bottom-auto sm:left-auto sm:right-auto z-[90] flex sm:bg-cream-100 bg-white/80 backdrop-blur-lg p-2.5 sm:p-1 rounded-2xl sm:rounded-xl shadow-[0_12px_40px_-8px_rgba(107,142,99,0.25)] sm:shadow-inner gap-2 sm:gap-0.5 border border-white/50 sm:border-0 animate-in fade-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 duration-300 justify-start sm:justify-start overflow-x-auto no-scrollbar flex-nowrap">
+                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 sm:hidden shrink-0 ${isSidebarOpen ? 'bg-rose-500 text-white shadow-[0_6px_20px_rgba(244,63,94,0.35)] scale-110' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50'}`} title="Toggle Palette"><Settings size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
+                <div className="w-px bg-tan-200 my-2 mx-1 sm:hidden shrink-0" />
+                <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'move' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`} title={t('pan')}><Hand size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
+                <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
+                
+                {/* Color (색상) */}
+                <button
+                    onClick={() => { previousToolRef.current = 'paint'; setActiveTool('paint'); setIsSelectionMode(false); }}
+                    className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                    title={locale === 'ko' ? '색상' : 'Color'}
+                >
+                    <Paintbrush size={20} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+                
+                {/* Symbol (기호) */}
+                <button
+                    onClick={() => { previousToolRef.current = 'symbol'; setActiveTool('symbol'); setIsSelectionMode(false); }}
+                    className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                    title={locale === 'ko' ? '기호' : 'Symbol'}
+                >
+                    <MousePointer2 size={20} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+                
+                {/* Fill (채우기) - with dropdown */}
+                <div ref={bucketDropdownRef} className="relative group flex items-center shrink-0">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsBucketMenuOpen(!isBucketMenuOpen);
+                            setActiveTool('bucket');
+                            setIsSelectionMode(false);
+                        }}
+                        className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 flex items-center gap-0.5 shrink-0 ${(activeTool === 'bucket') ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                        title={locale === 'ko' ? '채우기' : 'Fill'}
+                    >
+                        <PaintBucket size={20} className="sm:w-[18px] sm:h-[18px]" />
+                        <ChevronDown size={10} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isBucketMenuOpen && (
+                        <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
+                                {locale === 'ko' ? '채우기 옵션' : 'Fill Option'}
+                            </div>
+                            <div className="flex bg-stone-100 p-1 rounded-xl gap-1 mb-2">
+                                <button
+                                    onClick={() => setBucketMode('both')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
+                                        bucketMode === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                    }`}
+                                >
+                                    {locale === 'ko' ? '둘 다' : 'Both'}
+                                </button>
+                                <button
+                                    onClick={() => setBucketMode('color')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
+                                        bucketMode === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                    }`}
+                                >
+                                    {locale === 'ko' ? '색상만' : 'Color'}
+                                </button>
+                                <button
+                                    onClick={() => setBucketMode('symbol')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
+                                        bucketMode === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
+                                    }`}
+                                >
+                                    {locale === 'ko' ? '기호만' : 'Symbol'}
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-stone-400 leading-normal px-1">
+                                {bucketMode === 'both' && (locale === 'ko' ? '색상 & 기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching both.')}
+                                {bucketMode === 'color' && (locale === 'ko' ? '색상이 일치하는 영역을 채웁니다.' : 'Fills regions matching color.')}
+                                {bucketMode === 'symbol' && (locale === 'ko' ? '기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching symbol.')}
+                            </p>
+                        </div>
+                    )}
+                </div>
+                
+                {/* Eyedropper (Pipette) */}
+                <button
+                    onClick={() => { previousToolRef.current = (activeTool === 'eyedropper' ? previousToolRef.current : activeTool); setActiveTool('eyedropper'); setIsSelectionMode(false); }}
+                    className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'eyedropper' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                    title={locale === 'ko' ? '스포이드' : 'Eyedropper'}
+                >
+                    <Pipette size={20} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+
+                {/* Simultaneous Draw Toggle */}
+                {(activeTool === 'paint' || activeTool === 'symbol') && (
+                    <div className="flex items-center gap-1 ml-1 pl-1.5 border-l border-tan-200 shrink-0">
+                        <button
+                            onClick={() => setIsSimultaneousDraw(!isSimultaneousDraw)}
+                            className={`flex items-center gap-1 px-3 sm:px-2 py-2 sm:py-1 rounded-lg text-[11px] sm:text-[10px] font-bold transition-all duration-300 shrink-0 ${
+                                isSimultaneousDraw
+                                    ? 'bg-sage-600 text-white shadow-md'
+                                    : 'bg-white/60 text-stone-400 hover:text-stone-600 hover:bg-white'
+                            }`}
+                            title={locale === 'ko' ? '동시 그리기 모드' : 'Simultaneous Draw'}
+                        >
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSimultaneousDraw ? 'bg-white animate-pulse' : 'bg-stone-300'}`} />
+                            {locale === 'ko' ? '동시' : 'Dual'}
+                        </button>
+                    </div>
+                )}
+
+                <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
+                <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'eraser' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`} title={t('eraser')}><Eraser size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
+                <div ref={shapeDropdownRef} className="relative group flex items-center shrink-0">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsShapeMenuOpen(!isShapeMenuOpen);
+                            setActiveTool('shape');
+                            setIsSelectionMode(false);
+                        }}
+                        className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 flex items-center gap-0.5 shrink-0 ${activeTool === 'shape' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                        title={t('shapeTool')}
+                    >
+                        <Shapes size={20} className="sm:w-[18px] sm:h-[18px]" />
+                        <ChevronDown size={10} className={`opacity-50 transition-transform ${isShapeMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isShapeMenuOpen && (
+                        <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">{t('shapeType')}</div>
+                            <div className="grid grid-cols-5 gap-2 mb-4">
+                                <button onClick={() => { setActiveShape('circle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'circle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.circle')}><CircleIcon size={16} /></button>
+                                <button onClick={() => { setActiveShape('square'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'square' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.square')}><Square size={16} /></button>
+                                <button onClick={() => { setActiveShape('triangle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'triangle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.triangle')}><Triangle size={16} /></button>
+                                <button onClick={() => { setActiveShape('star'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'star' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.star')}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                </button>
+                                <button onClick={() => { setActiveShape('heart'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'heart' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.heart')}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z" /></svg>
+                                </button>
+                            </div>
+
+                            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">{t('drawMode')}</div>
+                            <div className="flex bg-stone-100 p-1 rounded-xl mb-3">
+                                <button
+                                    onClick={() => setShapeMode('outline')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'outline' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    {t('outline')}
+                                </button>
+                                <button
+                                    onClick={() => setShapeMode('fill')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'fill' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    {t('fill')}
+                                </button>
+                            </div>
+
+                            <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
+                                {locale === 'ko' ? '적용 속성' : 'Apply Property'}
+                            </div>
+                            <div className="flex bg-stone-100 p-1 rounded-xl gap-1">
+                                <button
+                                    onClick={() => setShapeApplyTarget('both')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    {locale === 'ko' ? '둘 다' : 'Both'}
+                                </button>
+                                <button
+                                    onClick={() => setShapeApplyTarget('color')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    {locale === 'ko' ? '색상만' : 'Color'}
+                                </button>
+                                <button
+                                    onClick={() => setShapeApplyTarget('symbol')}
+                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
+                                >
+                                    {locale === 'ko' ? '기호만' : 'Symbol'}
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => setIsShapeMenuOpen(false)}
+                                className="w-full mt-3 py-1.5 text-[10px] font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase"
+                            >
+                                {t('close')}
+                            </button>
+                        </div>
+                    )}
+                </div>
+                <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
+                <button
+                    onClick={() => {
+                        if (isSelectionMode) {
+                            setIsSelectionMode(false);
+                            handleSelectionCancel();
+                            setActiveTool('move');
+                        } else {
+                            setIsSelectionMode(true);
+                            setActiveTool('selection');
+                            setIsShapeMenuOpen(false);
+                        }
+                    }}
+                    className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${isSelectionMode ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
+                    title={t('areaSelectMode')}
+                >
+                    <BoxSelect size={20} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+            </div>
+        );
+
+        if (isMobile) {
+            if (!isEditMode) return null;
+            if (typeof document !== 'undefined') {
+                return createPortal(menuContent, document.body);
+            }
+            return null;
+        }
+
+        return menuContent;
+    };
+
+    const renderToggleModeButton = () => {
+        if (!isMobile) return null;
+
+        const buttonContent = (
+            <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`fixed z-[99] sm:hidden w-14 h-14 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                    isEditMode 
+                        ? 'bottom-[92px] right-4 bg-stone-850/90 text-white hover:bg-stone-900 active:scale-95'
+                        : 'bottom-6 right-4 bg-[#6B8E63] text-white hover:bg-[#5f7e58] active:scale-95 animate-bounce'
+                }`}
+                title={isEditMode ? 'View Mode' : 'Edit Mode'}
+            >
+                {isEditMode ? <Eye size={24} /> : <Pencil size={24} />}
+            </button>
+        );
+
+        if (typeof document !== 'undefined') {
+            return createPortal(buttonContent, document.body);
+        }
+        return null;
+    };
+
     return (
         <div className="flex flex-col h-[calc(100dvh-64px)] min-h-[600px] bg-cream-50 font-sans select-none relative">
             
@@ -3839,214 +4102,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     </div>
 
                     <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
-                    <div id="tour-tools" className="fixed sm:static bottom-6 left-4 right-4 sm:bottom-auto sm:left-auto sm:right-auto z-[90] flex sm:bg-cream-100 bg-white/80 backdrop-blur-lg p-2.5 sm:p-1 rounded-2xl sm:rounded-xl shadow-[0_12px_40px_-8px_rgba(107,142,99,0.25)] sm:shadow-inner gap-2 sm:gap-0.5 border border-white/50 sm:border-0 animate-in fade-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 duration-300 justify-start sm:justify-start overflow-x-auto no-scrollbar flex-nowrap">
-                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 sm:hidden shrink-0 ${isSidebarOpen ? 'bg-rose-500 text-white shadow-[0_6px_20px_rgba(244,63,94,0.35)] scale-110' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50'}`} title="Toggle Palette"><Settings size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
-                        <div className="w-px bg-tan-200 my-2 mx-1 sm:hidden shrink-0" />
-                        <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'move' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`} title={t('pan')}><Hand size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
-                        <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
-                        
-                        {/* Color (색상) */}
-                        <button
-                            onClick={() => { previousToolRef.current = 'paint'; setActiveTool('paint'); setIsSelectionMode(false); }}
-                            className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                            title={locale === 'ko' ? '색상' : 'Color'}
-                        >
-                            <Paintbrush size={20} className="sm:w-[18px] sm:h-[18px]" />
-                        </button>
-                        
-                        {/* Symbol (기호) */}
-                        <button
-                            onClick={() => { previousToolRef.current = 'symbol'; setActiveTool('symbol'); setIsSelectionMode(false); }}
-                            className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                            title={locale === 'ko' ? '기호' : 'Symbol'}
-                        >
-                            <MousePointer2 size={20} className="sm:w-[18px] sm:h-[18px]" />
-                        </button>
-                        
-                        {/* Fill (채우기) - with dropdown */}
-                        <div ref={bucketDropdownRef} className="relative group flex items-center shrink-0">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsBucketMenuOpen(!isBucketMenuOpen);
-                                    setActiveTool('bucket');
-                                    setIsSelectionMode(false);
-                                }}
-                                className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 flex items-center gap-0.5 shrink-0 ${(activeTool === 'bucket') ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                                title={locale === 'ko' ? '채우기' : 'Fill'}
-                            >
-                                <PaintBucket size={20} className="sm:w-[18px] sm:h-[18px]" />
-                                <ChevronDown size={10} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {isBucketMenuOpen && (
-                                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
-                                        {locale === 'ko' ? '채우기 옵션' : 'Fill Option'}
-                                    </div>
-                                    <div className="flex bg-stone-100 p-1 rounded-xl gap-1 mb-2">
-                                        <button
-                                            onClick={() => setBucketMode('both')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
-                                                bucketMode === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
-                                            }`}
-                                        >
-                                            {locale === 'ko' ? '둘 다' : 'Both'}
-                                        </button>
-                                        <button
-                                            onClick={() => setBucketMode('color')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
-                                                bucketMode === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
-                                            }`}
-                                        >
-                                            {locale === 'ko' ? '색상만' : 'Color'}
-                                        </button>
-                                        <button
-                                            onClick={() => setBucketMode('symbol')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${
-                                                bucketMode === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'
-                                            }`}
-                                        >
-                                            {locale === 'ko' ? '기호만' : 'Symbol'}
-                                        </button>
-                                    </div>
-                                    <p className="text-[10px] text-stone-400 leading-normal px-1">
-                                        {bucketMode === 'both' && (locale === 'ko' ? '색상 & 기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching both.')}
-                                        {bucketMode === 'color' && (locale === 'ko' ? '색상이 일치하는 영역을 채웁니다.' : 'Fills regions matching color.')}
-                                        {bucketMode === 'symbol' && (locale === 'ko' ? '기호가 일치하는 영역을 채웁니다.' : 'Fills regions matching symbol.')}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Eyedropper (Pipette) */}
-                        <button
-                            onClick={() => { previousToolRef.current = (activeTool === 'eyedropper' ? previousToolRef.current : activeTool); setActiveTool('eyedropper'); setIsSelectionMode(false); }}
-                            className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'eyedropper' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                            title={locale === 'ko' ? '스포이드' : 'Eyedropper'}
-                        >
-                            <Pipette size={20} className="sm:w-[18px] sm:h-[18px]" />
-                        </button>
-
-                        {/* Simultaneous Draw Toggle */}
-                        {(activeTool === 'paint' || activeTool === 'symbol') && (
-                            <div className="flex items-center gap-1 ml-1 pl-1.5 border-l border-tan-200 shrink-0">
-                                <button
-                                    onClick={() => setIsSimultaneousDraw(!isSimultaneousDraw)}
-                                    className={`flex items-center gap-1 px-3 sm:px-2 py-2 sm:py-1 rounded-lg text-[11px] sm:text-[10px] font-bold transition-all duration-300 shrink-0 ${
-                                        isSimultaneousDraw
-                                            ? 'bg-sage-600 text-white shadow-md'
-                                            : 'bg-white/60 text-stone-400 hover:text-stone-600 hover:bg-white'
-                                    }`}
-                                    title={locale === 'ko' ? '동시 그리기 모드' : 'Simultaneous Draw'}
-                                >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${isSimultaneousDraw ? 'bg-white animate-pulse' : 'bg-stone-300'}`} />
-                                    {locale === 'ko' ? '동시' : 'Dual'}
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
-                        <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${activeTool === 'eraser' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`} title={t('eraser')}><Eraser size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
-                        <div ref={shapeDropdownRef} className="relative group flex items-center shrink-0">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsShapeMenuOpen(!isShapeMenuOpen);
-                                    setActiveTool('shape');
-                                    setIsSelectionMode(false);
-                                }}
-                                className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 flex items-center gap-0.5 shrink-0 ${activeTool === 'shape' ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                                title={t('shapeTool')}
-                            >
-                                <Shapes size={20} className="sm:w-[18px] sm:h-[18px]" />
-                                <ChevronDown size={10} className={`opacity-50 transition-transform ${isShapeMenuOpen ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {isShapeMenuOpen && (
-                                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-tan-200 p-3 z-[100] min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">{t('shapeType')}</div>
-                                    <div className="grid grid-cols-5 gap-2 mb-4">
-                                        <button onClick={() => { setActiveShape('circle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'circle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.circle')}><CircleIcon size={16} /></button>
-                                        <button onClick={() => { setActiveShape('square'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'square' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.square')}><Square size={16} /></button>
-                                        <button onClick={() => { setActiveShape('triangle'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'triangle' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.triangle')}><Triangle size={16} /></button>
-                                        <button onClick={() => { setActiveShape('star'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'star' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.star')}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                                        </button>
-                                        <button onClick={() => { setActiveShape('heart'); setActiveTool('shape'); }} className={`p-1.5 rounded-lg transition-colors ${activeShape === 'heart' ? 'bg-sage-100 text-sage-700' : 'hover:bg-cream-50 text-stone-500'}`} title={t('shapes.heart')}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.51 4.05 3 5.5l7 7Z" /></svg>
-                                        </button>
-                                    </div>
-
-                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">{t('drawMode')}</div>
-                                    <div className="flex bg-stone-100 p-1 rounded-xl mb-3">
-                                        <button
-                                            onClick={() => setShapeMode('outline')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'outline' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-                                        >
-                                            {t('outline')}
-                                        </button>
-                                        <button
-                                            onClick={() => setShapeMode('fill')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeMode === 'fill' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-                                        >
-                                            {t('fill')}
-                                        </button>
-                                    </div>
-
-                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 px-1">
-                                        {locale === 'ko' ? '적용 속성' : 'Apply Property'}
-                                    </div>
-                                    <div className="flex bg-stone-100 p-1 rounded-xl gap-1">
-                                        <button
-                                            onClick={() => setShapeApplyTarget('both')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'both' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-                                        >
-                                            {locale === 'ko' ? '둘 다' : 'Both'}
-                                        </button>
-                                        <button
-                                            onClick={() => setShapeApplyTarget('color')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'color' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-                                        >
-                                            {locale === 'ko' ? '색상만' : 'Color'}
-                                        </button>
-                                        <button
-                                            onClick={() => setShapeApplyTarget('symbol')}
-                                            className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all ${shapeApplyTarget === 'symbol' ? 'bg-white shadow text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-                                        >
-                                            {locale === 'ko' ? '기호만' : 'Symbol'}
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        onClick={() => setIsShapeMenuOpen(false)}
-                                        className="w-full mt-3 py-1.5 text-[10px] font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase"
-                                    >
-                                        {t('close')}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        <div className="w-px bg-tan-200 my-2 mx-1 shrink-0" />
-                        <button
-                            onClick={() => {
-                                if (isSelectionMode) {
-                                    setIsSelectionMode(false);
-                                    handleSelectionCancel();
-                                    setActiveTool('move');
-                                } else {
-                                    setIsSelectionMode(true);
-                                    setActiveTool('selection');
-                                    setIsShapeMenuOpen(false);
-                                }
-                            }}
-                            className={`p-3 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-300 shrink-0 ${isSelectionMode ? 'bg-[#6B8E63] text-white shadow-[0_6px_20px_rgba(107,142,99,0.35)] scale-110 sm:scale-105 font-bold' : 'text-stone-500 hover:text-stone-700 hover:bg-cream-100/50 sm:hover:bg-transparent'}`}
-                            title={t('areaSelectMode')}
-                        >
-                            <BoxSelect size={20} className="sm:w-[18px] sm:h-[18px]" />
-                        </button>
-                    </div>
-                    <div className="h-8 w-px bg-tan-200" />
+                    {renderToolsMenu()}
+                    <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
                     <button
                         id="tour-undo"
                         onClick={handleUndo}
@@ -4189,7 +4246,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             </div >
 
             <div className="flex flex-1 overflow-hidden">
-                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-16 sm:pt-0 pb-24 sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
+                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-16 sm:pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
                     style={{
                         cursor: (activeTool === 'move' || isSpacePressed)
                             ? 'grab'
@@ -4285,6 +4342,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         position={position}
                         activeTool={isSpacePressed ? 'move' : activeTool}
                         symbolDefs={allSymbols}
+                        isEditMode={isEditMode}
                         onUpdateCell={updateCell}
                         onWheel={handleWheel}
                         onMouseDown={handleMouseDown}
@@ -5499,6 +5557,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     </div>
                 )
             }
+            {renderToggleModeButton()}
         </div >
     );
 }

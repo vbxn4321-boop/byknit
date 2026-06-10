@@ -52,6 +52,7 @@ interface GridCanvasProps {
     shapeRotation?: number;
     isRotationMode?: boolean;
     shapeApplyTarget?: 'both' | 'color' | 'symbol';
+    isEditMode?: boolean;
 }
 
 export default function GridCanvas({
@@ -87,7 +88,8 @@ export default function GridCanvas({
     finalSelection,
     shapeRotation = 0,
     isRotationMode = false,
-    shapeApplyTarget = 'both'
+    shapeApplyTarget = 'both',
+    isEditMode = true
 }: GridCanvasProps) {
     const CELL_SIZE = 30;
     const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
@@ -152,7 +154,7 @@ export default function GridCanvas({
     };
 
     // Guidelines overlay for hovered cell
-    const Guidelines = hoveredCell ? (
+    const Guidelines = hoveredCell && isEditMode ? (
         <Group>
             {/* Hovered cell background highlight */}
             <Rect
@@ -380,7 +382,7 @@ export default function GridCanvas({
             ref={stageRef}
             width={width}
             height={height}
-            draggable={activeTool === 'move' && !disabled}
+            draggable={(activeTool === 'move' || !isEditMode) && !disabled}
             preventDefault={true}
             listening={!disabled}
             onWheel={disabled ? undefined : onWheel}
@@ -431,7 +433,7 @@ export default function GridCanvas({
 
                 {/* Column Numbers (콧수) - Top Edge */}
                 {Array.from({ length: gridSize.cols }, (_, c) => {
-                    const isHovered = hoveredCell && hoveredCell.col === c;
+                    const isHovered = hoveredCell && isEditMode && hoveredCell.col === c;
                     return (
                         <Group key={`col-top-${c}`}>
                             {isHovered && (
@@ -464,7 +466,7 @@ export default function GridCanvas({
 
                 {/* Column Numbers (콧수) - Bottom Edge */}
                 {Array.from({ length: gridSize.cols }, (_, c) => {
-                    const isHovered = hoveredCell && hoveredCell.col === c;
+                    const isHovered = hoveredCell && isEditMode && hoveredCell.col === c;
                     return (
                         <Group key={`col-bottom-${c}`}>
                             {isHovered && (
@@ -497,7 +499,7 @@ export default function GridCanvas({
 
                 {/* Row Numbers (단수) - Left Edge */}
                 {Array.from({ length: gridSize.rows }, (_, r) => {
-                    const isHovered = hoveredCell && hoveredCell.row === r;
+                    const isHovered = hoveredCell && isEditMode && hoveredCell.row === r;
                     return (
                         <Group key={`row-left-${r}`}>
                             {isHovered && (
@@ -530,7 +532,7 @@ export default function GridCanvas({
 
                 {/* Row Numbers (단수) - Right Edge */}
                 {Array.from({ length: gridSize.rows }, (_, r) => {
-                    const isHovered = hoveredCell && hoveredCell.row === r;
+                    const isHovered = hoveredCell && isEditMode && hoveredCell.row === r;
                     return (
                         <Group key={`row-right-${r}`}>
                             {isHovered && (
