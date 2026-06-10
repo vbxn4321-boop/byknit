@@ -253,10 +253,10 @@ export default function EditorTour() {
 
     return (
         <>
-            {/* Help Button - always visible */}
+            {/* Help Button - hidden on mobile */}
             <button
                 onClick={handleStartTour}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#6B8E63] hover:bg-[#5A7853] text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+                className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#6B8E63] hover:bg-[#5A7853] text-white rounded-full shadow-lg hover:shadow-xl transition-all hidden sm:flex items-center justify-center group"
                 title="도움말 보기"
             >
                 <HelpCircle size={24} />

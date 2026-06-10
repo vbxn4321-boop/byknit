@@ -370,6 +370,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         if (typeof window !== 'undefined') {
             (window as any).startConverterDemo = () => {
                 (window as any).isDemoActive = true;
+                localStorage.setItem('hasSeenEditorTour', 'true');
                 
                 // Cleanup old overlays/cursors
                 const oldCursor = document.getElementById('demo-fake-cursor');
@@ -381,17 +382,18 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 const subtitle = document.createElement('div');
                 subtitle.id = 'demo-subtitle';
                 subtitle.style.position = 'fixed';
-                subtitle.style.bottom = '40px';
+                subtitle.style.bottom = '120px';
                 subtitle.style.left = '50%';
                 subtitle.style.transform = 'translateX(-50%)';
-                subtitle.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
-                subtitle.style.color = 'white';
+                subtitle.style.backgroundColor = 'transparent';
+                subtitle.style.color = '#4A3525';
+                subtitle.style.textShadow = '0 2px 10px rgba(255,255,255,0.8)';
                 subtitle.style.padding = '16px 32px';
                 subtitle.style.borderRadius = '32px';
                 subtitle.style.fontSize = '32px';
-                subtitle.style.fontWeight = 'bold';
+                subtitle.style.fontWeight = '800';
                 subtitle.style.zIndex = '99999';
-                subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+                subtitle.style.fontFamily = 'var(--font-nunito), sans-serif';
                 subtitle.innerText = "원하는 이미지를 업로드하세요";
                 document.body.appendChild(subtitle);
 
@@ -676,7 +678,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                     await new Promise(r => setTimeout(r, 2500));
 
                     // 5. Click Edit in Editor Button (9.0s to 12.0s)
-                    subtitle.innerText = "도안 에디터로 바로 연동하여 상세 편집 시작";
+                    subtitle.innerText = "강력한 도안 에디터에서 편집을 마치고 고화질 PNG로 다운로드하세요.";
                     
                     const editBtn = Array.from(document.querySelectorAll('button')).find(b => 
                         b.textContent?.includes('에디터') || b.textContent?.includes('Editor')
@@ -710,7 +712,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     (async () => {
                                         // Update subtitle in editor
                                         const editSubtitle = document.getElementById('demo-subtitle');
-                                        if (editSubtitle) editSubtitle.innerText = "나만의 맞춤형 뜨개 차트 완성!";
+                                        if (editSubtitle) editSubtitle.innerText = "에디터에서 나만의 맞춤형 뜨개 도안을 완성해 보세요!";
                                         
                                         // Move cursor to Save
                                         const sbRect = saveBtn.getBoundingClientRect();

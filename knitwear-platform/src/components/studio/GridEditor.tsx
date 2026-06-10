@@ -1996,18 +1996,19 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 const subtitle = document.createElement('div');
                 subtitle.id = 'demo-subtitle';
                 subtitle.style.position = 'fixed';
-                subtitle.style.bottom = '40px';
+                subtitle.style.bottom = '120px';
                 subtitle.style.left = '50%';
                 subtitle.style.transform = 'translateX(-50%)';
-                subtitle.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
-                subtitle.style.color = 'white';
+                subtitle.style.backgroundColor = 'transparent';
+                subtitle.style.color = '#4A3525';
+                subtitle.style.textShadow = '0 2px 10px rgba(255,255,255,0.8)';
                 subtitle.style.padding = '16px 32px';
                 subtitle.style.borderRadius = '32px';
                 subtitle.style.fontSize = '32px';
-                subtitle.style.fontWeight = 'bold';
+                subtitle.style.fontWeight = '800';
                 subtitle.style.zIndex = '99999';
-                subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-                subtitle.innerText = "원하는 도구와 색상을 선택하세요";
+                subtitle.style.fontFamily = 'var(--font-nunito), sans-serif';
+                subtitle.innerText = "1️⃣ 소파에 누워서 뜨개 도안 그리는 법 📱";
                 document.body.appendChild(subtitle);
 
                 // Fake Cursor
@@ -2271,7 +2272,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     await selectColor('#8B5A2B');
                     await selectSymbol('knit');
 
-                    subtitle.innerText = "곰돌이 패턴도 뚝딱! 나만의 디자인 완성";
+                    // Removed static text to use dynamic step-by-step subtitles
 
                     // Bear Pattern Mapping
                     const bearPattern = [
@@ -2313,6 +2314,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     const sortedEyes = sortZigZag(eyeCells);
                     const sortedNose = sortZigZag(noseCells);
 
+                    subtitle.innerText = "2️⃣ 하단 플로팅 메뉴로 한 손 조작 쓱쓱!";
                     // Draw Brown Head (2.1s to 7.0s -> ~4.9s)
                     const brownStepTime = Math.floor(4900 / sortedBrown.length); 
                     const containerRect = container.getBoundingClientRect();
@@ -2334,6 +2336,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     await selectColor('#F3A3B0');
                     await selectSymbol('purl');
 
+                    subtitle.innerText = "3️⃣ 원하는 색상과 기호를 터치 한 번에";
                     // Draw Pink Ears (7.8s to 9.5s -> 1.7s)
                     const pinkStepTime = Math.floor(1700 / sortedPink.length); 
                     for (let i = 0; i < sortedPink.length; i++) {
@@ -2353,6 +2356,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     await selectColor('#FDF6EC');
                     await selectSymbol('yo');
 
+                    subtitle.innerText = "4️⃣ 부드러운 줌 앤 팬으로 정밀한 작업까지";
                     // Draw Cream Snout (10.3s to 12.0s -> 1.7s)
                     const creamStepTime = Math.floor(1700 / sortedCream.length); 
                     for (let i = 0; i < sortedCream.length; i++) {
@@ -2372,6 +2376,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     await selectColor('#4A4A4A');
                     await selectSymbol('cable');
 
+                    subtitle.innerText = "5️⃣ 밖에서도 언제든 나만의 뜨개 작품 디자인 🧶";
                     // Draw Gray Eyes (12.8s to 14.0s -> 1.2s)
                     const eyeStepTime = Math.floor(1200 / sortedEyes.length); 
                     for (let i = 0; i < sortedEyes.length; i++) {
@@ -2390,6 +2395,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     // Move to Symbol Select and select Tbl (14.0s to 14.4s)
                     await selectSymbol('tbl');
 
+                    subtitle.innerText = "6️⃣ 지금 프로필 링크에서 모바일로 즐겨보세요!";
                     // Draw Gray Nose (14.4s to 15.2s -> 0.8s)
                     const noseStepTime = Math.floor(800 / sortedNose.length);
                     for (let i = 0; i < sortedNose.length; i++) {
@@ -3781,29 +3787,29 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         </button>
                     </div>
 
-                    <div className="h-8 w-px bg-tan-200" />
-                    <div id="tour-tools" className="flex bg-cream-100 p-1 rounded-xl shadow-inner gap-0.5 animate-in fade-in duration-300">
-                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-lg transition-all duration-200 sm:hidden ${isSidebarOpen ? 'bg-rose-100 text-rose-600 shadow-inner ring-1 ring-rose-200' : 'text-stone-400 hover:text-stone-600'}`} title="Toggle Palette"><Settings size={18} /></button>
+                    <div className="h-8 w-px bg-tan-200 hidden sm:block" />
+                    <div id="tour-tools" className="fixed sm:static bottom-6 left-4 right-4 sm:bottom-auto sm:left-auto sm:right-auto z-[90] flex sm:bg-cream-100 bg-white p-2 sm:p-1 rounded-2xl sm:rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] sm:shadow-inner gap-1 sm:gap-0.5 border sm:border-0 border-tan-200 animate-in fade-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 duration-300 justify-around sm:justify-start">
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 sm:hidden ${isSidebarOpen ? 'bg-rose-100 text-rose-600 shadow-inner ring-1 ring-rose-200' : 'text-stone-400 hover:text-stone-600'}`} title="Toggle Palette"><Settings size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
                         <div className="w-px bg-tan-200 my-2 mx-1 sm:hidden" />
-                        <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'move' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('pan')}><Hand size={18} /></button>
+                        <button onClick={() => { setActiveTool('move'); setIsSelectionMode(false); }} className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 ${activeTool === 'move' ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`} title={t('pan')}><Hand size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
                         <div className="w-px bg-tan-200 my-2 mx-1" />
                         
                         {/* Color (색상) */}
                         <button
                             onClick={() => { previousToolRef.current = 'paint'; setActiveTool('paint'); setIsSelectionMode(false); }}
-                            className={`p-2 rounded-lg transition-all duration-200 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 ${(activeTool === 'paint' || (isSimultaneousDraw && activeTool === 'symbol')) ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`}
                             title={locale === 'ko' ? '색상' : 'Color'}
                         >
-                            <Paintbrush size={18} />
+                            <Paintbrush size={20} className="sm:w-[18px] sm:h-[18px]" />
                         </button>
                         
                         {/* Symbol (기호) */}
                         <button
                             onClick={() => { previousToolRef.current = 'symbol'; setActiveTool('symbol'); setIsSelectionMode(false); }}
-                            className={`p-2 rounded-lg transition-all duration-200 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 ${(activeTool === 'symbol' || (isSimultaneousDraw && activeTool === 'paint')) ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`}
                             title={locale === 'ko' ? '기호' : 'Symbol'}
                         >
-                            <MousePointer2 size={18} />
+                            <MousePointer2 size={20} className="sm:w-[18px] sm:h-[18px]" />
                         </button>
                         
                         {/* Fill (채우기) - with dropdown */}
@@ -3815,10 +3821,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     setActiveTool('bucket');
                                     setIsSelectionMode(false);
                                 }}
-                                className={`p-2 rounded-lg transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'bucket' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                                className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 flex items-center gap-0.5 ${(activeTool === 'bucket') ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`}
                                 title={locale === 'ko' ? '채우기' : 'Fill'}
                             >
-                                <PaintBucket size={18} />
+                                <PaintBucket size={20} className="sm:w-[18px] sm:h-[18px]" />
                                 <ChevronDown size={10} className={`opacity-50 transition-transform ${isBucketMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -3865,10 +3871,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         {/* Eyedropper (Pipette) */}
                         <button
                             onClick={() => { previousToolRef.current = (activeTool === 'eyedropper' ? previousToolRef.current : activeTool); setActiveTool('eyedropper'); setIsSelectionMode(false); }}
-                            className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'eyedropper' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                            className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 ${activeTool === 'eyedropper' ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`}
                             title={locale === 'ko' ? '스포이드' : 'Eyedropper'}
                         >
-                            <Pipette size={18} />
+                            <Pipette size={20} className="sm:w-[18px] sm:h-[18px]" />
                         </button>
 
                         {/* Simultaneous Draw Toggle */}
@@ -3890,7 +3896,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         )}
 
                         <div className="w-px bg-tan-200 my-2 mx-1" />
-                        <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-2 rounded-lg transition-all duration-200 ${activeTool === 'eraser' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`} title={t('eraser')}><Eraser size={18} /></button>
+                        <button onClick={() => { setActiveTool('eraser'); setIsSelectionMode(false); }} className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 ${activeTool === 'eraser' ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`} title={t('eraser')}><Eraser size={20} className="sm:w-[18px] sm:h-[18px]" /></button>
                         <div ref={shapeDropdownRef} className="relative group flex items-center">
                             <button
                                 onClick={(e) => {
@@ -3899,10 +3905,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                     setActiveTool('shape');
                                     setIsSelectionMode(false);
                                 }}
-                                className={`p-2 rounded-lg transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'shape' ? 'bg-white shadow-soft text-sage-600 scale-105' : 'text-stone-400 hover:text-stone-600'}`}
+                                className={`p-2.5 sm:p-2 rounded-xl sm:rounded-lg transition-all duration-200 flex items-center gap-0.5 ${activeTool === 'shape' ? 'bg-white sm:bg-white shadow-md sm:shadow-soft text-sage-600 scale-110 sm:scale-105' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50 sm:hover:bg-transparent'}`}
                                 title={t('shapeTool')}
                             >
-                                <Shapes size={18} />
+                                <Shapes size={20} className="sm:w-[18px] sm:h-[18px]" />
                                 <ChevronDown size={10} className={`opacity-50 transition-transform ${isShapeMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -4031,10 +4037,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
+                        className="bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
                     >
-                        <Save size={16} />
-                        <span>{isSaving ? tPublish('saving') : tPublish('save')}</span>
+                        <Save size={18} className="sm:w-[16px] sm:h-[16px]" />
+                        <span className="hidden sm:inline">{isSaving ? tPublish('saving') : tPublish('save')}</span>
                     </button>
 
                     {/* Publish Button (New) */}
@@ -4057,10 +4063,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                 setShowPublishModal(true);
                             }
                         }}
-                        className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm ml-1 sm:ml-2"
+                        className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm ml-1 sm:ml-2"
                     >
-                        <ShoppingBag size={16} />
-                        <span>{tPublish('publish')}</span>
+                        <ShoppingBag size={18} className="sm:w-[16px] sm:h-[16px]" />
+                        <span className="hidden sm:inline">{tPublish('publish')}</span>
                     </button>
                     <div className="flex items-center bg-cream-100 px-3 py-1.5 rounded-xl shadow-inner gap-1">
                         <button onClick={() => setScale(s => s / 1.2)}><ZoomOut size={16} className="text-stone-400 hover:text-stone-600" /></button>
@@ -4071,11 +4077,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         <button
                             id="tour-export"
                             onClick={() => setShowExportMenu(!showExportMenu)}
-                            className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm"
+                            className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm"
                         >
-                            <Download size={16} />
-                            <span>{tEditor('export.title')}</span>
-                            <ChevronDown size={12} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+                            <Download size={18} className="sm:w-[16px] sm:h-[16px]" />
+                            <span className="hidden sm:inline">{tEditor('export.title')}</span>
+                            <ChevronDown size={12} className={`transition-transform duration-200 hidden sm:block ${showExportMenu ? 'rotate-180' : ''}`} />
                         </button>
 
                         {/* Export Menu Dropdown */}
@@ -4132,7 +4138,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             </div >
 
             <div className="flex flex-1 overflow-hidden">
-                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none ${hasOpenModal ? 'pointer-events-none' : ''}`}
+                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pb-24 sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
                     style={{
                         cursor: (activeTool === 'move' || isSpacePressed)
                             ? 'grab'
