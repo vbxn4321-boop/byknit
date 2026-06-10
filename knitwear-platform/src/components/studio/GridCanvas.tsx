@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { Stage, Layer, Rect, Group, Line, Circle, Text } from 'react-konva';
 import { GridCell, StitchSymbolDef } from './types';
 
@@ -90,6 +90,107 @@ export default function GridCanvas({
     shapeApplyTarget = 'both'
 }: GridCanvasProps) {
     const CELL_SIZE = 30;
+    const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
+
+    const handleMouseMoveLocal = (e: any) => {
+        const stage = e.target.getStage();
+        if (stage) {
+            const pointer = stage.getPointerPosition();
+            if (pointer) {
+                const scale = stage.scaleX();
+                const x = (pointer.x - stage.x()) / scale;
+                const y = (pointer.y - stage.y()) / scale;
+                const col = Math.floor(x / CELL_SIZE);
+                const row = Math.floor(y / CELL_SIZE);
+                if (row >= 0 && row < gridSize.rows && col >= 0 && col < gridSize.cols) {
+                    if (!hoveredCell || hoveredCell.row !== row || hoveredCell.col !== col) {
+                        setHoveredCell({ row, col });
+                    }
+                } else {
+                    if (hoveredCell) setHoveredCell(null);
+                }
+            }
+        }
+        if (onMouseMove) onMouseMove(e);
+    };
+
+    const handleMouseLeaveLocal = (e: any) => {
+        setHoveredCell(null);
+        if (onMouseLeave) onMouseLeave(e);
+    };
+
+    const handleTouchMoveLocal = (e: any) => {
+        const stage = e.target.getStage();
+        if (stage) {
+            const pointer = stage.getPointerPosition();
+            if (pointer) {
+                const scale = stage.scaleX();
+                const x = (pointer.x - stage.x()) / scale;
+                const y = (pointer.y - stage.y()) / scale;
+                const col = Math.floor(x / CELL_SIZE);
+                const row = Math.floor(y / CELL_SIZE);
+                if (row >= 0 && row < gridSize.rows && col >= 0 && col < gridSize.cols) {
+                    if (!hoveredCell || hoveredCell.row !== row || hoveredCell.col !== col) {
+                        setHoveredCell({ row, col });
+                    }
+                } else {
+                    if (hoveredCell) setHoveredCell(null);
+                }
+            }
+        }
+        if (onTouchMove) onTouchMove(e);
+    };
+
+    const handleTouchEndLocal = (e: any) => {
+        setHoveredCell(null);
+        if (onTouchEnd) onTouchEnd(e);
+    };
+
+    const handleTouchCancelLocal = (e: any) => {
+        setHoveredCell(null);
+        if (onTouchCancel) onTouchCancel(e);
+    };
+
+    // Guidelines overlay for hovered cell
+    const Guidelines = hoveredCell ? (
+        <Group>
+            {/* Hovered cell background highlight */}
+            <Rect
+                x={hoveredCell.col * CELL_SIZE}
+                y={hoveredCell.row * CELL_SIZE}
+                width={CELL_SIZE}
+                height={CELL_SIZE}
+                stroke="#6B8E63"
+                strokeWidth={1.5}
+                fill="rgba(107, 142, 99, 0.08)"
+                listening={false}
+            />
+            {/* Vertical guide line */}
+            <Line
+                points={[
+                    (hoveredCell.col + 0.5) * CELL_SIZE, 0,
+                    (hoveredCell.col + 0.5) * CELL_SIZE, gridSize.rows * CELL_SIZE
+                ]}
+                stroke="#6B8E63"
+                strokeWidth={1}
+                dash={[4, 4]}
+                opacity={0.5}
+                listening={false}
+            />
+            {/* Horizontal guide line */}
+            <Line
+                points={[
+                    0, (hoveredCell.row + 0.5) * CELL_SIZE,
+                    gridSize.cols * CELL_SIZE, (hoveredCell.row + 0.5) * CELL_SIZE
+                ]}
+                stroke="#6B8E63"
+                strokeWidth={1}
+                dash={[4, 4]}
+                opacity={0.5}
+                listening={false}
+            />
+        </Group>
+    ) : null;
 
     // Render symbol based on symbolId
     const renderSymbol = (symbolId: string, x: number, y: number, size: number) => {
@@ -285,18 +386,14 @@ export default function GridCanvas({
             onWheel={disabled ? undefined : onWheel}
             onMouseDown={disabled ? undefined : onMouseDown}
             onTap={disabled ? undefined : onMouseDown}
-            onMouseMove={disabled ? undefined : onMouseMove}
+            onMouseMove={disabled ? undefined : handleMouseMoveLocal}
+            onMouseLeave={disabled ? undefined : handleMouseLeaveLocal}
             onMouseUp={disabled ? undefined : onMouseUp}
             onContextMenu={disabled ? undefined : onContextMenu}
             onTouchStart={disabled ? undefined : onTouchStart}
-            onTouchMove={(e) => {
-                // We handle logic in parent, so just pass through or use the prop directly if we passed one that handles logic.
-                // Wait, previous code had custom logic inline?
-                // The parent GridEditor passes `handleTouchMove` which contains the logic.
-                // So we should just call onTouchMove(e).
-                if (onTouchMove) onTouchMove(e);
-            }}
-            onTouchEnd={onTouchEnd}
+            onTouchMove={disabled ? undefined : handleTouchMoveLocal}
+            onTouchEnd={disabled ? undefined : handleTouchEndLocal}
+            onTouchCancel={disabled ? undefined : handleTouchCancelLocal}
             onDragEnd={disabled ? undefined : onDragEnd}
             scaleX={scale}
             scaleY={scale}
@@ -320,6 +417,8 @@ export default function GridCanvas({
                 {/* 5-unit grid lines */}
                 {FiveUnitLines}
 
+                {Guidelines}
+
                 {/* Border around pattern */}
                 <Rect
                     x={0} y={0}
@@ -331,72 +430,136 @@ export default function GridCanvas({
                 />
 
                 {/* Column Numbers (콧수) - Top Edge */}
-                {Array.from({ length: gridSize.cols }, (_, c) => (
-                    <Text
-                        key={`col-top-${c}`}
-                        x={c * CELL_SIZE}
-                        y={-20}
-                        width={CELL_SIZE}
-                        height={18}
-                        text={String(c + 1)}
-                        fontSize={10}
-                        fill="#64748b"
-                        align="center"
-                        verticalAlign="bottom"
-                        listening={false}
-                    />
-                ))}
+                {Array.from({ length: gridSize.cols }, (_, c) => {
+                    const isHovered = hoveredCell && hoveredCell.col === c;
+                    return (
+                        <Group key={`col-top-${c}`}>
+                            {isHovered && (
+                                <Rect
+                                    x={c * CELL_SIZE + 2}
+                                    y={-20}
+                                    width={CELL_SIZE - 4}
+                                    height={16}
+                                    fill="#6B8E63"
+                                    cornerRadius={4}
+                                    listening={false}
+                                />
+                            )}
+                            <Text
+                                x={c * CELL_SIZE}
+                                y={-20}
+                                width={CELL_SIZE}
+                                height={18}
+                                text={String(gridSize.cols - c)}
+                                fontSize={10}
+                                fontStyle={isHovered ? "bold" : "normal"}
+                                fill={isHovered ? "#ffffff" : "#64748b"}
+                                align="center"
+                                verticalAlign="bottom"
+                                listening={false}
+                            />
+                        </Group>
+                    );
+                })}
 
                 {/* Column Numbers (콧수) - Bottom Edge */}
-                {Array.from({ length: gridSize.cols }, (_, c) => (
-                    <Text
-                        key={`col-bottom-${c}`}
-                        x={c * CELL_SIZE}
-                        y={gridSize.rows * CELL_SIZE + 4}
-                        width={CELL_SIZE}
-                        height={18}
-                        text={String(c + 1)}
-                        fontSize={10}
-                        fill="#64748b"
-                        align="center"
-                        verticalAlign="top"
-                        listening={false}
-                    />
-                ))}
+                {Array.from({ length: gridSize.cols }, (_, c) => {
+                    const isHovered = hoveredCell && hoveredCell.col === c;
+                    return (
+                        <Group key={`col-bottom-${c}`}>
+                            {isHovered && (
+                                <Rect
+                                    x={c * CELL_SIZE + 2}
+                                    y={gridSize.rows * CELL_SIZE + 4}
+                                    width={CELL_SIZE - 4}
+                                    height={16}
+                                    fill="#6B8E63"
+                                    cornerRadius={4}
+                                    listening={false}
+                                />
+                            )}
+                            <Text
+                                x={c * CELL_SIZE}
+                                y={gridSize.rows * CELL_SIZE + 4}
+                                width={CELL_SIZE}
+                                height={18}
+                                text={String(gridSize.cols - c)}
+                                fontSize={10}
+                                fontStyle={isHovered ? "bold" : "normal"}
+                                fill={isHovered ? "#ffffff" : "#64748b"}
+                                align="center"
+                                verticalAlign="top"
+                                listening={false}
+                            />
+                        </Group>
+                    );
+                })}
 
                 {/* Row Numbers (단수) - Left Edge */}
-                {Array.from({ length: gridSize.rows }, (_, r) => (
-                    <Text
-                        key={`row-left-${r}`}
-                        x={-25}
-                        y={r * CELL_SIZE}
-                        width={22}
-                        height={CELL_SIZE}
-                        text={String(r + 1)}
-                        fontSize={10}
-                        fill="#64748b"
-                        align="right"
-                        verticalAlign="middle"
-                        listening={false}
-                    />
-                ))}
+                {Array.from({ length: gridSize.rows }, (_, r) => {
+                    const isHovered = hoveredCell && hoveredCell.row === r;
+                    return (
+                        <Group key={`row-left-${r}`}>
+                            {isHovered && (
+                                <Rect
+                                    x={-26}
+                                    y={r * CELL_SIZE + 6}
+                                    width={24}
+                                    height={18}
+                                    fill="#6B8E63"
+                                    cornerRadius={4}
+                                    listening={false}
+                                />
+                            )}
+                            <Text
+                                x={-25}
+                                y={r * CELL_SIZE}
+                                width={22}
+                                height={CELL_SIZE}
+                                text={String(gridSize.rows - r)}
+                                fontSize={10}
+                                fontStyle={isHovered ? "bold" : "normal"}
+                                fill={isHovered ? "#ffffff" : "#64748b"}
+                                align="right"
+                                verticalAlign="middle"
+                                listening={false}
+                            />
+                        </Group>
+                    );
+                })}
 
                 {/* Row Numbers (단수) - Right Edge */}
-                {Array.from({ length: gridSize.rows }, (_, r) => (
-                    <Text
-                        key={`row-right-${r}`}
-                        x={gridSize.cols * CELL_SIZE + 4}
-                        y={r * CELL_SIZE}
-                        width={22}
-                        height={CELL_SIZE}
-                        text={String(r + 1)}
-                        fontSize={10}
-                        fill="#64748b"
-                        align="left"
-                        verticalAlign="middle"
-                        listening={false}
-                    />
-                ))}
+                {Array.from({ length: gridSize.rows }, (_, r) => {
+                    const isHovered = hoveredCell && hoveredCell.row === r;
+                    return (
+                        <Group key={`row-right-${r}`}>
+                            {isHovered && (
+                                <Rect
+                                    x={gridSize.cols * CELL_SIZE + 3}
+                                    y={r * CELL_SIZE + 6}
+                                    width={24}
+                                    height={18}
+                                    fill="#6B8E63"
+                                    cornerRadius={4}
+                                    listening={false}
+                                />
+                            )}
+                            <Text
+                                x={gridSize.cols * CELL_SIZE + 4}
+                                y={r * CELL_SIZE}
+                                width={22}
+                                height={CELL_SIZE}
+                                text={String(gridSize.rows - r)}
+                                fontSize={10}
+                                fontStyle={isHovered ? "bold" : "normal"}
+                                fill={isHovered ? "#ffffff" : "#64748b"}
+                                align="left"
+                                verticalAlign="middle"
+                                listening={false}
+                            />
+                        </Group>
+                    );
+                })}
 
                 {/* Selection Overlay */}
                 {selectionStart && selectionEnd && !((activeTool === 'shape' || isRotationMode) && finalSelection) && (
