@@ -335,6 +335,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const lastDistRef = useRef<number>(0);
+    const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
 
     // Custom Symbols
     const [customSymbols, setCustomSymbols] = useState<StitchSymbolDef[]>([]);
@@ -2608,7 +2609,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
 
     const handleTouchStart = (e: any) => {
-        // Multi-touch: Zoom
+        // Multi-touch: Zoom and Pan
         if (e.evt.touches.length === 2) {
             e.evt.preventDefault();
             const touch1 = e.evt.touches[0];
@@ -2620,6 +2621,12 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     { x: touch2.clientX, y: touch2.clientY }
                 );
                 lastDistRef.current = dist;
+
+                const center = getCenter(
+                    { x: touch1.clientX, y: touch1.clientY },
+                    { x: touch2.clientX, y: touch2.clientY }
+                );
+                lastTouchCenterRef.current = center;
             }
         }
         // Single-touch: Paint/Select
@@ -2639,7 +2646,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     };
 
     const handleTouchMove = (e: any) => {
-        // Multi-touch: Zoom
+        // Multi-touch: Zoom and Pan
         if (e.evt.touches.length === 2) {
             e.evt.preventDefault();
             const touch1 = e.evt.touches[0];
@@ -2652,22 +2659,33 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     { x: touch2.clientX, y: touch2.clientY }
                 );
 
-                if (!lastDistRef.current) {
-                    lastDistRef.current = dist;
-                    return;
-                }
-
-                const oldScale = stage.scaleX();
                 const center = getCenter(
                     { x: touch1.clientX, y: touch1.clientY },
                     { x: touch2.clientX, y: touch2.clientY }
                 );
 
+                if (!lastDistRef.current || !lastTouchCenterRef.current) {
+                    lastDistRef.current = dist;
+                    lastTouchCenterRef.current = center;
+                    return;
+                }
+
+                const oldScale = stage.scaleX();
                 const stageBox = stage.container().getBoundingClientRect();
+
                 const touchPos = {
                     x: center.x - stageBox.left,
                     y: center.y - stageBox.top,
                 };
+
+                const lastCenter = lastTouchCenterRef.current;
+                const lastTouchPos = {
+                    x: lastCenter.x - stageBox.left,
+                    y: lastCenter.y - stageBox.top,
+                };
+
+                const dx = touchPos.x - lastTouchPos.x;
+                const dy = touchPos.y - lastTouchPos.y;
 
                 const mousePointTo = {
                     x: (touchPos.x - stage.x()) / oldScale,
@@ -2678,8 +2696,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 if (newScale < 0.1 || newScale > 5) return;
 
                 const newPos = {
-                    x: touchPos.x - mousePointTo.x * newScale,
-                    y: touchPos.y - mousePointTo.y * newScale,
+                    x: touchPos.x - mousePointTo.x * newScale + dx,
+                    y: touchPos.y - mousePointTo.y * newScale + dy,
                 };
 
                 // Direct DOM manipulation for native performance (60fps)
@@ -2692,6 +2710,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 positionRef.current = newPos;
 
                 lastDistRef.current = dist;
+                lastTouchCenterRef.current = center;
             }
         }
         // Single-touch: Paint
@@ -2705,6 +2724,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     const handleTouchEnd = () => {
         lastDistRef.current = 0;
+        lastTouchCenterRef.current = null;
         lastPointerPosRef.current = null;
         
         // Sync stage scale/position to React state
