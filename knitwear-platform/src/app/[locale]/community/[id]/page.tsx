@@ -12,6 +12,16 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    let userRole = 'knitter';
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+        userRole = profile?.role || 'knitter';
+    }
+
     // 📈 조회수 증가
     await incrementPostViews(id);
     
@@ -26,6 +36,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
             post={post as any}
             comments={comments as any}
             user={user}
+            userRole={userRole}
             locale={locale}
         />
     );

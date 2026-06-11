@@ -50,10 +50,11 @@ interface Props {
     post: Post;
     comments: Comment[];
     user: User | null;
+    userRole?: string;
     locale: string;
 }
 
-export function PostDetailClient({ post, comments: initialComments, user, locale }: Props) {
+export function PostDetailClient({ post, comments: initialComments, user, userRole = 'knitter', locale }: Props) {
     const t = useTranslations('community');
     const tCommon = useTranslations('common');
     const router = useRouter();
@@ -139,7 +140,8 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
         }
     };
 
-    const isOwner = !!user && (user.id === post.user_id || user.id === post.profiles?.id);
+    const isAdmin = userRole === 'admin';
+    const isOwner = !!user && (user.id === post.user_id || user.id === post.profiles?.id || isAdmin);
 
     // 트리 구조로 변환: 최상위 댓글 + 하위 답글
     const topLevelComments = comments.filter(c => !c.parent_id);
@@ -593,7 +595,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                         <span>{translatingCommentIds.has(comment.id) ? t('detail.translating') : (translatedComments[comment.id] ? t('detail.originalView') : t('detail.translateView'))}</span>
                                                     </button>
 
-                                                    {user && user.id === comment.user_id && (
+                                                    {user && (user.id === comment.user_id || isAdmin) && (
                                                         <button
                                                             onClick={() => handleDeleteComment(comment.id)}
                                                             className="text-[11px] font-bold text-stone-300 hover:text-rose-500 transition-colors flex items-center gap-1"
@@ -664,7 +666,7 @@ export function PostDetailClient({ post, comments: initialComments, user, locale
                                                                     <span>{translatingCommentIds.has(reply.id) ? t('detail.translating') : (translatedComments[reply.id] ? t('detail.originalView') : t('detail.translateView'))}</span>
                                                                 </button>
 
-                                                                {user && user.id === reply.user_id && (
+                                                                {user && (user.id === reply.user_id || isAdmin) && (
                                                                     <button
                                                                         onClick={() => handleDeleteComment(reply.id)}
                                                                         className="text-[11px] font-bold text-stone-300 hover:text-rose-500 transition-colors flex items-center gap-1"

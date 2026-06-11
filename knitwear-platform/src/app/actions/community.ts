@@ -633,14 +633,24 @@ export async function updatePost(postId: string, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
-    // 🔒 권한 검증: 본인 글만 수정 가능
+    // 🔒 권한 검증: 본인 글 또는 관리자만 수정 가능
     const { data: post } = await supabase
         .from('posts')
         .select('user_id')
         .eq('id', postId)
         .single();
 
-    if (!post || post.user_id !== user.id) {
+    if (!post) throw new Error('Post not found');
+
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    const isAdmin = profile?.role === 'admin';
+
+    if (post.user_id !== user.id && !isAdmin) {
         throw new Error('Unauthorized: 본인의 게시글만 수정할 수 있습니다.');
     }
 
@@ -648,7 +658,9 @@ export async function updatePost(postId: string, formData: FormData) {
     const content = formData.get('content') as string;
     const category = formData.get('category') as string;
 
-    const { error } = await supabase
+    // 관리자라면 adminClient(service_role)를 사용하여 RLS 우회 수정
+    const clientToUse = isAdmin ? adminClient : supabase;
+    const { error } = await clientToUse
         .from('posts')
         .update({ title, content, category })
         .eq('id', postId);
