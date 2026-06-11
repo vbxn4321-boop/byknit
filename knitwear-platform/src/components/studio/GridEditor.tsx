@@ -334,6 +334,26 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const [demoCursorPos, setDemoCursorPos] = useState({ x: -100, y: -100 });
     const stageRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const observerRef = useRef<ResizeObserver | null>(null);
+    const setContainerRef = useCallback((node: HTMLDivElement | null) => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+            observerRef.current = null;
+        }
+        containerRef.current = node;
+        if (node) {
+            const observer = new ResizeObserver((entries) => {
+                for (let entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    if (width > 0 && height > 0) {
+                        setContainerDimensions({ width, height });
+                    }
+                }
+            });
+            observer.observe(node);
+            observerRef.current = observer;
+        }
+    }, []);
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const lastDistRef = useRef<number>(0);
     const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
@@ -463,22 +483,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         };
     }, []);
 
-    // Track container dimensions using ResizeObserver to prevent layout collapse on mount
-    useEffect(() => {
-        if (!containerRef.current) return;
 
-        const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
-                const { width, height } = entry.contentRect;
-                if (width > 0 && height > 0) {
-                    setContainerDimensions({ width, height });
-                }
-            }
-        });
-
-        observer.observe(containerRef.current);
-        return () => observer.disconnect();
-    }, [isMounted]);
 
     // Handle clicks outside of dropdown menus to close them
     useEffect(() => {
@@ -4081,6 +4086,11 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
     return (
         <div className="flex flex-col h-[calc(100dvh-64px)] min-h-[600px] bg-cream-50 font-sans select-none relative">
+            <style>{`
+                footer {
+                    display: none !important;
+                }
+            `}</style>
             
             {/* 시연 모드 가짜 마우스 커서 */}
             {isDemoRunning && (
@@ -4277,7 +4287,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             </div>
 
             <div className="flex flex-1 overflow-hidden">
-                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
+                <div ref={setContainerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
                     style={{
                         cursor: (activeTool === 'move' || isSpacePressed)
                             ? 'grab'
