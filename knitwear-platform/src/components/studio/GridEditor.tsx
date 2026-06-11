@@ -4090,186 +4090,182 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             )}
 
             {/* Top Toolbar */}
-            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-nowrap items-center justify-between shadow-sm z-20 gap-3 overflow-x-auto no-scrollbar">
-                <div className="flex flex-nowrap items-center gap-1.5 sm:gap-2.5 shrink-0">
-                    {/* Project Title Input */}
-                    <input
-                        type="text"
-                        value={projectTitle}
-                        onChange={(e) => {
-                            setProjectTitle(e.target.value);
-                            setIsDirty(true);
-                        }}
-                        className="bg-transparent font-bold text-stone-700 text-lg border-b border-transparent hover:border-tan-300 focus:border-sage-400 focus:outline-none w-40 px-1 transition-all"
-                        placeholder={t('projectName')}
-                        title={t('editProjectName')}
-                    />
+            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center shadow-sm z-20 gap-1.5 sm:gap-3">
+                {/* Project Title Input */}
+                <input
+                    type="text"
+                    value={projectTitle}
+                    onChange={(e) => {
+                        setProjectTitle(e.target.value);
+                        setIsDirty(true);
+                    }}
+                    className="bg-transparent font-bold text-stone-700 text-lg border-b border-transparent hover:border-tan-300 focus:border-sage-400 focus:outline-none w-40 px-1 transition-all"
+                    placeholder={t('projectName')}
+                    title={t('editProjectName')}
+                />
 
-                    {/* Mode Toggle: Knitting / Crochet */}
-                    <div className="inline-flex p-1 rounded-full bg-cream-100 border border-tan-200">
-                        <button
-                            onClick={() => setEditorMode('knitting')}
-                            className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'knitting'
-                                ? 'bg-white text-brown-700 shadow-soft'
-                                : 'text-stone-500 hover:text-stone-700'
-                                }`}
-                        >
-                            {tEditor('modeKnitting')}
-                        </button>
-                        <button
-                            onClick={() => setEditorMode('crochet')}
-                            className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'crochet'
-                                ? 'bg-white text-brown-700 shadow-soft'
-                                : 'text-stone-500 hover:text-stone-700'
-                                }`}
-                        >
-                            {tEditor('modeCrochet')}
-                        </button>
-                    </div>
-
-                    <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
-                    {renderToolsMenu()}
-                    <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
+                {/* Mode Toggle: Knitting / Crochet */}
+                <div className="inline-flex p-1 rounded-full bg-cream-100 border border-tan-200">
                     <button
-                        id="tour-undo"
-                        onClick={handleUndo}
-                        disabled={historyIndex <= 0}
-                        className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                        title="Undo (Ctrl+Z)"
+                        onClick={() => setEditorMode('knitting')}
+                        className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'knitting'
+                            ? 'bg-white text-brown-700 shadow-soft'
+                            : 'text-stone-500 hover:text-stone-700'
+                            }`}
                     >
-                        <Undo size={18} />
+                        {tEditor('modeKnitting')}
                     </button>
                     <button
-                        onClick={handleRedo}
-                        disabled={historyIndex >= history.length - 1}
-                        className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                        title="Redo (Ctrl+Y)"
+                        onClick={() => setEditorMode('crochet')}
+                        className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'crochet'
+                            ? 'bg-white text-brown-700 shadow-soft'
+                            : 'text-stone-500 hover:text-stone-700'
+                            }`}
                     >
-                        <Redo size={18} />
+                        {tEditor('modeCrochet')}
                     </button>
-                    <div className="h-8 w-px bg-tan-200" />
-                    <button
-                        onClick={() => {
+                </div>
+
+                <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
+                {renderToolsMenu()}
+                <div className="h-8 w-px bg-tan-200 hidden sm:block shrink-0" />
+                <button
+                    id="tour-undo"
+                    onClick={handleUndo}
+                    disabled={historyIndex <= 0}
+                    className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    title="Undo (Ctrl+Z)"
+                >
+                    <Undo size={18} />
+                </button>
+                <button
+                    onClick={handleRedo}
+                    disabled={historyIndex >= history.length - 1}
+                    className="p-2 rounded-lg hover:bg-white/50 text-stone-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    title="Redo (Ctrl+Y)"
+                >
+                    <Redo size={18} />
+                </button>
+                <div className="h-8 w-px bg-tan-200" />
+                <button
+                    onClick={() => {
+                        setCustomAlert({
+                            title: locale === 'ko' ? '전체 초기화' : 'Clear All',
+                            message: locale === 'ko' ? '정말로 캔버스의 모든 코를 지우시겠습니까? 이 작업은 실행 취소가 가능합니다.' : 'Are you sure you want to clear the canvas? You can undo this action.',
+                            onConfirm: () => {
+                                saveToHistory(gridData);
+                                setGridData(prev => prev.map(r => r.map(() => ({ color: '#ffffff', symbolId: null }))));
+                            },
+                            onCancel: () => {}
+                        });
+                    }}
+                    className="p-2 hover:bg-rose-50 text-rose-400 hover:text-rose-500 rounded-lg transition-colors"
+                >
+                    <Trash2 size={18} />
+                </button>
+
+                {/* Save Button */}
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="sm:ml-auto bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
+                >
+                    <Save size={18} className="sm:w-[16px] sm:h-[16px]" />
+                    <span className="hidden sm:inline">{isSaving ? tPublish('saving') : tPublish('save')}</span>
+                </button>
+
+                {/* Publish Button (New) */}
+                <button
+                    onClick={() => {
+                        if (!projectId) {
                             setCustomAlert({
-                                title: locale === 'ko' ? '전체 초기화' : 'Clear All',
-                                message: locale === 'ko' ? '정말로 캔버스의 모든 코를 지우시겠습니까? 이 작업은 실행 취소가 가능합니다.' : 'Are you sure you want to clear the canvas? You can undo this action.',
+                                title: locale === 'ko' ? '도안 저장 필요' : 'Save Required',
+                                message: locale === 'ko' ? '도안을 먼저 저장한 후 출시를 진행하시겠습니까?' : 'Would you like to save the project first to proceed with publishing?',
                                 onConfirm: () => {
-                                    saveToHistory(gridData);
-                                    setGridData(prev => prev.map(r => r.map(() => ({ color: '#ffffff', symbolId: null }))));
+                                    handleSave().then((success) => {
+                                        if (success) {
+                                            setShowPublishModal(true);
+                                        }
+                                    });
                                 },
                                 onCancel: () => {}
                             });
-                        }}
-                        className="p-2 hover:bg-rose-50 text-rose-400 hover:text-rose-500 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={18} />
-                    </button>
+                        } else {
+                            setShowPublishModal(true);
+                        }
+                    }}
+                    className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm ml-1 sm:ml-2"
+                >
+                    <ShoppingBag size={18} className="sm:w-[16px] sm:h-[16px]" />
+                    <span className="hidden sm:inline">{tPublish('publish')}</span>
+                </button>
+                <div className="flex items-center bg-cream-100 px-3 py-1.5 rounded-xl shadow-inner gap-1">
+                    <button onClick={() => setScale(s => s / 1.2)}><ZoomOut size={16} className="text-stone-400 hover:text-stone-600" /></button>
+                    <span className="w-12 text-center text-xs font-bold text-stone-500">{Math.round(scale * 100)}%</span>
+                    <button onClick={() => setScale(s => s * 1.2)}><ZoomIn size={16} className="text-stone-400 hover:text-stone-600" /></button>
                 </div>
-
-                <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0 shrink-0">
-                    {/* Save Button */}
+                <div className="relative">
                     <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="bg-stone-700 hover:bg-stone-800 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
+                        id="tour-export"
+                        onClick={() => setShowExportMenu(!showExportMenu)}
+                        className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm"
                     >
-                        <Save size={18} className="sm:w-[16px] sm:h-[16px]" />
-                        <span className="hidden sm:inline">{isSaving ? tPublish('saving') : tPublish('save')}</span>
+                        <Download size={18} className="sm:w-[16px] sm:h-[16px]" />
+                        <span className="hidden sm:inline">{tEditor('export.title')}</span>
+                        <ChevronDown size={12} className={`transition-transform duration-200 hidden sm:block ${showExportMenu ? 'rotate-180' : ''}`} />
                     </button>
 
-                    {/* Publish Button (New) */}
-                    <button
-                        onClick={() => {
-                            if (!projectId) {
-                                setCustomAlert({
-                                    title: locale === 'ko' ? '도안 저장 필요' : 'Save Required',
-                                    message: locale === 'ko' ? '도안을 먼저 저장한 후 출시를 진행하시겠습니까?' : 'Would you like to save the project first to proceed with publishing?',
-                                    onConfirm: () => {
-                                        handleSave().then((success) => {
-                                            if (success) {
-                                                setShowPublishModal(true);
-                                            }
-                                        });
-                                    },
-                                    onCancel: () => {}
-                                });
-                            } else {
-                                setShowPublishModal(true);
-                            }
-                        }}
-                        className="bg-rose-500 hover:bg-rose-600 text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm ml-1 sm:ml-2"
-                    >
-                        <ShoppingBag size={18} className="sm:w-[16px] sm:h-[16px]" />
-                        <span className="hidden sm:inline">{tPublish('publish')}</span>
-                    </button>
-                    <div className="flex items-center bg-cream-100 px-3 py-1.5 rounded-xl shadow-inner gap-1">
-                        <button onClick={() => setScale(s => s / 1.2)}><ZoomOut size={16} className="text-stone-400 hover:text-stone-600" /></button>
-                        <span className="w-12 text-center text-xs font-bold text-stone-500">{Math.round(scale * 100)}%</span>
-                        <button onClick={() => setScale(s => s * 1.2)}><ZoomIn size={16} className="text-stone-400 hover:text-stone-600" /></button>
-                    </div>
-                    <div className="relative">
-                        <button
-                            id="tour-export"
-                            onClick={() => setShowExportMenu(!showExportMenu)}
-                            className="bg-[#6B8E63] hover:bg-[#5A7853] text-white shadow-soft hover:shadow-lg transform transition-all active:scale-95 flex items-center gap-1.5 p-2.5 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm"
-                        >
-                            <Download size={18} className="sm:w-[16px] sm:h-[16px]" />
-                            <span className="hidden sm:inline">{tEditor('export.title')}</span>
-                            <ChevronDown size={12} className={`transition-transform duration-200 hidden sm:block ${showExportMenu ? 'rotate-180' : ''}`} />
-                        </button>
+                    {/* Export Menu Dropdown */}
+                    {showExportMenu && (
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-tan-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <button
+                                onClick={() => handleDownload('png')}
+                                className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <ImageIcon size={18} className="text-sage-600" />
+                                    {t('exportFormat.png')}
+                                </div>
+                                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
+                                    <Coins size={12} className="text-amber-500" />
+                                    <span>-1</span>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => handleDownload('jpg')}
+                                className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors border-t border-tan-100 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <ImageIcon size={18} className="text-sage-600" />
+                                    {t('exportFormat.jpg')}
+                                </div>
+                                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
+                                    <Coins size={12} className="text-amber-500" />
+                                    <span>-1</span>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => handleDownload('pdf')}
+                                className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors border-t border-tan-100 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <FileText size={18} className="text-rose-500" />
+                                    {t('exportFormat.pdf')}
+                                </div>
+                                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
+                                    <Coins size={12} className="text-amber-500" />
+                                    <span>-1</span>
+                                </div>
+                            </button>
+                        </div>
+                    )}
 
-                        {/* Export Menu Dropdown */}
-                        {showExportMenu && (
-                            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-tan-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                                <button
-                                    onClick={() => handleDownload('png')}
-                                    className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <ImageIcon size={18} className="text-sage-600" />
-                                        {t('exportFormat.png')}
-                                    </div>
-                                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
-                                        <Coins size={12} className="text-amber-500" />
-                                        <span>-1</span>
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => handleDownload('jpg')}
-                                    className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors border-t border-tan-100 group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <ImageIcon size={18} className="text-sage-600" />
-                                        {t('exportFormat.jpg')}
-                                    </div>
-                                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
-                                        <Coins size={12} className="text-amber-500" />
-                                        <span>-1</span>
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => handleDownload('pdf')}
-                                    className="w-full text-left px-5 py-3 hover:bg-sage-50 text-stone-700 font-semibold flex items-center justify-between transition-colors border-t border-tan-100 group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <FileText size={18} className="text-rose-500" />
-                                        {t('exportFormat.pdf')}
-                                    </div>
-                                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
-                                        <Coins size={12} className="text-amber-500" />
-                                        <span>-1</span>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Overlay to close menu when clicking outside */}
-                        {showExportMenu && (
-                            <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowExportMenu(false)} />
-                        )}
-                    </div>
+                    {/* Overlay to close menu when clicking outside */}
+                    {showExportMenu && (
+                        <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowExportMenu(false)} />
+                    )}
                 </div>
-            </div >
+            </div>
 
             <div className="flex flex-1 overflow-hidden">
                 <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
