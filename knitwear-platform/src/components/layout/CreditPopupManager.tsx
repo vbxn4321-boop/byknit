@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Gift, Sparkles } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 interface CreditPopupManagerProps {
     isAuth: boolean;
@@ -14,7 +15,63 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [dontShowToday, setDontShowToday] = useState(false);
 
+    const [isNewUser, setIsNewUser] = useState(false);
+    const [credits, setCredits] = useState(0);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
     useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!isAuth) {
+                setLoadingProfile(false);
+                return;
+            }
+
+            try {
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    setLoadingProfile(false);
+                    return;
+                }
+                setUserId(user.id);
+
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('created_at, credits')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    setCredits(profile.credits || 0);
+
+                    // A user is new if they registered in the last 10 minutes
+                    const createdTime = new Date(profile.created_at).getTime();
+                    const now = new Date().getTime();
+                    const isWithinSignupWindow = (now - createdTime) < 10 * 60 * 1000; 
+
+                    // Or if they haven't seen the signup gift popup yet
+                    const hasSeenGift = localStorage.getItem(`hasSeenSignupGift_${user.id}`);
+                    
+                    if (isWithinSignupWindow && !hasSeenGift) {
+                        setIsNewUser(true);
+                    } else {
+                        setIsNewUser(false);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching profile in credit popup:', err);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
+        fetchUserProfile();
+    }, [isAuth]);
+
+    useEffect(() => {
+        if (loadingProfile) return;
+
         const timer = setTimeout(() => {
             const hideUntil = localStorage.getItem('hideCreditPopupUntil_byknit');
             const now = new Date().getTime();
@@ -24,7 +81,12 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                 return;
             }
 
-            // Otherwise, always show on new session/visit!
+            // Session check: only show once per tab session
+            const hasSeenSessionPopup = sessionStorage.getItem('hasSeenWelcomePopup_byknit');
+            if (hasSeenSessionPopup) {
+                return;
+            }
+
             if (isAuth) {
                 setIsUserModalOpen(true);
             } else {
@@ -33,7 +95,7 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
         }, 1000);
 
         return () => clearTimeout(timer);
-    }, [isAuth]);
+    }, [isAuth, loadingProfile]);
 
     const handleClose = () => {
         if (dontShowToday) {
@@ -41,6 +103,15 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
             tomorrow.setDate(tomorrow.getDate() + 1);
             localStorage.setItem('hideCreditPopupUntil_byknit', tomorrow.getTime().toString());
         }
+        
+        // Save that they have seen the welcome/signup gift modal
+        if (isAuth && isNewUser && userId) {
+            localStorage.setItem(`hasSeenSignupGift_${userId}`, 'true');
+        }
+
+        // Save session flag so they don't see any popups again in this session
+        sessionStorage.setItem('hasSeenWelcomePopup_byknit', 'true');
+
         setIsUserModalOpen(false);
         setIsGuestModalOpen(false);
     };
@@ -74,26 +145,45 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                     <div className="flex flex-col items-center text-center space-y-4">
                         <div className="p-4 bg-rose-50 rounded-3xl">
                             {isAuth ? (
-                                <Gift className="w-12 h-12 text-rose-500" />
+                                isNewUser ? (
+                                    <Gift className="w-12 h-12 text-rose-500" />
+                                ) : (
+                                    <Sparkles className="w-12 h-12 text-rose-500" />
+                                )
                             ) : (
                                 <Sparkles className="w-12 h-12 text-rose-500" />
                             )}
                         </div>
                         <h3 className="text-2xl font-bold text-brown-800">
-                            {isAuth ? '축하합니다! 1,000 크레딧 지급 완료' : '로그인하고 1,000 크레딧 받기'}
+                            {isAuth ? (
+                                isNewUser ? '축하합니다! 1,000 크레딧 지급 완료' : '반가워요! 다시 오셨군요 🧶'
+                            ) : (
+                                '로그인하고 1,000 크레딧 받기'
+                            )}
                         </h3>
                     </div>
- 
+
                     <div className="space-y-4 text-brown-600 leading-relaxed text-center">
                         <p>
-                            byKnit에 오신 것을 환영합니다!
+                            {isAuth ? (
+                                isNewUser ? 'byKnit에 오신 것을 환영합니다!' : '오늘도 byKnit와 함께 나만의 특별한 도안을 디자인해 보세요.'
+                            ) : (
+                                'byKnit에 오신 것을 환영합니다!'
+                            )}
                         </p>
                         <div className="bg-cream-50 p-6 rounded-2xl border border-tan-100 text-sm font-medium">
                             {isAuth ? (
-                                <>
-                                    자유롭게 AI 기능을 체험해 볼 수 있도록 <br/>
-                                    <span className="text-rose-500 text-base font-bold">1,000 크레딧</span>이 지급되었습니다.
-                                </>
+                                isNewUser ? (
+                                    <>
+                                        자유롭게 AI 기능을 체험해 볼 수 있도록 <br/>
+                                        <span className="text-rose-500 text-base font-bold">1,000 크레딧</span>이 지급되었습니다.
+                                    </>
+                                ) : (
+                                    <>
+                                        현재 보유하신 크레딧은<br/>
+                                        <span className="text-rose-500 text-base font-bold">{credits.toLocaleString()} 크레딧</span>입니다.
+                                    </>
+                                )
                             ) : (
                                 <>
                                     구글 계정 또는 회원가입 및 로그인하시면 <br/>
@@ -103,12 +193,16 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                             )}
                         </div>
                     </div>
- 
+
                     <button
                         onClick={handleActionClick}
                         className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl transition-all shadow-md active:scale-95"
                     >
-                        {isAuth ? '감사합니다, 지금 시작하기' : 'Google 계정 또는 가입 / 로그인하기'}
+                        {isAuth ? (
+                            isNewUser ? '감사합니다, 지금 시작하기' : '오늘의 뜨개 시작하기'
+                        ) : (
+                            'Google 계정 또는 가입 / 로그인하기'
+                        )}
                     </button>
                 </div>
                 
