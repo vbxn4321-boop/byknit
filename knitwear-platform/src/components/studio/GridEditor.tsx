@@ -4090,8 +4090,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             )}
 
             {/* Top Toolbar */}
-            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-between shadow-sm z-20 gap-3">
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
+            <div className="bg-white/80 backdrop-blur-sm border-b border-tan-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-nowrap items-center justify-between shadow-sm z-20 gap-3 overflow-x-auto no-scrollbar">
+                <div className="flex flex-nowrap items-center gap-1.5 sm:gap-2.5 shrink-0">
                     {/* Project Title Input */}
                     <input
                         type="text"
@@ -4166,7 +4166,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     </button>
                 </div>
 
-                <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0">
+                <div className="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0 shrink-0">
                     {/* Save Button */}
                     <button
                         onClick={handleSave}
@@ -4272,7 +4272,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             </div >
 
             <div className="flex flex-1 overflow-hidden">
-                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-16 sm:pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
+                <div ref={containerRef} className={`flex-1 bg-stone-100 relative overflow-hidden touch-none pt-0 ${isEditMode ? 'pb-24' : 'pb-0'} sm:pb-0 ${hasOpenModal ? 'pointer-events-none' : ''}`}
                     style={{
                         cursor: (activeTool === 'move' || isSpacePressed)
                             ? 'grab'
