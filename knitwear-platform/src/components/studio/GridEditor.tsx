@@ -448,9 +448,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         };
         document.addEventListener('touchmove', preventTouchMove, { passive: false });
 
+        // Prevent browser zoom using Ctrl + mouse wheel inside the editor page
+        const preventBrowserZoom = (e: WheelEvent) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        };
+        window.addEventListener('wheel', preventBrowserZoom, { passive: false });
+
         return () => {
             document.body.style.overflow = '';
             document.removeEventListener('touchmove', preventTouchMove);
+            window.removeEventListener('wheel', preventBrowserZoom);
         };
     }, []);
 
@@ -469,7 +478,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
 
         observer.observe(containerRef.current);
         return () => observer.disconnect();
-    }, []);
+    }, [isMounted]);
 
     // Handle clicks outside of dropdown menus to close them
     useEffect(() => {
