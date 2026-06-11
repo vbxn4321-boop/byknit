@@ -232,6 +232,11 @@ export default function EditorTour() {
     const [hasSeenTour, setHasSeenTour] = useState(true);
 
     useEffect(() => {
+        // Only trigger onboarding tour automatically on desktop/tablet
+        if (window.innerWidth < 640) {
+            localStorage.setItem('hasSeenEditorTour', 'true');
+            return;
+        }
         const seen = localStorage.getItem('hasSeenEditorTour');
         if (!seen) {
             // Delay tour start to ensure elements are rendered

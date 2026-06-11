@@ -337,6 +337,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const lastDistRef = useRef<number>(0);
     const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
+    const isMultiTouchingRef = useRef<boolean>(false);
 
     // Custom Symbols
     const [customSymbols, setCustomSymbols] = useState<StitchSymbolDef[]>([]);
@@ -2628,6 +2629,14 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Multi-touch: Zoom and Pan
         if (e.evt.touches.length === 2) {
             e.evt.preventDefault();
+            isMultiTouchingRef.current = true; // Mark as multi-touching to lock drawing
+
+            // Cancel any active Konva stage drag to prevent interference
+            const stage = e.target.getStage();
+            if (stage && stage.isDragging()) {
+                stage.stopDrag();
+            }
+
             const touch1 = e.evt.touches[0];
             const touch2 = e.evt.touches[1];
 
@@ -2648,6 +2657,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Single-touch: Paint/Select
         else if (e.evt.touches.length === 1) {
             if (!isEditMode) return;
+            if (isMultiTouchingRef.current) return; // Skip if we are still releasing fingers from a zoom action
+
             // Check if we started on the stage - prevent scrolling if so
             const stage = e.target.getStage();
             if (activeTool !== 'move' && !isSpacePressed) {
@@ -2666,11 +2677,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Multi-touch: Zoom and Pan
         if (e.evt.touches.length === 2) {
             e.evt.preventDefault();
+            isMultiTouchingRef.current = true; // Safety reinforcement
+
             const touch1 = e.evt.touches[0];
             const touch2 = e.evt.touches[1];
             const stage = e.target.getStage();
 
             if (touch1 && touch2 && stage) {
+                // Cancel any active Konva stage drag to prevent interference
+                if (stage.isDragging()) {
+                    stage.stopDrag();
+                }
+
                 const dist = getDistance(
                     { x: touch1.clientX, y: touch1.clientY },
                     { x: touch2.clientX, y: touch2.clientY }
@@ -2701,20 +2719,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                     y: lastCenter.y - stageBox.top,
                 };
 
-                const dx = touchPos.x - lastTouchPos.x;
-                const dy = touchPos.y - lastTouchPos.y;
-
+                // Mathematically correct zoom around lastTouchPos and translate to touchPos
                 const mousePointTo = {
-                    x: (touchPos.x - stage.x()) / oldScale,
-                    y: (touchPos.y - stage.y()) / oldScale,
+                    x: (lastTouchPos.x - stage.x()) / oldScale,
+                    y: (lastTouchPos.y - stage.y()) / oldScale,
                 };
 
                 const newScale = oldScale * (dist / lastDistRef.current);
                 if (newScale < 0.1 || newScale > 5) return;
 
                 const newPos = {
-                    x: touchPos.x - mousePointTo.x * newScale + dx,
-                    y: touchPos.y - mousePointTo.y * newScale + dy,
+                    x: touchPos.x - mousePointTo.x * newScale,
+                    y: touchPos.y - mousePointTo.y * newScale,
                 };
 
                 // Direct DOM manipulation for native performance (60fps)
@@ -2733,6 +2749,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         // Single-touch: Paint
         else if (e.evt.touches.length === 1) {
             if (!isEditMode) return;
+            if (isMultiTouchingRef.current) return; // Skip if we are still releasing fingers from a zoom action
+
             if (activeTool !== 'move' && !isSpacePressed) {
                 e.evt.preventDefault(); // Stop scrolling while painting
                 handleMouseMove(e);
@@ -2740,10 +2758,18 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         }
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e?: any) => {
         lastDistRef.current = 0;
         lastTouchCenterRef.current = null;
         lastPointerPosRef.current = null;
+
+        // Reset multi-touch lock only when all fingers are lifted from the screen (touches.length === 0)
+        if (e?.evt?.touches && e.evt.touches.length === 0) {
+            isMultiTouchingRef.current = false;
+        } else if (!e || !e.evt || !e.evt.touches) {
+            // Fallback for non-touch triggers or missing events
+            isMultiTouchingRef.current = false;
+        }
         
         // Sync stage scale/position to React state
         if (stageRef.current) {

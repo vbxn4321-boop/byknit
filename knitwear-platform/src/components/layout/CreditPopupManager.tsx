@@ -80,13 +80,13 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                             )}
                         </div>
                         <h3 className="text-2xl font-bold text-brown-800">
-                            {isAuth ? '축하합니다! 1,000 크레딧 지급 완료' : '가입 없이 1,000 크레딧 체험하기'}
+                            {isAuth ? '축하합니다! 1,000 크레딧 지급 완료' : '로그인하고 1,000 크레딧 받기'}
                         </h3>
                     </div>
-
+ 
                     <div className="space-y-4 text-brown-600 leading-relaxed text-center">
                         <p>
-                            {isAuth ? 'byKnit에 오신 것을 환영합니다!' : 'byKnit에 오신 것을 환영합니다!'}
+                            byKnit에 오신 것을 환영합니다!
                         </p>
                         <div className="bg-cream-50 p-6 rounded-2xl border border-tan-100 text-sm font-medium">
                             {isAuth ? (
@@ -96,19 +96,19 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                                 </>
                             ) : (
                                 <>
-                                    로그인하지 않아도 즉시 <span className="text-rose-500 font-bold text-base">1,000 크레딧</span>을<br/>
-                                    사용하여 뜨개질 도안 변환 AI 기능을 테스트해 볼 수 있습니다.<br/><br/>
-                                    <span className="text-xs text-brown-400">*로그인하시면 작업 내역이 안전하게 보관됩니다.</span>
+                                    구글 계정 또는 회원가입 및 로그인하시면 <br/>
+                                    AI 분석 기능을 즉시 사용하실 수 있는 <span className="text-rose-500 font-bold text-base">1,000 크레딧</span>을 드립니다.<br/><br/>
+                                    <span className="text-xs text-brown-400">*로그인하지 않은 비회원 상태에서는 크레딧이 지급되지 않습니다.</span>
                                 </>
                             )}
                         </div>
                     </div>
-
+ 
                     <button
                         onClick={handleActionClick}
                         className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl transition-all shadow-md active:scale-95"
                     >
-                        {isAuth ? '감사합니다, 지금 시작하기' : '지금 바로 무료 체험하기'}
+                        {isAuth ? '감사합니다, 지금 시작하기' : 'Google 계정 또는 가입 / 로그인하기'}
                     </button>
                 </div>
                 

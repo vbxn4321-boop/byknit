@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { syncViewCounts } from '@/app/actions/pattern';
 
-async function handleSync() {
+async function handleSync(formData: FormData) {
     'use server';
     await syncViewCounts();
 }
