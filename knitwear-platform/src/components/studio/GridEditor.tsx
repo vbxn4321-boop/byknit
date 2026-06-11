@@ -649,6 +649,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             const y = (containerDimensions.height - gridHeight) / 2;
 
             setPosition({ x, y });
+            positionRef.current = { x, y };
             hasCentered.current = true;
         }
     }, [isMounted, containerDimensions, gridSize]);
@@ -2602,7 +2603,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         if (!stage) return;
 
         const scaleBy = 1.1;
-        const oldScale = stage.scaleX();
+        // Use the mutable refs directly to ensure we accumulate zoom correctly
+        // during rapid wheel scrolling before React completes a re-render cycle.
+        const oldScale = scaleRef.current;
+        const oldPos = positionRef.current;
         
         // 마우스 커서 위치를 기준점으로 설정하여 휠 스크롤 시 쏠림 현상을 방지합니다.
         const pointer = stage.getPointerPosition() || {
@@ -2611,8 +2615,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         };
 
         const mousePointTo = {
-            x: (pointer.x - stage.x()) / oldScale,
-            y: (pointer.y - stage.y()) / oldScale,
+            x: (pointer.x - oldPos.x) / oldScale,
+            y: (pointer.y - oldPos.y) / oldScale,
         };
 
         const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
@@ -2622,6 +2626,10 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             x: pointer.x - mousePointTo.x * newScale,
             y: pointer.y - mousePointTo.y * newScale,
         };
+
+        // Sync refs immediately to prevent drift on rapid subsequent wheel events
+        scaleRef.current = newScale;
+        positionRef.current = newPos;
 
         setScale(newScale);
         setPosition(newPos);
@@ -2785,10 +2793,14 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
             isMultiTouchingRef.current = false;
         }
         
-        // Sync stage scale/position to React state
+        // Sync stage scale/position to React state and refs
         if (stageRef.current) {
-            setScale(stageRef.current.scaleX());
-            setPosition(stageRef.current.position());
+            const newScale = stageRef.current.scaleX();
+            const newPos = stageRef.current.position();
+            setScale(newScale);
+            setPosition(newPos);
+            scaleRef.current = newScale;
+            positionRef.current = newPos;
         }
 
         handleMouseUp();
@@ -4392,7 +4404,9 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         onMouseLeave={handleMouseUp}
                         onDragEnd={(e) => {
                             if (e.target === e.target.getStage()) {
-                                setPosition({ x: e.target.x(), y: e.target.y() });
+                                const newPos = { x: e.target.x(), y: e.target.y() };
+                                setPosition(newPos);
+                                positionRef.current = newPos;
                             }
                         }}
                         onTouchStart={handleTouchStart}
