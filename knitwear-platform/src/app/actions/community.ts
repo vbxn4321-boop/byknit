@@ -7,6 +7,17 @@ import { addCredits } from './credits';
 import { sendNotification } from './notifications';
 
 // ============================================
+// Helper: Map image_url column to images array for frontend compatibility
+// ============================================
+function mapPostImages(post: any) {
+    if (!post) return post;
+    return {
+        ...post,
+        images: post.image_url ? [post.image_url] : []
+    };
+}
+
+// ============================================
 // 게시글 조회 (언어별 필터링 + 도안 정보 JOIN)
 // ============================================
 export async function getPosts(locale: string = 'ko') {
@@ -27,7 +38,7 @@ export async function getPosts(locale: string = 'ko') {
         return [];
     }
 
-    return data || [];
+    return (data || []).map(mapPostImages);
 }
 
 // ============================================
@@ -66,7 +77,8 @@ export async function getPopularPosts(limit: number = 5) {
             const bLikes = b.likes?.[0]?.count || 0;
             return bLikes - aLikes;
         })
-        .slice(0, limit);
+        .slice(0, limit)
+        .map(mapPostImages);
 }
 
 // ============================================
@@ -74,7 +86,6 @@ export async function getPopularPosts(limit: number = 5) {
 // ============================================
 export async function createPost(formData: FormData) {
     const supabase = await createClient();
-    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
@@ -100,7 +111,7 @@ export async function createPost(formData: FormData) {
     }
 
     // 커버 이미지 업로드 처리
-    if (imageFile && imageFile.size > 0) {
+    if (imageFile && typeof imageFile === 'object' && 'size' in imageFile && imageFile.size > 0) {
         try {
             const fileExt = imageFile.name.split('.').pop() || 'png';
             const fileName = `${user.id}/${Date.now()}.${fileExt}`;
@@ -120,7 +131,8 @@ export async function createPost(formData: FormData) {
                     .from('community-images')
                     .getPublicUrl(filePath);
 
-                insertData.images = [publicUrl];
+                // posts 테이블은 images text[]가 아니라 image_url text 컬럼을 사용합니다.
+                insertData.image_url = publicUrl;
             }
         } catch (uploadException) {
             console.error('Failed to handle image upload:', uploadException);
@@ -153,7 +165,7 @@ export async function createPost(formData: FormData) {
             .select('follower_id')
             .eq('following_id', user.id);
         if (followers) {
-            const { data: profile } = await adminClient.from('profiles').select('display_name').eq('id', user.id).single();
+            const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
             const senderName = profile?.display_name || '누군가';
             for (const f of followers) {
                 await sendNotification(f.follower_id, user.id, 'new_post', user.id, `${senderName}님이 새 글을 작성했습니다: "${title}"`);
@@ -344,7 +356,7 @@ export async function getPost(postId: string) {
         return null;
     }
 
-    return data;
+    return mapPostImages(data);
 }
 
 // ============================================
@@ -609,7 +621,7 @@ export async function searchPosts(query: string, locale: string) {
         return [];
     }
 
-    return data || [];
+    return (data || []).map(mapPostImages);
 }
 
 // ============================================
