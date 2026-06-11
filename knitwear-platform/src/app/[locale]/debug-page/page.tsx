@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { createAdminClient, createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export async function GET() {
+export default async function DebugPage() {
     const results: any = {
         timestamp: new Date().toISOString(),
         env: {
@@ -44,22 +44,22 @@ export async function GET() {
             error: profileError ? profileError.message : null
         };
 
-        // Check if there are columns missing from patterns table
-        const { data: patternColumns, error: patternError } = await adminClient
+        // Check columns of patterns table
+        const { data: patternsData, error: patternsError } = await adminClient
             .from('patterns')
             .select('*')
             .limit(1);
 
         results.patternsTableTest = {
-            success: !patternError,
-            error: patternError ? {
-                code: patternError.code,
-                message: patternError.message,
-                details: patternError.details
+            success: !patternsError,
+            error: patternsError ? {
+                code: patternsError.code,
+                message: patternsError.message,
+                details: patternsError.details
             } : null
         };
 
-        // Try updating a post as admin
+        // Try updating a post as admin (welcome notice post)
         const otherPostId = 'a4aca9e9-fba8-4840-981b-edc9da2c88d8';
         const { data: postBefore, error: postFetchError } = await adminClient
             .from('posts')
@@ -107,5 +107,12 @@ export async function GET() {
         };
     }
 
-    return NextResponse.json(results);
+    return (
+        <div style={{ padding: '2rem', fontFamily: 'monospace', background: '#121212', color: '#00ff00', minHeight: '100vh' }}>
+            <h1>Admin Production Debug Panel</h1>
+            <pre style={{ background: '#1e1e1e', padding: '1rem', borderRadius: '8px', overflowX: 'auto', border: '1px solid #333' }}>
+                {JSON.stringify(results, null, 2)}
+            </pre>
+        </div>
+    );
 }
