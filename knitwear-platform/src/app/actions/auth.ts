@@ -11,7 +11,7 @@ export async function login(formData: FormData) {
     // manual data extraction as we might call this from a handler
     const data = Object.fromEntries(formData)
     const email = data.email as string
-    const password = data.password as string
+    const password = (data.password as string).normalize('NFC')
 
     const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -135,7 +135,7 @@ export async function verifySignupOtp(formData: FormData) {
     const data = Object.fromEntries(formData);
     const email = data.email as string;
     const otpCode = data.otp_code as string;
-    const password = data.password as string;
+    const password = (data.password as string).normalize('NFC');
     const username = data.username as string;
     const privacyAgreed = data.privacy_policy_agreed === 'on';
     const adAgreement = data.ad_agreement === 'on';
