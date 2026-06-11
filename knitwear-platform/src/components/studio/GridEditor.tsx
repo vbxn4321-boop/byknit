@@ -2604,8 +2604,8 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         const scaleBy = 1.1;
         const oldScale = stage.scaleX();
         
-        // 좌우 대칭으로 중앙 기준 확대/축소를 위해 마우스 위치 대신 화면 중앙 좌표를 사용합니다.
-        const pointer = {
+        // 마우스 커서 위치를 기준점으로 설정하여 휠 스크롤 시 쏠림 현상을 방지합니다.
+        const pointer = stage.getPointerPosition() || {
             x: stage.width() / 2,
             y: stage.height() / 2
         };
