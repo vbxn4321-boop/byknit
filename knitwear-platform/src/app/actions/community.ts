@@ -433,18 +433,39 @@ export async function deleteComment(commentId: string) {
 
     if (!user) throw new Error('Unauthorized');
 
-    // Fetch comment to get post_id for revalidation before deletion
+    // Fetch comment to get post_id and user_id for validation
     const { data: comment } = await supabase
         .from('post_comments')
-        .select('post_id')
+        .select('post_id, user_id')
         .eq('id', commentId)
         .single();
 
-    const { error } = await supabase
+    if (!comment) throw new Error('Comment not found');
+
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    const isAdmin = profile?.role === 'admin';
+
+    if (comment.user_id !== user.id && !isAdmin) {
+        throw new Error('Unauthorized: 본인의 댓글만 삭제할 수 있습니다.');
+    }
+
+    // 관리자라면 adminClient(service_role)를 사용하여 RLS 우회 삭제
+    const clientToUse = isAdmin ? adminClient : supabase;
+    const deleteQuery = clientToUse
         .from('post_comments')
         .delete()
-        .eq('id', commentId)
-        .eq('user_id', user.id);
+        .eq('id', commentId);
+
+    if (!isAdmin) {
+        deleteQuery.eq('user_id', user.id);
+    }
+
+    const { error } = await deleteQuery;
 
     if (error) {
         console.error('Error deleting comment:', error);
@@ -637,18 +658,30 @@ export async function deletePost(postId: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
-    // 🔒 권한 검증: 본인 글만 삭제 가능
+    // 🔒 권한 검증: 본인 글 또는 관리자만 삭제 가능
     const { data: post } = await supabase
         .from('posts')
         .select('user_id')
         .eq('id', postId)
         .single();
 
-    if (!post || post.user_id !== user.id) {
+    if (!post) throw new Error('Post not found');
+
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    const isAdmin = profile?.role === 'admin';
+
+    if (post.user_id !== user.id && !isAdmin) {
         throw new Error('Unauthorized: 본인의 게시글만 삭제할 수 있습니다.');
     }
 
-    const { error } = await supabase
+    // 관리자라면 adminClient(service_role)를 사용하여 RLS 우회 삭제
+    const clientToUse = isAdmin ? adminClient : supabase;
+    const { error } = await clientToUse
         .from('posts')
         .delete()
         .eq('id', postId);

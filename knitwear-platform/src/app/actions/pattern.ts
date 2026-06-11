@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { addCredits } from "./credits";
 
@@ -105,6 +105,7 @@ export async function updatePattern(data: {
     locale: string;
 }) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -122,8 +123,16 @@ export async function updatePattern(data: {
         throw new Error(fetchError?.message || 'Pattern not found');
     }
 
+    // Check if the user is an admin
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+    const isAdmin = profile?.role === 'admin';
+
     // Check ownership (support both designer_id and author_id for backward compatibility)
-    const isOwner = existing.designer_id === user.id || (existing as any).author_id === user.id;
+    const isOwner = existing.designer_id === user.id || (existing as any).author_id === user.id || isAdmin;
     if (!isOwner) {
         console.error('Ownership check failed:', { designer_id: existing.designer_id, author_id: (existing as any).author_id, user_id: user.id });
         throw new Error('You do not have permission to edit this pattern');
@@ -154,7 +163,9 @@ export async function updatePattern(data: {
         updatePayload.price_updated_at = new Date().toISOString();
     }
 
-    const { error: updateError, count } = await supabase
+    // If admin, use adminClient to bypass RLS
+    const clientToUse = isAdmin ? adminClient : supabase;
+    const { error: updateError, count } = await clientToUse
         .from('patterns')
         .update(updatePayload, { count: 'exact' })
         .eq('id', data.id);
@@ -214,6 +225,7 @@ export async function incrementDownloadCount(patternId: string) {
 
 export async function deletePattern(patternId: string) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: 'Unauthorized' };
@@ -226,9 +238,20 @@ export async function deletePattern(patternId: string) {
         .single();
 
     if (!pattern) return { success: false, error: 'Pattern not found' };
-    if (pattern.designer_id !== user.id) return { success: false, error: 'Unauthorized' };
 
-    const { error } = await supabase
+    // Check if the user is an admin
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+    const isAdmin = profile?.role === 'admin';
+
+    if (pattern.designer_id !== user.id && !isAdmin) return { success: false, error: 'Unauthorized' };
+
+    // If admin, use adminClient to bypass RLS
+    const clientToUse = isAdmin ? adminClient : supabase;
+    const { error } = await clientToUse
         .from('patterns')
         .update({ status: 'archived' })
         .eq('id', patternId);
