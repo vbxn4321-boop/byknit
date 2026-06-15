@@ -171,7 +171,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
     };
     const getCategoryColor = (cat: string) => {
         const map: Record<string, string> = {
-            notice: 'bg-stone-900 text-white font-extrabold border border-stone-800',
+            notice: 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200',
             event: 'bg-rose-500 text-white font-extrabold',
             general: 'bg-stone-100 text-stone-600',
             showcase: 'bg-rose-50 text-rose-600',
@@ -320,7 +320,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                         className={`px-4 py-1.5 rounded-full border text-xs font-bold transition-all ${
                                             editCategory === cat 
                                                 ? (cat === 'notice' 
-                                                    ? 'bg-stone-900 text-white border-stone-900 font-extrabold' 
+                                                    ? 'bg-emerald-600 text-white border-emerald-600 font-extrabold' 
                                                     : cat === 'event'
                                                     ? 'bg-rose-500 text-white border-rose-500 font-extrabold'
                                                     : 'bg-stone-800 text-white border-stone-800') 

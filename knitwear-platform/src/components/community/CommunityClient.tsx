@@ -182,7 +182,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
 
     const getCategoryColor = (cat: string) => {
         const map: Record<string, string> = {
-            notice: 'bg-stone-900 text-white font-extrabold border border-stone-800',
+            notice: 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200',
             event: 'bg-rose-500 text-white font-extrabold',
             general: 'bg-stone-100 text-stone-600',
             showcase: 'bg-rose-50 text-rose-600',

@@ -210,7 +210,7 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                                 <span className={`px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-bold text-sm transition-all
                                     peer-checked:text-white transition-all
                                     ${cat === 'notice' 
-                                        ? 'peer-checked:bg-stone-900 peer-checked:border-stone-900' 
+                                        ? 'peer-checked:bg-emerald-600 peer-checked:border-emerald-600' 
                                         : cat === 'event'
                                         ? 'peer-checked:bg-rose-500 peer-checked:border-rose-500'
                                         : 'peer-checked:bg-stone-800 peer-checked:border-stone-800'
