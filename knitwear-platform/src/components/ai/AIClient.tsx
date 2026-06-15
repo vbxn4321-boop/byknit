@@ -220,7 +220,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                             const r = hrPixels[idx * 4];
                             const g = hrPixels[idx * 4 + 1];
                             const b = hrPixels[idx * 4 + 2];
-                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < 35) {
+                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < 15) {
                                 queue.push(idx);
                                 visited[idx] = 1;
                             }
@@ -261,7 +261,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     const nr = hrPixels[nIdx * 4];
                                     const ng = hrPixels[nIdx * 4 + 1];
                                     const nb = hrPixels[nIdx * 4 + 2];
-                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < 35) {
+                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < 15) {
                                         queue.push(nIdx);
                                         visited[nIdx] = 1;
                                     }

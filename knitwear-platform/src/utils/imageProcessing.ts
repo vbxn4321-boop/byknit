@@ -61,7 +61,7 @@ export function quantizeImage(
     
     // Check initial alpha transparency
     for (let i = 0; i < pixels.length; i += 4) {
-        if (pixels[i + 3] < 128) {
+        if (pixels[i + 3] < 30) {
             transparentMask[i / 4] = true;
         }
     }
@@ -77,7 +77,7 @@ export function quantizeImage(
                 const r = pixels[idx * 4];
                 const g = pixels[idx * 4 + 1];
                 const b = pixels[idx * 4 + 2];
-                if (colorDistance(r, g, b, bgR, bgG, bgB) < 35) {
+                if (colorDistance(r, g, b, bgR, bgG, bgB) < 15) {
                     queue.push(idx);
                     visited[idx] = 1;
                 }
@@ -119,7 +119,7 @@ export function quantizeImage(
                         const nr = pixels[nIdx * 4];
                         const ng = pixels[nIdx * 4 + 1];
                         const nb = pixels[nIdx * 4 + 2];
-                        if (colorDistance(nr, ng, nb, bgR, bgG, bgB) < 35) {
+                        if (colorDistance(nr, ng, nb, bgR, bgG, bgB) < 15) {
                             queue.push(nIdx);
                             visited[nIdx] = 1;
                         }
