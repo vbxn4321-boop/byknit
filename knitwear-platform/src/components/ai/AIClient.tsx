@@ -100,7 +100,6 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         targetWidth: 50,
         targetHeight: 50,
         maxColors: 8,
-        removeBgThreshold: 30,
     });
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,7 +220,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                             const r = hrPixels[idx * 4];
                             const g = hrPixels[idx * 4 + 1];
                             const b = hrPixels[idx * 4 + 2];
-                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < settings.removeBgThreshold) {
+                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < 15) {
                                 queue.push(idx);
                                 visited[idx] = 1;
                             }
@@ -262,7 +261,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     const nr = hrPixels[nIdx * 4];
                                     const ng = hrPixels[nIdx * 4 + 1];
                                     const nb = hrPixels[nIdx * 4 + 2];
-                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < settings.removeBgThreshold) {
+                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < 15) {
                                         queue.push(nIdx);
                                         visited[nIdx] = 1;
                                     }
@@ -295,6 +294,47 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 settings.maxColors,
                 false // Already processed at high resolution!
             );
+
+            // Quantization-based dominant border color removal (handles complex/gradient backgrounds)
+            if (removeBackground) {
+                const borderCounts = new Map<number, number>();
+                
+                // Count cluster occurrences along the borders
+                for (let x = 0; x < targetWidth; x++) {
+                    const topVal = grid[0][x];
+                    const bottomVal = grid[targetHeight - 1][x];
+                    if (topVal !== -1) borderCounts.set(topVal, (borderCounts.get(topVal) || 0) + 1);
+                    if (bottomVal !== -1) borderCounts.set(bottomVal, (borderCounts.get(bottomVal) || 0) + 1);
+                }
+                for (let y = 0; y < targetHeight; y++) {
+                    const leftVal = grid[y][0];
+                    const rightVal = grid[y][targetWidth - 1];
+                    if (leftVal !== -1) borderCounts.set(leftVal, (borderCounts.get(leftVal) || 0) + 1);
+                    if (rightVal !== -1) borderCounts.set(rightVal, (borderCounts.get(rightVal) || 0) + 1);
+                }
+
+                // Find the cluster index with the highest frequency on borders
+                let bgClusterIdx = -1;
+                let maxCount = 0;
+                borderCounts.forEach((count, idx) => {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bgClusterIdx = idx;
+                    }
+                });
+
+                // If a border cluster represents more than 15% of the total border pixels, erase it completely (set to -1)
+                const totalBorderPixels = targetWidth * 2 + targetHeight * 2;
+                if (bgClusterIdx !== -1 && maxCount > totalBorderPixels * 0.15) {
+                    for (let y = 0; y < targetHeight; y++) {
+                        for (let x = 0; x < targetWidth; x++) {
+                            if (grid[y][x] === bgClusterIdx) {
+                                grid[y][x] = -1;
+                            }
+                        }
+                    }
+                }
+            }
 
             // Preview conversion is FREE - credits are only deducted on export/editor import
 
@@ -970,26 +1010,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     {t('removeBackground')}
                                 </label>
                             </div>
-                            {removeBackground && (
-                                <div className="pl-6 space-y-1">
-                                    <label className="text-xs text-brown-500 block font-medium">
-                                        {t('removeBgThreshold')}: {settings.removeBgThreshold}
-                                    </label>
-                                    <input
-                                        type="range"
-                                        min="5"
-                                        max="80"
-                                        value={settings.removeBgThreshold}
-                                        onChange={(e) => setSettings(prev => ({ ...prev, removeBgThreshold: Number(e.target.value) }))}
-                                        className="w-full accent-rose-300 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <p className="text-[10px] text-brown-400">
-                                        {locale === 'ko' 
-                                            ? '값이 낮을수록 얼굴 피부가 더 잘 보존되며, 높을수록 그라데이션 배경이 더 깔끔하게 제거됩니다.' 
-                                            : 'Lower values preserve face details, while higher values remove gradient backgrounds better.'}
-                                    </p>
-                                </div>
-                            )}
+
                             <div>
                                 <label className="text-sm text-brown-600">{t('conversionMode')}</label>
                                 <select
