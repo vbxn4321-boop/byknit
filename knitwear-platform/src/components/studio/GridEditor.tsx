@@ -562,7 +562,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 // Convert simple color grid to GridCellData
                 const newGrid = imported.grid.map((row: number[]) =>
                     row.map(colorIdx => ({
-                        color: imported.palette[colorIdx],
+                        color: imported.palette[colorIdx] || '#ffffff',
                         symbolId: null
                     }))
                 );

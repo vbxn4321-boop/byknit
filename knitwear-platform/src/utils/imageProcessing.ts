@@ -33,82 +33,155 @@ export function quantizeImage(
     pixels: Uint8ClampedArray,
     width: number,
     height: number,
-    maxColors: number
+    maxColors: number,
+    removeBackground?: boolean
 ): QuantizationResult {
+    // Detect background color from corners if removeBackground is enabled
+    let bgR = 255, bgG = 255, bgB = 255, hasBg = false;
+    if (removeBackground) {
+        const corners = [
+            0,
+            (width - 1) * 4,
+            (height - 1) * width * 4,
+            (height * width - 1) * 4
+        ];
+        for (const idx of corners) {
+            if (pixels[idx + 3] >= 128) {
+                bgR = pixels[idx];
+                bgG = pixels[idx + 1];
+                bgB = pixels[idx + 2];
+                hasBg = true;
+                break;
+            }
+        }
+    }
+
     // 1. Gather all non-transparent pixels
     const allColors: [number, number, number][] = [];
+    const transparentMask: boolean[] = new Array(width * height);
+    
     for (let i = 0; i < pixels.length; i += 4) {
-        // Skip fully transparent pixels? 
-        // Our previous logic flattened to white, so alpha should be 255 mostly.
-        // But let's check just in case.
-        if (pixels[i + 3] < 128) continue;
-        allColors.push([pixels[i], pixels[i + 1], pixels[i + 2]]);
+        const r = pixels[i];
+        const g = pixels[i + 1];
+        const b = pixels[i + 2];
+        const a = pixels[i + 3];
+
+        let isTransparent = a < 128;
+
+        if (!isTransparent && removeBackground && hasBg) {
+            const dist = colorDistance(r, g, b, bgR, bgG, bgB);
+            if (dist < 35) { // Euclidean distance threshold
+                isTransparent = true;
+            }
+        }
+
+        transparentMask[i / 4] = isTransparent;
+
+        if (!isTransparent) {
+            allColors.push([r, g, b]);
+        }
     }
 
     if (allColors.length === 0) {
-        return { palette: ['#FFFFFF'], grid: Array(height).fill(Array(width).fill(0)) };
+        return { palette: ['#FFFFFF'], grid: Array(height).fill(null).map(() => Array(width).fill(0)) };
     }
 
-    // 2. Initialize Centers (K-Means)
-    // We'll pick random pixels as starting points
+    // Find unique colors to handle simple images/pixel art and clean initialization
+    const uniqueColorMap = new Map<string, [number, number, number]>();
+    for (const [r, g, b] of allColors) {
+        const hex = rgbToHex(r, g, b);
+        if (!uniqueColorMap.has(hex)) {
+            uniqueColorMap.set(hex, [r, g, b]);
+        }
+    }
+    const uniqueColors = Array.from(uniqueColorMap.values());
+
     let centers: [number, number, number][] = [];
-    if (allColors.length <= maxColors) {
-        centers = allColors;
+
+    if (uniqueColors.length <= maxColors) {
+        // If image has fewer colors than requested, use them directly
+        centers = uniqueColors;
     } else {
-        // Random initialization
-        for (let i = 0; i < maxColors; i++) {
-            centers.push(allColors[Math.floor(Math.random() * allColors.length)]);
+        // Initialize using furthest-point (Greedy Maxmin) heuristic from unique colors
+        centers.push(uniqueColors[0]);
+        while (centers.length < maxColors) {
+            let maxDist = -1;
+            let furthestIdx = 0;
+            for (let i = 0; i < uniqueColors.length; i++) {
+                const [r, g, b] = uniqueColors[i];
+                let minDist = Infinity;
+                for (let c = 0; c < centers.length; c++) {
+                    const dist = colorDistance(r, g, b, centers[c][0], centers[c][1], centers[c][2]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                    }
+                }
+                if (minDist > maxDist) {
+                    maxDist = minDist;
+                    furthestIdx = i;
+                }
+            }
+            centers.push(uniqueColors[furthestIdx]);
         }
-    }
 
-    // 3. K-Means Iterations
-    const MAX_ITERATIONS = 5; // Fast approximation is enough for UI
+        // K-Means Iterations to optimize the centers
+        const MAX_ITERATIONS = 10;
+        for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
+            const sums: [number, number, number][] = centers.map(() => [0, 0, 0]);
+            const counts: number[] = centers.map(() => 0);
 
-    for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
-        // Assign points to nearest center
-        const assignments: number[] = new Array(allColors.length);
-        const sums: [number, number, number][] = centers.map(() => [0, 0, 0]);
-        const counts: number[] = centers.map(() => 0);
+            for (let i = 0; i < allColors.length; i++) {
+                const [r, g, b] = allColors[i];
+                let minDist = Infinity;
+                let bestCenter = 0;
 
-        for (let i = 0; i < allColors.length; i++) {
-            const [r, g, b] = allColors[i];
-            let minDist = Infinity;
-            let bestCenter = 0;
+                for (let c = 0; c < centers.length; c++) {
+                    const dist = colorDistance(r, g, b, centers[c][0], centers[c][1], centers[c][2]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        bestCenter = c;
+                    }
+                }
+                sums[bestCenter][0] += r;
+                sums[bestCenter][1] += g;
+                sums[bestCenter][2] += b;
+                counts[bestCenter]++;
+            }
 
+            let changed = false;
             for (let c = 0; c < centers.length; c++) {
-                const dist = colorDistance(r, g, b, centers[c][0], centers[c][1], centers[c][2]);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestCenter = c;
+                if (counts[c] > 0) {
+                    const newR = sums[c][0] / counts[c];
+                    const newG = sums[c][1] / counts[c];
+                    const newB = sums[c][2] / counts[c];
+
+                    if (Math.abs(newR - centers[c][0]) > 1 || Math.abs(newG - centers[c][1]) > 1 || Math.abs(newB - centers[c][2]) > 1) {
+                        changed = true;
+                    }
+                    centers[c] = [newR, newG, newB];
+                } else {
+                    // Re-initialize to the furthest unique color from other active centers
+                    let maxDist = -1;
+                    let furthestIdx = 0;
+                    for (let i = 0; i < uniqueColors.length; i++) {
+                        const [r, g, b] = uniqueColors[i];
+                        let minDist = Infinity;
+                        for (let tempC = 0; tempC < centers.length; tempC++) {
+                            if (tempC === c || counts[tempC] === 0) continue;
+                            const dist = colorDistance(r, g, b, centers[tempC][0], centers[tempC][1], centers[tempC][2]);
+                            if (dist < minDist) minDist = dist;
+                        }
+                        if (minDist > maxDist) {
+                            maxDist = minDist;
+                            furthestIdx = i;
+                        }
+                    }
+                    centers[c] = uniqueColors[furthestIdx];
                 }
             }
-            assignments[i] = bestCenter;
-            sums[bestCenter][0] += r;
-            sums[bestCenter][1] += g;
-            sums[bestCenter][2] += b;
-            counts[bestCenter]++;
+
+            if (!changed) break;
         }
-
-        // Recalculate centers
-        let changed = false;
-        for (let c = 0; c < centers.length; c++) {
-            if (counts[c] > 0) {
-                const newR = sums[c][0] / counts[c];
-                const newG = sums[c][1] / counts[c];
-                const newB = sums[c][2] / counts[c];
-
-                // Check convergence (simple check)
-                if (Math.abs(newR - centers[c][0]) > 1 || Math.abs(newG - centers[c][1]) > 1 || Math.abs(newB - centers[c][2]) > 1) {
-                    changed = true;
-                }
-                centers[c] = [newR, newG, newB];
-            } else {
-                // If a center has no points, re-initialize it to a random point
-                centers[c] = allColors[Math.floor(Math.random() * allColors.length)];
-            }
-        }
-
-        if (!changed) break;
     }
 
     // 4. Create Palette
@@ -116,30 +189,31 @@ export function quantizeImage(
 
     // 5. Create Grid
     const grid: number[][] = [];
-    let pixelIdx = 0;
+    let idx = 0;
 
     for (let y = 0; y < height; y++) {
         const row: number[] = [];
         for (let x = 0; x < width; x++) {
-            const r = pixels[pixelIdx];
-            const g = pixels[pixelIdx + 1];
-            const b = pixels[pixelIdx + 2];
-            const a = pixels[pixelIdx + 3];
+            if (transparentMask[idx]) {
+                row.push(-1); // Transparent/ignored
+            } else {
+                const r = pixels[idx * 4];
+                const g = pixels[idx * 4 + 1];
+                const b = pixels[idx * 4 + 2];
 
-            // Re-find nearest center for the final grid
-            // (We could cached this if we tracked pixel positions, but re-calculating map is fast for small grids)
-            let minDist = Infinity;
-            let bestCenter = 0;
+                let minDist = Infinity;
+                let bestCenter = 0;
 
-            for (let c = 0; c < centers.length; c++) {
-                const dist = colorDistance(r, g, b, centers[c][0], centers[c][1], centers[c][2]);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestCenter = c;
+                for (let c = 0; c < centers.length; c++) {
+                    const dist = colorDistance(r, g, b, centers[c][0], centers[c][1], centers[c][2]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        bestCenter = c;
+                    }
                 }
+                row.push(bestCenter);
             }
-            row.push(bestCenter);
-            pixelIdx += 4;
+            idx++;
         }
         grid.push(row);
     }

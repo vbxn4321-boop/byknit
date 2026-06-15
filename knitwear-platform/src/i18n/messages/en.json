@@ -290,6 +290,7 @@
       "convert": "Convert to Chart",
       "converting": "Converting...",
       "maintainAspectRatio": "Maintain Aspect Ratio",
+      "removeBackground": "Remove Background (Solid)",
       "conversionMode": "Conversion Mode",
       "modePhoto": "Smooth Style",
       "modePixel": "Sharp Style",

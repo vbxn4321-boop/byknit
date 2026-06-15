@@ -95,6 +95,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
     const [maintainAspectRatio, setMaintainAspectRatio] = useState(true);
     const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
     const [conversionMode, setConversionMode] = useState<'photo' | 'pixel'>('photo');
+    const [removeBackground, setRemoveBackground] = useState(false);
     const [settings, setSettings] = useState({
         targetWidth: 50,
         targetHeight: 50,
@@ -177,12 +178,11 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
             const offscreenCtx = offscreenCanvas.getContext('2d');
             if (!offscreenCtx) throw new Error('Could not get offscreen context');
 
-            // Fill white on offscreen canvas first
-            offscreenCtx.fillStyle = '#FFFFFF';
-            offscreenCtx.fillRect(0, 0, img.width, img.height);
+            // Clear offscreen canvas first to preserve image transparency
+            offscreenCtx.clearRect(0, 0, img.width, img.height);
             offscreenCtx.drawImage(img, 0, 0);
 
-            // Draw the flattened image onto the target resizing canvas
+            // Draw the image onto the target resizing canvas
             // Disable smoothing for sharp pixelation (prevents color bleeding artifacts)
             // Use 'photo' (smooth) for complex images to avoid aliasing artifacts
             // Use 'pixel' (sharp) for pixel art to preserve edges
@@ -198,7 +198,8 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 pixels,
                 targetWidth,
                 targetHeight,
-                settings.maxColors
+                settings.maxColors,
+                removeBackground
             );
 
             // Preview conversion is FREE - credits are only deducted on export/editor import
@@ -238,10 +239,17 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         for (let y = 0; y < result.height; y++) {
             for (let x = 0; x < result.width; x++) {
                 const colorIdx = result.grid[y][x];
-                ctx.fillStyle = result.palette[colorIdx] || '#FFFFFF';
-                // Solid pixels without gaps for cleaner preview
-                // Add slight overlap (0.5) to prevent sub-pixel rendering gaps
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize + 0.5, cellSize + 0.5);
+                if (colorIdx === -1) {
+                    // Draw subtle checkerboard pattern for transparent cells
+                    const isEven = (Math.floor(x / 2) + Math.floor(y / 2)) % 2 === 0;
+                    ctx.fillStyle = isEven ? '#F8FAFC' : '#E2E8F0';
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize + 0.5, cellSize + 0.5);
+                } else {
+                    ctx.fillStyle = result.palette[colorIdx] || '#FFFFFF';
+                    // Solid pixels without gaps for cleaner preview
+                    // Add slight overlap (0.5) to prevent sub-pixel rendering gaps
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize + 0.5, cellSize + 0.5);
+                }
             }
         }
     }, [result]);
@@ -854,6 +862,18 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                 />
                                 <label htmlFor="maintainAspectRatio" className="text-sm text-brown-600 cursor-pointer select-none">
                                     {t('maintainAspectRatio')}
+                                </label>
+                            </div>
+                            <div className="flex items-center gap-2 pt-1">
+                                <input
+                                    type="checkbox"
+                                    id="removeBackground"
+                                    checked={removeBackground}
+                                    onChange={(e) => setRemoveBackground(e.target.checked)}
+                                    className="accent-rose-300 w-4 h-4"
+                                />
+                                <label htmlFor="removeBackground" className="text-sm text-brown-600 cursor-pointer select-none">
+                                    {t('removeBackground')}
                                 </label>
                             </div>
                             <div>

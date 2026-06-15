@@ -5,13 +5,23 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 def process_image(image_path, target_width, n_colors=8):
-    # 1. Load Image
-    img = cv2.imread(image_path)
+    # 1. Load Image with alpha channel if present
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     if img is None:
         return json.dumps({"error": "Failed to load image"})
     
-    # Convert BGR to RGB
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Handle transparent PNGs by blending over white background
+    if len(img.shape) == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    elif img.shape[2] == 4:
+        alpha = img[:, :, 3] / 255.0
+        alpha = np.expand_dims(alpha, axis=2)
+        bgr = img[:, :, :3]
+        white_bg = np.ones_like(bgr, dtype=np.uint8) * 255
+        img = (bgr * alpha + white_bg * (1.0 - alpha)).astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    else:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
     # 2. Resizing
     h, w, _ = img.shape

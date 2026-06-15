@@ -291,6 +291,7 @@
       "convert": "차트로 변환하기",
       "converting": "변환 중...",
       "maintainAspectRatio": "비율 유지",
+      "removeBackground": "배경 제거 (단색 배경)",
       "conversionMode": "변환 모드",
       "modePhoto": "부드럽게",
       "modePixel": "선명하게",
