@@ -308,7 +308,8 @@
       "download": "다운로드",
       "editInEditor": "에디터에서 수정하기",
       "resultInfo": "변환 결과: {width} x {height}",
-      "stitchCount": "{count} 코"
+      "stitchCount": "{count} 코",
+      "removeBgThreshold": "배경 제거 범위 (허용치)"
     },
     "chatToPattern": {
       "title": "대화로 도안 만들기",

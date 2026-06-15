@@ -100,6 +100,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         targetWidth: 50,
         targetHeight: 50,
         maxColors: 8,
+        removeBgThreshold: 30,
     });
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,7 +221,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                             const r = hrPixels[idx * 4];
                             const g = hrPixels[idx * 4 + 1];
                             const b = hrPixels[idx * 4 + 2];
-                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < 15) {
+                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < settings.removeBgThreshold) {
                                 queue.push(idx);
                                 visited[idx] = 1;
                             }
@@ -261,7 +262,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     const nr = hrPixels[nIdx * 4];
                                     const ng = hrPixels[nIdx * 4 + 1];
                                     const nb = hrPixels[nIdx * 4 + 2];
-                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < 15) {
+                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < settings.removeBgThreshold) {
                                         queue.push(nIdx);
                                         visited[nIdx] = 1;
                                     }
@@ -969,6 +970,26 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                     {t('removeBackground')}
                                 </label>
                             </div>
+                            {removeBackground && (
+                                <div className="pl-6 space-y-1">
+                                    <label className="text-xs text-brown-500 block font-medium">
+                                        {t('removeBgThreshold')}: {settings.removeBgThreshold}
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="5"
+                                        max="80"
+                                        value={settings.removeBgThreshold}
+                                        onChange={(e) => setSettings(prev => ({ ...prev, removeBgThreshold: Number(e.target.value) }))}
+                                        className="w-full accent-rose-300 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <p className="text-[10px] text-brown-400">
+                                        {locale === 'ko' 
+                                            ? '값이 낮을수록 얼굴 피부가 더 잘 보존되며, 높을수록 그라데이션 배경이 더 깔끔하게 제거됩니다.' 
+                                            : 'Lower values preserve face details, while higher values remove gradient backgrounds better.'}
+                                    </p>
+                                </div>
+                            )}
                             <div>
                                 <label className="text-sm text-brown-600">{t('conversionMode')}</label>
                                 <select

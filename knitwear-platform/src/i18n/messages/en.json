@@ -307,7 +307,8 @@
       "download": "Download Chart",
       "editInEditor": "Edit in Pattern Editor",
       "resultInfo": "Result: {width} x {height}",
-      "stitchCount": "{count} sts"
+      "stitchCount": "{count} sts",
+      "removeBgThreshold": "Background Removal Tolerance"
     },
     "chatToPattern": {
       "title": "Chat to Pattern",
