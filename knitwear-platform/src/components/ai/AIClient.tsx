@@ -351,7 +351,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         if (!result) return;
         
         const isDemo = typeof window !== 'undefined' && (window as any).isDemoActive;
-        if (!isDemo && credits < 10) {
+        if (!isDemo && credits < 50) {
             alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
@@ -434,7 +434,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         if (!result) return;
         
         const isDemo = typeof window !== 'undefined' && (window as any).isDemoActive;
-        if (!isDemo && credits < 10) {
+        if (!isDemo && credits < 50) {
             alert(locale === 'ko' ? '크레딧이 부족합니다.' : 'Insufficient credits.');
             return;
         }
@@ -1102,7 +1102,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                         <span>{t('download')}</span>
                                         <div className="flex items-center gap-1 ml-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
                                             <Coins className="w-3 h-3 text-amber-500" />
-                                            <span>-10</span>
+                                            <span>-50</span>
                                         </div>
                                     </button>
                                     <button
@@ -1113,7 +1113,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                                         <span>{t('editInEditor')}</span>
                                         <div className="flex items-center gap-1 ml-1 px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-bold border border-amber-200 text-amber-600 shadow-sm transition-transform group-hover:scale-105">
                                             <Coins className="w-3 h-3 text-amber-500" />
-                                            <span>-10</span>
+                                            <span>-50</span>
                                         </div>
                                     </button>
                                 </div>
