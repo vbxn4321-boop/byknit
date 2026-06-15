@@ -4138,7 +4138,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                 {/* Mode Toggle: Knitting / Crochet */}
                 <div className="inline-flex p-1 rounded-full bg-cream-100 border border-tan-200">
                     <button
-                        onClick={() => setEditorMode('knitting')}
+                        onClick={() => {
+                            setEditorMode('knitting');
+                            setSelectedSymbol('knit');
+                            if (activeTool !== 'bucket' && activeTool !== 'eyedropper') {
+                                setActiveTool('symbol');
+                            }
+                        }}
                         className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'knitting'
                             ? 'bg-white text-brown-700 shadow-soft'
                             : 'text-stone-500 hover:text-stone-700'
@@ -4147,7 +4153,13 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                         {tEditor('modeKnitting')}
                     </button>
                     <button
-                        onClick={() => setEditorMode('crochet')}
+                        onClick={() => {
+                            setEditorMode('crochet');
+                            setSelectedSymbol('sc'); // Default to 'sc' (single crochet / 짧은뜨기)
+                            if (activeTool !== 'bucket' && activeTool !== 'eyedropper') {
+                                setActiveTool('symbol');
+                            }
+                        }}
                         className={`px-2.5 py-1 rounded-full font-medium text-xs sm:text-sm transition-all flex items-center gap-1.5 ${editorMode === 'crochet'
                             ? 'bg-white text-brown-700 shadow-soft'
                             : 'text-stone-500 hover:text-stone-700'
