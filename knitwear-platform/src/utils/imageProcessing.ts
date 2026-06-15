@@ -56,29 +56,84 @@ export function quantizeImage(
         }
     }
 
-    // 1. Gather all non-transparent pixels
-    const allColors: [number, number, number][] = [];
-    const transparentMask: boolean[] = new Array(width * height);
+    // Initialize masks
+    const transparentMask: boolean[] = new Array(width * height).fill(false);
     
+    // Check initial alpha transparency
     for (let i = 0; i < pixels.length; i += 4) {
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
-        const a = pixels[i + 3];
+        if (pixels[i + 3] < 128) {
+            transparentMask[i / 4] = true;
+        }
+    }
 
-        let isTransparent = a < 128;
+    if (removeBackground && hasBg) {
+        // BFS Flood-fill starting from all border pixels that match the background color
+        const visited = new Uint8Array(width * height);
+        const queue: number[] = [];
 
-        if (!isTransparent && removeBackground && hasBg) {
-            const dist = colorDistance(r, g, b, bgR, bgG, bgB);
-            if (dist < 35) { // Euclidean distance threshold
-                isTransparent = true;
+        // Helper to check and enqueue border seeds
+        const checkAndEnqueue = (idx: number) => {
+            if (!visited[idx] && !transparentMask[idx]) {
+                const r = pixels[idx * 4];
+                const g = pixels[idx * 4 + 1];
+                const b = pixels[idx * 4 + 2];
+                if (colorDistance(r, g, b, bgR, bgG, bgB) < 35) {
+                    queue.push(idx);
+                    visited[idx] = 1;
+                }
             }
+        };
+
+        // Top and Bottom borders
+        for (let x = 0; x < width; x++) {
+            checkAndEnqueue(x);
+            checkAndEnqueue((height - 1) * width + x);
+        }
+        // Left and Right borders
+        for (let y = 0; y < height; y++) {
+            checkAndEnqueue(y * width);
+            checkAndEnqueue(y * width + (width - 1));
         }
 
-        transparentMask[i / 4] = isTransparent;
+        // Run Breadth-First Search
+        let head = 0;
+        while (head < queue.length) {
+            const currIdx = queue[head++];
+            transparentMask[currIdx] = true;
 
-        if (!isTransparent) {
-            allColors.push([r, g, b]);
+            const cx = currIdx % width;
+            const cy = Math.floor(currIdx / width);
+
+            // 4-neighborhood
+            const neighbors = [
+                [cx - 1, cy],
+                [cx + 1, cy],
+                [cx, cy - 1],
+                [cx, cy + 1]
+            ];
+
+            for (const [nx, ny] of neighbors) {
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const nIdx = ny * width + nx;
+                    if (!visited[nIdx] && !transparentMask[nIdx]) {
+                        const nr = pixels[nIdx * 4];
+                        const ng = pixels[nIdx * 4 + 1];
+                        const nb = pixels[nIdx * 4 + 2];
+                        if (colorDistance(nr, ng, nb, bgR, bgG, bgB) < 35) {
+                            queue.push(nIdx);
+                            visited[nIdx] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Gather all non-transparent pixels
+    const allColors: [number, number, number][] = [];
+    for (let i = 0; i < transparentMask.length; i++) {
+        if (!transparentMask[i]) {
+            allColors.push([pixels[i * 4], pixels[i * 4 + 1], pixels[i * 4 + 2]]);
         }
     }
 
