@@ -169,6 +169,17 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
         if (hours < 24) return t('time.hoursAgo', { count: hours });
         return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
     };
+    const getCategoryColor = (cat: string) => {
+        const map: Record<string, string> = {
+            notice: 'bg-stone-900 text-white font-extrabold border border-stone-800',
+            event: 'bg-rose-500 text-white font-extrabold',
+            general: 'bg-stone-100 text-stone-600',
+            showcase: 'bg-rose-50 text-rose-600',
+            qna: 'bg-sky-50 text-sky-600',
+            tip: 'bg-amber-50 text-amber-600'
+        };
+        return map[cat] || 'bg-stone-100 text-stone-600';
+    };
 
     const getCategoryLabel = (cat: string) => {
         return t(`categories.${cat}`, { defaultValue: cat });
@@ -298,13 +309,22 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                         {/* Category */}
                         {isEditing ? (
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {['general', 'showcase', 'qna', 'tip'].map((cat) => (
+                                {(isAdmin 
+                                    ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip'] 
+                                    : ['general', 'showcase', 'qna', 'tip']
+                                ).map((cat) => (
                                     <button
                                         key={cat}
                                         type="button"
                                         onClick={() => setEditCategory(cat)}
                                         className={`px-4 py-1.5 rounded-full border text-xs font-bold transition-all ${
-                                            editCategory === cat ? 'bg-stone-800 text-white border-stone-800' : 'border-stone-200 text-stone-500'
+                                            editCategory === cat 
+                                                ? (cat === 'notice' 
+                                                    ? 'bg-stone-900 text-white border-stone-900 font-extrabold' 
+                                                    : cat === 'event'
+                                                    ? 'bg-rose-500 text-white border-rose-500 font-extrabold'
+                                                    : 'bg-stone-800 text-white border-stone-800') 
+                                                : 'border-stone-200 text-stone-500'
                                         }`}
                                     >
                                         #{t(`categories.${cat}`, { defaultValue: cat })}
@@ -312,7 +332,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                 ))}
                             </div>
                         ) : (
-                            <span className="inline-block px-3 py-1 rounded-lg bg-stone-100 text-stone-600 text-xs font-bold mb-4">
+                            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold mb-4 ${getCategoryColor(post.category)}`}>
                                 #{getCategoryLabel(post.category)}
                             </span>
                         )}

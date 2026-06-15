@@ -32,6 +32,7 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const [user, setUser] = useState<any>(null);
+    const [userRole, setUserRole] = useState<string>('knitter');
     const [loadingAuth, setLoadingAuth] = useState(true);
 
     useEffect(() => {
@@ -39,6 +40,14 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
         async function checkAuth() {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                setUserRole(profile?.role || 'knitter');
+            }
             setLoadingAuth(false);
         }
         checkAuth();
@@ -186,11 +195,27 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                 <form id="write-form" onSubmit={handleSubmit} className="space-y-12">
                     {/* Category Selection */}
                     <div className="flex flex-wrap gap-3">
-                        {['general', 'showcase', 'qna', 'tip'].map((cat) => (
+                        {(userRole === 'admin'
+                            ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip']
+                            : ['general', 'showcase', 'qna', 'tip']
+                        ).map((cat) => (
                             <label key={cat} className="cursor-pointer">
-                                <input type="radio" name="category" value={cat} className="hidden peer" defaultChecked={cat === 'general'} />
-                                <span className="px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-bold text-sm peer-checked:bg-stone-800 peer-checked:text-white peer-checked:border-stone-800 transition-all">
-                                    #{cat === 'general' ? '자유' : cat === 'qna' ? '질문' : cat === 'showcase' ? '자랑' : '팁'}
+                                <input 
+                                    type="radio" 
+                                    name="category" 
+                                    value={cat} 
+                                    className="hidden peer" 
+                                    defaultChecked={cat === (userRole === 'admin' ? 'notice' : 'general')} 
+                                />
+                                <span className={`px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-bold text-sm transition-all
+                                    peer-checked:text-white transition-all
+                                    ${cat === 'notice' 
+                                        ? 'peer-checked:bg-stone-900 peer-checked:border-stone-900' 
+                                        : cat === 'event'
+                                        ? 'peer-checked:bg-rose-500 peer-checked:border-rose-500'
+                                        : 'peer-checked:bg-stone-800 peer-checked:border-stone-800'
+                                    }`}>
+                                    #{cat === 'notice' ? '공지사항' : cat === 'event' ? '이벤트' : cat === 'general' ? '자유' : cat === 'qna' ? '질문' : cat === 'showcase' ? '자랑' : '팁'}
                                 </span>
                             </label>
                         ))}

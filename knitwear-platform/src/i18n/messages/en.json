@@ -1021,6 +1021,8 @@
     "writePost": "Write Post",
     "categories": {
       "all": "All",
+      "notice": "Notice",
+      "event": "Event",
       "general": "Free Talk",
       "showcase": "Showcase",
       "qna": "Q&A",

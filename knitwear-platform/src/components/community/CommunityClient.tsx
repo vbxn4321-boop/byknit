@@ -89,19 +89,22 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                 );
             }
 
-            let filtered = [...posts];
-
             if (listFilter === 'popular') {
-                // 🔒 좋아요가 1개 이상 달린 게시글만 노출
-                filtered = filtered.filter(p => (p.likes?.[0]?.count || 0) > 0);
-                
-                filtered = [...filtered].sort((a, b) => {
-                    const aLikes = a.likes?.[0]?.count || 0;
-                    const bLikes = b.likes?.[0]?.count || 0;
-                    return bLikes - aLikes;
-                });
+                const notices = posts.filter(p => p.category === 'notice');
+                const populars = posts
+                    .filter(p => p.category !== 'notice' && (p.likes?.[0]?.count || 0) > 0)
+                    .sort((a, b) => {
+                        const aLikes = a.likes?.[0]?.count || 0;
+                        const bLikes = b.likes?.[0]?.count || 0;
+                        return bLikes - aLikes;
+                    });
+                return [...notices, ...populars];
             }
-            return filtered;
+
+            // latest filter
+            const notices = posts.filter(p => p.category === 'notice');
+            const regulars = posts.filter(p => p.category !== 'notice');
+            return [...notices, ...regulars];
         })();
 
     const getPatternTitle = (title: any): string => {
@@ -179,6 +182,8 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
 
     const getCategoryColor = (cat: string) => {
         const map: Record<string, string> = {
+            notice: 'bg-stone-900 text-white font-extrabold border border-stone-800',
+            event: 'bg-rose-500 text-white font-extrabold',
             general: 'bg-stone-100 text-stone-600',
             showcase: 'bg-rose-50 text-rose-600',
             qna: 'bg-sky-50 text-sky-600',
@@ -394,6 +399,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             <div className="flex gap-3 mb-3">
                                                 <div className="flex-1 min-w-0">
                                                     <Link href={`/community/${post.id}`} className="font-bold text-stone-800 text-sm hover:text-rose-500 transition-colors block mb-1 truncate">
+                                                        {post.category === 'notice' && <span className="mr-1">📌</span>}
                                                         {post.title}
                                                     </Link>
                                                     {post.pattern && (
@@ -482,6 +488,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <Link href={`/community/${post.id}`} className="font-bold text-stone-800 text-sm truncate group-hover:text-rose-500 transition-colors cursor-pointer">
+                                                         {post.category === 'notice' && <span className="mr-1">📌</span>}
                                                         {post.title}
                                                     </Link>
                                                     {/* Credit Badge */}

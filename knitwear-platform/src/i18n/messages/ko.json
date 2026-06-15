@@ -1023,6 +1023,8 @@
     "writePost": "글쓰기",
     "categories": {
       "all": "전체",
+      "notice": "공지사항",
+      "event": "이벤트",
       "general": "자유",
       "showcase": "자랑",
       "qna": "질문",
