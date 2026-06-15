@@ -231,6 +231,14 @@ export async function publishPattern(projectId: string, metadata: {
         return { error: insertError.message };
     }
 
+    // Award credits for uploading a pattern
+    try {
+        const { addCredits } = await import('./credits');
+        await addCredits(user.id, 100, 'Pattern Upload Reward');
+    } catch (creditError) {
+        console.error('Failed to award credits:', creditError);
+    }
+
     revalidatePath('/marketplace');
     return { success: true, patternId: pattern.id };
 }

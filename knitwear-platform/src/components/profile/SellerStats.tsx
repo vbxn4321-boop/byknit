@@ -54,7 +54,7 @@ export function SellerStats({
             key: 'sales' as const,
             label: locale === 'ko' ? '판매' : 'Sales',
             value: totalSales,
-            subValue: `$${totalRevenue.toLocaleString()}`,
+            subValue: `${totalRevenue.toLocaleString()} ${locale === 'ko' ? '크레딧' : 'Credits'}`,
             icon: TrendingUp,
             bgColor: 'bg-peach-50',
             iconColor: 'text-peach-500',
@@ -446,7 +446,7 @@ export function SellerStats({
                                 </p>
                                 {selectedStat === 'sales' && (
                                     <p className="text-sm text-brown-400 font-bold">
-                                        ({locale === 'ko' ? '수익' : 'Revenue'}: ${totalRevenue.toLocaleString()})
+                                        ({locale === 'ko' ? '수익' : 'Revenue'}: {totalRevenue.toLocaleString()} {locale === 'ko' ? '크레딧' : 'Credits'})
                                     </p>
                                 )}
                             </div>

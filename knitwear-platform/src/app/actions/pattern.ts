@@ -87,7 +87,7 @@ export async function createPdfPattern(data: {
 
     // Award credits for uploading a pattern
     try {
-        await addCredits(user.id, 3, 'Pattern Upload Reward');
+        await addCredits(user.id, 100, 'Pattern Upload Reward');
     } catch (creditError) {
         console.error('Failed to award credits:', creditError);
     }

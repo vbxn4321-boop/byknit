@@ -113,6 +113,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
     const [publishMetadata, setPublishMetadata] = useState({
         title: initialData?.title || '',
         price: initialData?.price ? (typeof initialData.price === 'string' ? parseFloat(initialData.price) : initialData.price) : 0,
+        isFree: initialData?.price ? false : true,
         difficulty: initialData?.difficulty || 'intermediate',
         category: initialData?.category || 'clothing',
         subcategory: '',
@@ -261,7 +262,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             const payload: any = {
                 ...publishMetadata,
                 pdfUrl,
-                price: Number(publishMetadata.price),
+                price: publishMetadata.isFree ? 0 : Number(publishMetadata.price),
                 gauge: String(publishMetadata.gaugeStitches),
                 yarnAmount: String(publishMetadata.yardage || ''),
                 gaugeStitches: parseInt(String(publishMetadata.gaugeStitches)) || 0,
@@ -449,18 +450,18 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                             <label className="text-base font-bold text-stone-800">
                                 {tPublish('fields.price')} <span className="text-rose-500">*</span>
                                 <span className="text-xs font-normal text-stone-400 ml-1.5">
-                                    ({isKo ? 'KRW' : 'USD'})
+                                    ({isKo ? '크레딧' : 'Credits'})
                                 </span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer group bg-stone-50 px-3 py-1.5 rounded-full hover:bg-stone-100 transition-colors">
-                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${publishMetadata.price === 0 ? 'bg-rose-500 border-rose-500' : 'border-stone-300 group-hover:border-rose-400'}`}>
-                                    {publishMetadata.price === 0 && <Check size={10} className="text-white" />}
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${publishMetadata.isFree ? 'bg-rose-500 border-rose-500' : 'border-stone-300 group-hover:border-rose-400'}`}>
+                                    {publishMetadata.isFree && <Check size={10} className="text-white" />}
                                 </div>
                                 <input
                                     type="checkbox"
                                     className="hidden"
-                                    checked={publishMetadata.price === 0}
-                                    onChange={e => setPublishMetadata(p => ({ ...p, price: e.target.checked ? 0 : (isKo ? 5000 : 5) }))}
+                                    checked={publishMetadata.isFree || false}
+                                    onChange={e => setPublishMetadata(p => ({ ...p, isFree: e.target.checked, price: e.target.checked ? 0 : 100 }))}
                                 />
                                 <span className="text-xs font-bold text-stone-500 group-hover:text-rose-600 transition-colors uppercase tracking-wider">{tPublish('fields.freeLabel')}</span>
                             </label>
@@ -469,18 +470,15 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                             <input
                                 type="number"
                                 min="0"
-                                step={isKo ? "100" : "0.1"}
-                                disabled={publishMetadata.price === 0}
+                                step="10"
+                                disabled={publishMetadata.isFree}
                                 className="w-full border border-tan-200 rounded-xl px-4 py-3.5 text-stone-800 font-bold text-lg focus:ring-4 focus:ring-rose-100 outline-none disabled:bg-stone-50 disabled:text-stone-300 transition-all font-mono"
-                                value={publishMetadata.price === 0 ? '0' : publishMetadata.price}
+                                value={publishMetadata.isFree ? '0' : (publishMetadata.price === 0 ? '' : publishMetadata.price.toString())}
                                 onChange={e => setPublishMetadata(p => ({ ...p, price: parseFloat(e.target.value) || 0 }))}
                                 placeholder="0"
                             />
                             <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-bold bg-white px-2 pointer-events-none">
-                                {isKo
-                                    ? `≈ $${(publishMetadata.price / 1450).toFixed(2)}`
-                                    : `≈ ₩${Math.round(publishMetadata.price * 1450).toLocaleString()}`
-                                }
+                                {isKo ? '크레딧' : 'Credits'}
                             </div>
                         </div>
                     </div>

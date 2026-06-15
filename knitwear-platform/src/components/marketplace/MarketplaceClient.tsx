@@ -474,7 +474,7 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
                         </span>
                     ) : (
                         <span className="glass-premium px-3 py-1 rounded-full shadow-sm text-brown-800 font-bold text-xs backdrop-blur-md border border-white/50">
-                            ${pattern.price_usd}
+                            {pattern.price_usd} {locale === 'ko' ? '크레딧' : 'Credits'}
                         </span>
                     )}
                 </div>

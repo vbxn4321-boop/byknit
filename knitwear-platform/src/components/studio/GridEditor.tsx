@@ -191,6 +191,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     const [publishMetadata, setPublishMetadata] = useState<{
         title: string;
         price: number;
+        isFree?: boolean;
         craftType: 'knitting' | 'crochet' | 'mixed' | 'other';
         category: string;
         subcategory?: string;
@@ -211,6 +212,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
     }>({
         title: '',
         price: 0,
+        isFree: true,
         craftType: 'knitting',
         category: 'clothing',
         difficulty: 'intermediate',
@@ -3454,6 +3456,7 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
         try {
             const res = await publishPattern(projectId, {
                 ...publishMetadata,
+                price: publishMetadata.isFree ? 0 : publishMetadata.price,
                 needles: compiledNeedles || '3.5mm', // Auto-compiled needles
                 title: publishMetadata.title || projectTitle // Ensure title is set
             });
@@ -5072,26 +5075,24 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                     <label className="text-base font-bold text-stone-800">
                                                         {tPublish('fields.price')} <span className="text-rose-500">*</span>
                                                         <span className="text-xs font-normal text-stone-400 ml-1.5">
-                                                            ({router.toString().includes('/ko') ? 'KRW' : 'USD'})
-                                                        </span>
-                                                        <span className="text-xs font-bold text-rose-500 ml-3 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100 animate-pulse-soft">
-                                                            {locale === 'ko' ? '베타 기간 동안 무료 등록만 가능합니다.' : 'Currently only free in beta service'}
+                                                            ({locale === 'ko' ? '크레딧' : 'Credits'})
                                                         </span>
                                                     </label>
                                                     <label className="flex items-center gap-2 cursor-pointer group bg-stone-50 px-3 py-1.5 rounded-full hover:bg-stone-100 transition-colors">
-                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${publishMetadata.price === 0 ? 'bg-rose-500 border-rose-500' : 'border-stone-300 group-hover:border-rose-400'}`}>
-                                                            {publishMetadata.price === 0 && <Check size={10} className="text-white" />}
+                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${publishMetadata.isFree ? 'bg-rose-500 border-rose-500' : 'border-stone-300 group-hover:border-rose-400'}`}>
+                                                            {publishMetadata.isFree && <Check size={10} className="text-white" />}
                                                         </div>
                                                         <input
                                                             type="checkbox"
                                                             className="hidden"
-                                                            checked={publishMetadata.price === 0}
+                                                            checked={publishMetadata.isFree || false}
                                                             onChange={e => {
-                                                                if (e.target.checked) {
-                                                                    setPublishMetadata(p => ({ ...p, price: 0 }));
-                                                                } else {
-                                                                    setPublishMetadata(p => ({ ...p, price: router.toString().includes('/ko') ? 5000 / 1450 : 5 }));
-                                                                }
+                                                                const free = e.target.checked;
+                                                                setPublishMetadata(p => ({
+                                                                    ...p,
+                                                                    isFree: free,
+                                                                    price: free ? 0 : 100
+                                                                }));
                                                             }}
                                                         />
                                                         <span className="text-xs font-bold text-stone-500 group-hover:text-rose-600 transition-colors uppercase tracking-wider">{tPublish('fields.isFreeLabel')}</span>
@@ -5101,26 +5102,21 @@ export default function GridEditor({ initialGrid, initialSize, user, initialProj
                                                     <input
                                                         type="number"
                                                         min="0"
-                                                        step={router.toString().includes('/ko') ? "100" : "0.1"}
-                                                        disabled={publishMetadata.price === 0}
+                                                        step="10"
+                                                        disabled={publishMetadata.isFree}
                                                         className="w-full border border-tan-200 rounded-2xl px-6 py-5 text-stone-800 font-bold text-2xl focus:ring-4 focus:ring-rose-100 outline-none disabled:bg-stone-50 disabled:text-stone-300 transition-all font-mono"
                                                         value={
-                                                            publishMetadata.price === 0 ? '0' :
-                                                                (router.toString().includes('/ko')
-                                                                    ? Math.round(publishMetadata.price * 1450)
-                                                                    : publishMetadata.price.toFixed(2))
+                                                            publishMetadata.isFree ? '0' :
+                                                                (publishMetadata.price === 0 ? '' : publishMetadata.price.toString())
                                                         }
                                                         onChange={e => {
                                                             const val = parseFloat(e.target.value) || 0;
-                                                            const priceInUsd = router.toString().includes('/ko') ? val / 1450 : val;
-                                                            setPublishMetadata(prev => ({ ...prev, price: priceInUsd }));
+                                                            setPublishMetadata(prev => ({ ...prev, price: val }));
                                                         }}
+                                                        placeholder="0"
                                                     />
                                                     <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-bold bg-white px-2 pointer-events-none">
-                                                        {router.toString().includes('/ko')
-                                                            ? `≈ $${publishMetadata.price.toFixed(2)}`
-                                                            : `≈ ₩${Math.round(publishMetadata.price * 1450).toLocaleString()}`
-                                                        }
+                                                        {locale === 'ko' ? '크레딧' : 'Credits'}
                                                     </div>
                                                 </div>
                                             </div>

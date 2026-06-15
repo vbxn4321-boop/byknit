@@ -65,7 +65,7 @@ export function SellerProductList({ initialProducts, locale }: SellerProductList
                                     <span className="text-[10px] px-2 py-0.5 bg-rose-500 text-white rounded-full font-black uppercase">Sale {product.discount_percentage}%</span>
                                 )}
                             </div>
-                            <p className="text-sm text-brown-400 font-medium">${product.price_usd}</p>
+                            <p className="text-sm text-brown-400 font-medium">{product.price_usd} {locale === 'ko' ? '크레딧' : 'Credits'}</p>
                         </div>
 
                         {editingId === product.id ? (

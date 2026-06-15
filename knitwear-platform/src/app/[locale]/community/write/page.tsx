@@ -305,7 +305,7 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                                                     {getPatternTitle(pattern.title)}
                                                 </p>
                                                 <p className="text-xs text-stone-400 mt-0.5">
-                                                    {pattern.difficulty} · {pattern.price_usd === 0 ? '무료' : `$${pattern.price_usd}`}
+                                                    {pattern.difficulty} · {pattern.price_usd === 0 ? '무료' : `${pattern.price_usd} ${locale === 'ko' ? '크레딧' : 'Credits'}`}
                                                 </p>
                                             </div>
                                             <Check className="w-5 h-5 text-stone-200" />

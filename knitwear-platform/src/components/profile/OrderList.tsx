@@ -60,9 +60,8 @@ export function OrderList({ initialOrders, locale, user }: OrderListProps) {
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="font-bold text-brown-700">${order.amount}</p>
-                            <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${order.status === 'paid' ? 'bg-sage-100 text-sage-600' : 'bg-tan-100 text-brown-400'
-                                }`}>
+                            <p className="font-bold text-brown-700">{order.amount} {locale === 'ko' ? '크레딧' : 'Credits'}</p>
+                            <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${order.status === 'paid' ? 'bg-sage-100 text-sage-600' : 'bg-tan-100 text-brown-400'}`}>
                                 {order.status}
                             </span>
                         </div>

@@ -152,7 +152,7 @@ export function SellerProductGrid({ products, locale }: SellerProductGridProps) 
                                 <span className="text-rose-500 font-bold text-sm">
                                     {product.price_usd === 0
                                         ? (locale === 'ko' ? '무료' : 'Free')
-                                        : `$${product.price_usd}`
+                                        : `${product.price_usd} ${locale === 'ko' ? '크레딧' : 'Credits'}`
                                     }
                                 </span>
                                 {(isDiscounted(product) || (product.is_on_sale && product.discount_percentage)) && (
@@ -304,7 +304,7 @@ function PatternDetailModal({
                                 {product.title?.ko || product.title?.en}
                             </h3>
                             <p className="text-rose-500 font-bold text-sm mb-2">
-                                {product.price_usd === 0 ? (locale === 'ko' ? '무료' : 'Free') : `$${product.price_usd}`}
+                                {product.price_usd === 0 ? (locale === 'ko' ? '무료' : 'Free') : `${product.price_usd} ${locale === 'ko' ? '크레딧' : 'Credits'}`}
                             </p>
                             <div className="flex items-center gap-2 text-xs text-gray-500">
                                 <span className={product.is_on_sale ? "text-rose-500 font-bold" : ""}>
@@ -537,7 +537,7 @@ function EditPatternModal({ product, locale, onClose, setShowSaveSuccess }: {
                     {/* Price */}
                     <div>
                         <label className="text-sm font-bold text-brown-600 block mb-1">
-                            {locale === 'ko' ? '가격 (USD)' : 'Price (USD)'}
+                            {locale === 'ko' ? '가격 (크레딧)' : 'Price (Credits)'}
                         </label>
                         <input
                             type="number"

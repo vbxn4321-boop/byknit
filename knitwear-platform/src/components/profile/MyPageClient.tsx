@@ -192,7 +192,7 @@ export function MyPageClient({
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-stone-800 text-xs truncate">{getPatternTitle(pattern.title)}</p>
                                                     <p className="text-[10px] text-stone-400 mt-0.5">
-                                                        {pattern.difficulty} · {pattern.price_usd === 0 ? '무료' : `$${pattern.price_usd}`}
+                                                        {pattern.difficulty} · {pattern.price_usd === 0 ? '무료' : `${pattern.price_usd} ${locale === 'ko' ? '크레딧' : 'Credits'}`}
                                                     </p>
                                                 </div>
                                                 <Link

@@ -260,8 +260,24 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         }
 
         // If paid, start purchase flow
-        alert('Purchase flow to be connected');
-        // In real app, reuse handlePurchase logic from original file
+        try {
+            setIsLoading(true);
+            const res = await createOrder({
+                patternId,
+                amount: pattern?.price_usd || 0
+            });
+            if (res.error) {
+                alert(res.error);
+            } else {
+                alert(locale === 'ko' ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
+                setCanDownload(true);
+                setShowDownloadOptions(true);
+            }
+        } catch (e: any) {
+            alert(e.message || 'Error occurred');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleActualDownload = async (lang: 'ko' | 'en') => {
@@ -300,7 +316,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     const titleStr = typeof pattern.title === 'string' ? pattern.title : (locale === 'ko' ? (pattern.title?.ko || pattern.title?.en) : (pattern.title?.en || pattern.title?.ko));
     const descStr = typeof pattern.description === 'string' ? pattern.description : (locale === 'ko' ? (pattern.description?.ko || pattern.description?.en) : (pattern.description?.en || pattern.description?.ko));
-    const priceStr = pattern.is_free ? (locale === 'ko' ? 'Free' : 'Free') : `$${pattern.price_usd}`;
+    const priceStr = pattern.is_free ? (locale === 'ko' ? '무료' : 'Free') : (locale === 'ko' ? `${pattern.price_usd} 크레딧` : `${pattern.price_usd} Credits`);
 
     return (
         <div className="bg-white min-h-screen relative pt-12">
