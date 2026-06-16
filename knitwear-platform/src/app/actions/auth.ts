@@ -185,6 +185,16 @@ export async function verifySignupOtp(formData: FormData) {
 
     const newUserId = userData.user.id;
 
+    // 1. Grant 1000 Welcome Sign Up Bonus to every new user explicitly
+    if (newUserId) {
+        await adminClient.from('credit_transactions').insert({
+            user_id: newUserId,
+            amount: 1000,
+            type: 'initial_bonus',
+            description: 'signUpBonus'
+        });
+    }
+
     // Process Referral Bonus if provided
     if (referrerName && newUserId) {
         const { data: referrerData } = await adminClient
