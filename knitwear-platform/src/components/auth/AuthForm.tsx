@@ -272,16 +272,16 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                                 name="username"
                                 type="text"
                                 required
-                                 pattern="[A-Za-z0-9\._\-]+"
-                                title={locale === 'ko' ? "영문, 숫자, 특수문자(._-)만 사용 가능합니다." : "Only English letters, numbers, dots, dashes, and underscores are allowed."}
+                                 pattern="[A-Za-z0-9ㄱ-ㅎㅏ-ㅣ가-힣\._\-]+"
+                                title={locale === 'ko' ? "한글, 영문, 숫자, 특수문자(._-)만 사용 가능합니다." : "Only Korean, English letters, numbers, dots, dashes, and underscores are allowed."}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all"
                                 placeholder=""
                                 minLength={2}
                                 maxLength={20}
                                 onInput={(e) => {
-                                    // Strictly enforce English only - remove any other characters immediately
+                                    // Allow Korean, English, numbers, and symbols - remove any other characters immediately
                                     const input = e.currentTarget;
-                                    const regex = /[^A-Za-z0-9._-]/g;
+                                    const regex = /[^A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ._-]/g;
                                     if (regex.test(input.value)) {
                                         input.value = input.value.replace(regex, '');
                                     }
@@ -290,8 +290,8 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                             />
                             <p className="mt-1 text-xs text-stone-500 whitespace-nowrap tracking-tight">
                                 {locale === 'ko'
-                                    ? "* 글로벌 서비스 연동을 위해 영문, 숫자, 특수문자(._-)만 사용 가능합니다."
-                                    : "* Only English, numbers, and special characters (._-) are allowed."}
+                                    ? "* 한글, 영문, 숫자, 특수문자(._-)만 사용 가능합니다."
+                                    : "* Korean, English, numbers, and special characters (._-) are allowed."}
                             </p>
                         </div>
 
