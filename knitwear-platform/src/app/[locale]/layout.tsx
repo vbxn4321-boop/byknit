@@ -27,7 +27,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: t('title'),
         description: t('description'),
-        keywords: ["knitting", "patterns", "crochet", "yarn", "DIY", "crafts", "뜨개질", "도안", "코바늘", "대바늘"],
+        keywords: [
+            "knitting", "patterns", "crochet", "yarn", "DIY", "crafts", "byknit",
+            "knitting chart maker", "crochet pattern generator", "photo to knitting pattern", "colorwork chart editor", "free knitting patterns",
+            "뜨개질", "도안", "코바늘", "대바늘", "뜨개질 도안", "코바늘 도안", "대바늘 도안", "도안 변환기", "뜨개 도안 에디터", "사진 뜨개질", "무료 도안", "배색 차트", "뜨개질 차트", "손뜨개"
+        ],
         openGraph: {
             title: t('title'),
             description: t('description'),
