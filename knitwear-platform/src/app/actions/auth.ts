@@ -34,10 +34,10 @@ export async function sendSignupOtp(formData: FormData) {
     const passwordConfirm = data.passwordConfirm as string;
     const password = data.password as string;
 
-    // Validate Username (English only)
-    const usernameRegex = /^[A-Za-z0-9._-]+$/;
+    // Validate Username (Korean, English, Numbers allowed)
+    const usernameRegex = /^[A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ._-]+$/;
     if (!usernameRegex.test(username)) {
-        return { error: '프로필 이름은 영문, 숫자, 특수문자(._-)만 가능합니다.' };
+        return { error: '프로필 이름은 한글, 영문, 숫자, 특수문자(._-)만 가능합니다.' };
     }
 
     if (password !== passwordConfirm) {
@@ -244,9 +244,9 @@ export async function completeOnboarding(formData: FormData) {
     const data = Object.fromEntries(formData)
     const username = data.username as string;
 
-    const usernameRegex = /^[A-Za-z0-9._-]+$/;
+    const usernameRegex = /^[A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ._-]+$/;
     if (!usernameRegex.test(username)) {
-        return redirect('/onboarding?error=' + encodeURIComponent('프로필 이름은 영문, 숫자, 특수문자(._-)만 가능합니다.'))
+        return redirect('/onboarding?error=' + encodeURIComponent('프로필 이름은 한글, 영문, 숫자, 특수문자(._-)만 가능합니다.'))
     }
 
     const privacyAgreed = data.privacy_policy_agreed === 'on';
