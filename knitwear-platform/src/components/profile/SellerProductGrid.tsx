@@ -537,14 +537,13 @@ function EditPatternModal({ product, locale, onClose, setShowSaveSuccess }: {
                     {/* Price */}
                     <div>
                         <label className="text-sm font-bold text-brown-600 block mb-1">
-                            {locale === 'ko' ? '가격 (크레딧)' : 'Price (Credits)'}
+                            {locale === 'ko' ? '가격 (크레딧 - 베타 기간 변경 불가)' : 'Price (Credits - Locked in Beta)'}
                         </label>
                         <input
                             type="number"
-                            min="0"
+                            disabled
                             value={price}
-                            onChange={(e) => setPrice(Number(e.target.value))}
-                            className="w-full px-4 py-3 rounded-xl border border-tan-200 text-brown-700 focus:outline-none focus:ring-2 focus:ring-rose-300"
+                            className="w-full px-4 py-3 rounded-xl border border-tan-200 text-stone-400 bg-stone-50 cursor-not-allowed focus:outline-none"
                         />
                     </div>
                 </div>

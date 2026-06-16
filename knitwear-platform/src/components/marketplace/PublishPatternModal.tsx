@@ -452,34 +452,18 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                                 <span className="text-xs font-normal text-stone-400 ml-1.5">
                                     ({isKo ? '크레딧' : 'Credits'})
                                 </span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer group bg-stone-50 px-3 py-1.5 rounded-full hover:bg-stone-100 transition-colors">
-                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${publishMetadata.isFree ? 'bg-rose-500 border-rose-500' : 'border-stone-300 group-hover:border-rose-400'}`}>
-                                    {publishMetadata.isFree && <Check size={10} className="text-white" />}
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    className="hidden"
-                                    checked={publishMetadata.isFree || false}
-                                    onChange={e => setPublishMetadata(p => ({ ...p, isFree: e.target.checked, price: e.target.checked ? 0 : 100 }))}
-                                />
-                                <span className="text-xs font-bold text-stone-500 group-hover:text-rose-600 transition-colors uppercase tracking-wider">{tPublish('fields.freeLabel')}</span>
+                                <span className="text-xs font-bold text-rose-500 ml-3 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100 animate-pulse-soft">
+                                    {isKo ? '베타 기간 동안 무료 등록만 가능합니다.' : 'Currently only free in beta service'}
+                                </span>
                             </label>
                         </div>
                         <div className="relative">
                             <input
-                                type="number"
-                                min="0"
-                                step="10"
-                                disabled={publishMetadata.isFree}
-                                className="w-full border border-tan-200 rounded-xl px-4 py-3.5 text-stone-800 font-bold text-lg focus:ring-4 focus:ring-rose-100 outline-none disabled:bg-stone-50 disabled:text-stone-300 transition-all font-mono"
-                                value={publishMetadata.isFree ? '0' : (publishMetadata.price === 0 ? '' : publishMetadata.price.toString())}
-                                onChange={e => setPublishMetadata(p => ({ ...p, price: parseFloat(e.target.value) || 0 }))}
-                                placeholder="0"
+                                type="text"
+                                disabled
+                                className="w-full border border-tan-200 rounded-xl px-4 py-3.5 text-stone-400 bg-stone-50 font-bold text-lg outline-none transition-all font-mono cursor-not-allowed"
+                                value={isKo ? '0 크레딧 (무료)' : '0 Credits (Free)'}
                             />
-                            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-bold bg-white px-2 pointer-events-none">
-                                {isKo ? '크레딧' : 'Credits'}
-                            </div>
                         </div>
                     </div>
 
