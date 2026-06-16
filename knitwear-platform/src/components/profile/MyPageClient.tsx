@@ -117,6 +117,41 @@ export function MyPageClient({
                     정보 수정
                 </button>
 
+                {/* 친구 초대 홍보 영역 (Referral Promotion Widget) */}
+                <div className="mt-6 p-5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100 flex flex-col gap-3 shadow-sm">
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">🎁</span>
+                        <div className="space-y-0.5">
+                            <h4 className="text-xs font-black text-amber-900">
+                                {locale === 'ko' ? '친구 초대 보너스 크레딧' : 'Invite a Friend Bonus'}
+                            </h4>
+                            <p className="text-[10.5px] text-amber-700/80 leading-relaxed">
+                                {locale === 'ko' 
+                                    ? '가입할 때 내 추천인 닉네임을 입력하면, 초대한 나와 가입한 친구 모두 100 크레딧씩 적립됩니다!'
+                                    : 'Invite friends using your display name as the referral code! Both of you will get 100 credits!'}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 bg-white border border-amber-200/80 rounded-xl px-3.5 py-2 text-xs font-bold text-stone-700 font-mono select-all">
+                            {profile?.display_name || ''}
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (profile?.display_name) {
+                                    navigator.clipboard.writeText(profile.display_name);
+                                    alert(locale === 'ko' 
+                                        ? '추천인 닉네임이 복사되었습니다! 가입하는 친구에게 알려주세요.' 
+                                        : 'Referral nickname copied! Share it with your friends.');
+                                }
+                            }}
+                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-black rounded-xl transition-all cursor-pointer shadow-sm shadow-amber-200"
+                        >
+                            {locale === 'ko' ? '복사' : 'Copy'}
+                        </button>
+                    </div>
+                </div>
+
                 {/* Smooth Expandable Profile Form */}
                 {activeSection === 'edit_profile' && (
                     <div className="mt-6 p-6 bg-stone-50/50 rounded-3xl border border-stone-200/60 space-y-8 animate-fadeIn">
