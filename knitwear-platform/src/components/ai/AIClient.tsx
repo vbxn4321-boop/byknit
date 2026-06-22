@@ -171,11 +171,40 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
 
             if (removeBackground) {
                 try {
-                    const { removeBackground: imglyRemoveBackground } = await import('@imgly/background-removal');
-                    const blob = await imglyRemoveBackground(image);
-                    sourceImage = URL.createObjectURL(blob);
-                } catch (e) {
+                    // Create an Image to resize before passing to imgly (prevents WASM OOM)
+                    const tempImg = new Image();
+                    tempImg.src = image;
+                    await new Promise<void>((resolve, reject) => {
+                        tempImg.onload = () => resolve();
+                        tempImg.onerror = reject;
+                    });
+                    
+                    const MAX_SIZE = 1024;
+                    let rw = tempImg.width;
+                    let rh = tempImg.height;
+                    if (rw > MAX_SIZE || rh > MAX_SIZE) {
+                        const ratio = Math.min(MAX_SIZE / rw, MAX_SIZE / rh);
+                        rw = Math.round(rw * ratio);
+                        rh = Math.round(rh * ratio);
+                    }
+                    
+                    const rc = document.createElement('canvas');
+                    rc.width = rw;
+                    rc.height = rh;
+                    const rctx = rc.getContext('2d');
+                    if (rctx) {
+                        rctx.drawImage(tempImg, 0, 0, rw, rh);
+                        const blobInput = await new Promise<Blob>((res) => rc.toBlob((b) => res(b!), 'image/png'));
+                        
+                        const { removeBackground: imglyRemoveBackground } = await import('@imgly/background-removal');
+                        const blob = await imglyRemoveBackground(blobInput, {
+                            publicPath: "https://unpkg.com/@imgly/background-removal/dist/"
+                        });
+                        sourceImage = URL.createObjectURL(blob);
+                    }
+                } catch (e: any) {
                     console.error('Background removal failed', e);
+                    alert("AI 배경 제거 중 오류가 발생했습니다: " + (e?.message || '알 수 없는 오류'));
                 }
             }
 
