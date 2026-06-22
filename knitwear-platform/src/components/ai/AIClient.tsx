@@ -261,7 +261,17 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
             // Use 'pixel' (sharp) for pixel art to preserve edges
             tempCtx.imageSmoothingEnabled = conversionMode === 'photo';
 
+            // Boost contrast and saturation slightly to make pixel art colors pop and reduce muddy interpolation
+            if (conversionMode === 'photo') {
+                tempCtx.filter = 'contrast(1.15) saturate(1.2)';
+            } else {
+                tempCtx.filter = 'contrast(1.05) saturate(1.1)';
+            }
+
             tempCtx.drawImage(offscreenCanvas, 0, 0, targetWidth, targetHeight);
+            
+            // Reset filter
+            tempCtx.filter = 'none';
 
             const imageData = tempCtx.getImageData(0, 0, targetWidth, targetHeight);
             const pixels = imageData.data;
