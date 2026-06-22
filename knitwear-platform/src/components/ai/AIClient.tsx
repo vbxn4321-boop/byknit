@@ -197,9 +197,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                         const blobInput = await new Promise<Blob>((res) => rc.toBlob((b) => res(b!), 'image/png'));
                         
                         const { removeBackground: imglyRemoveBackground } = await import('@imgly/background-removal');
-                        const blob = await imglyRemoveBackground(blobInput, {
-                            publicPath: "https://unpkg.com/@imgly/background-removal/dist/"
-                        });
+                        const blob = await imglyRemoveBackground(blobInput);
                         sourceImage = URL.createObjectURL(blob);
                     }
                 } catch (e: any) {
