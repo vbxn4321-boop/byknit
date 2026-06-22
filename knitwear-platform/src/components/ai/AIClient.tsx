@@ -132,17 +132,31 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         }
     };
 
+    const handleDragEnter = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
     };
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        
         const file = e.dataTransfer.files?.[0];
-        if (file) {
+        if (file && file.type.startsWith('image/')) {
             processFile(file);
+        } else {
+            console.warn('Dropped item is not an image file');
         }
     };
 
@@ -930,6 +944,8 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 <div className="space-y-4">
                     <div
                         onClick={() => fileInputRef.current?.click()}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
                         className={`relative aspect-square rounded-3xl border-2 border-dashed transition-all cursor-pointer ${image
