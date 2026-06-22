@@ -56,13 +56,12 @@ export function quantizeImage(
         }
     }
 
-    // Initialize masks
-    const transparentMask: boolean[] = new Array(width * height).fill(false);
+    const transparentMask = new Array(width * height).fill(false);
     
-    // Check initial alpha transparency
-    for (let i = 0; i < pixels.length; i += 4) {
-        if (pixels[i + 3] < 30) {
-            transparentMask[i / 4] = true;
+    // Always mask out pixels that are already transparent
+    for (let i = 0; i < width * height; i++) {
+        if (pixels[i * 4 + 3] < 128) {
+            transparentMask[i] = true;
         }
     }
 

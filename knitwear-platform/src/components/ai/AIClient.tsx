@@ -167,15 +167,27 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         setIsConverting(true);
 
         try {
+            let sourceImage = image;
+
+            if (removeBackground) {
+                try {
+                    const { removeBackground: imglyRemoveBackground } = await import('@imgly/background-removal');
+                    const blob = await imglyRemoveBackground(image);
+                    sourceImage = URL.createObjectURL(blob);
+                } catch (e) {
+                    console.error('Background removal failed', e);
+                }
+            }
+
             const img = new Image();
-            if (image.startsWith('http')) {
+            if (sourceImage.startsWith('http') || sourceImage.startsWith('blob:')) {
                 img.crossOrigin = 'anonymous';
             }
 
             await new Promise<void>((resolve, reject) => {
                 img.onload = () => resolve();
                 img.onerror = reject;
-                img.src = image;
+                img.src = sourceImage;
             });
 
             // Calculate dimensions
@@ -214,98 +226,7 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
             offscreenCtx.clearRect(0, 0, img.width, img.height);
             offscreenCtx.drawImage(img, 0, 0);
 
-            if (removeBackground) {
-                // Get high-resolution image data
-                const hrImageData = offscreenCtx.getImageData(0, 0, img.width, img.height);
-                const hrPixels = hrImageData.data;
-                const hrW = img.width;
-                const hrH = img.height;
 
-                // Sample background color from corners of original image
-                let bgR = 255, bgG = 255, bgB = 255, hasBg = false;
-                const corners = [
-                    0,
-                    (hrW - 1) * 4,
-                    (hrH - 1) * hrW * 4,
-                    (hrH * hrW - 1) * 4
-                ];
-                for (const idx of corners) {
-                    if (hrPixels[idx + 3] >= 128) {
-                        bgR = hrPixels[idx];
-                        bgG = hrPixels[idx + 1];
-                        bgB = hrPixels[idx + 2];
-                        hasBg = true;
-                        break;
-                    }
-                }
-
-                if (hasBg) {
-                    const visited = new Uint8Array(hrW * hrH);
-                    const queue: number[] = [];
-
-                    const colorDistanceLocal = (r1: number, g1: number, b1: number, r2: number, g2: number, b2: number) => {
-                        return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
-                    };
-
-                    const checkAndEnqueue = (idx: number) => {
-                        if (!visited[idx] && hrPixels[idx * 4 + 3] >= 128) {
-                            const r = hrPixels[idx * 4];
-                            const g = hrPixels[idx * 4 + 1];
-                            const b = hrPixels[idx * 4 + 2];
-                            if (colorDistanceLocal(r, g, b, bgR, bgG, bgB) < 15) {
-                                queue.push(idx);
-                                visited[idx] = 1;
-                            }
-                        }
-                    };
-
-                    // Enqueue borders
-                    for (let x = 0; x < hrW; x++) {
-                        checkAndEnqueue(x);
-                        checkAndEnqueue((hrH - 1) * hrW + x);
-                    }
-                    for (let y = 0; y < hrH; y++) {
-                        checkAndEnqueue(y * hrW);
-                        checkAndEnqueue(y * hrW + (hrW - 1));
-                    }
-
-                    // Run BFS flood fill
-                    let head = 0;
-                    while (head < queue.length) {
-                        const currIdx = queue[head++];
-
-                        // Set alpha to 0 (make transparent)
-                        hrPixels[currIdx * 4 + 3] = 0;
-
-                        const cx = currIdx % hrW;
-                        const cy = Math.floor(currIdx / hrW);
-
-                        const neighbors = [
-                            [cx - 1, cy],
-                            [cx + 1, cy],
-                            [cx, cy - 1],
-                            [cx, cy + 1]
-                        ];
-                        for (const [nx, ny] of neighbors) {
-                            if (nx >= 0 && nx < hrW && ny >= 0 && ny < hrH) {
-                                const nIdx = ny * hrW + nx;
-                                if (!visited[nIdx] && hrPixels[nIdx * 4 + 3] >= 128) {
-                                    const nr = hrPixels[nIdx * 4];
-                                    const ng = hrPixels[nIdx * 4 + 1];
-                                    const nb = hrPixels[nIdx * 4 + 2];
-                                    if (colorDistanceLocal(nr, ng, nb, bgR, bgG, bgB) < 15) {
-                                        queue.push(nIdx);
-                                        visited[nIdx] = 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Put modified pixels back to offscreen canvas
-                    offscreenCtx.putImageData(hrImageData, 0, 0);
-                }
-            }
 
             // Draw the image onto the target resizing canvas
             // Disable smoothing for sharp pixelation (prevents color bleeding artifacts)
@@ -327,45 +248,9 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 false // Already processed at high resolution!
             );
 
-            // Quantization-based dominant border color removal (handles complex/gradient backgrounds)
-            if (removeBackground) {
-                const borderCounts = new Map<number, number>();
-                
-                // Count cluster occurrences along the borders
-                for (let x = 0; x < targetWidth; x++) {
-                    const topVal = grid[0][x];
-                    const bottomVal = grid[targetHeight - 1][x];
-                    if (topVal !== -1) borderCounts.set(topVal, (borderCounts.get(topVal) || 0) + 1);
-                    if (bottomVal !== -1) borderCounts.set(bottomVal, (borderCounts.get(bottomVal) || 0) + 1);
-                }
-                for (let y = 0; y < targetHeight; y++) {
-                    const leftVal = grid[y][0];
-                    const rightVal = grid[y][targetWidth - 1];
-                    if (leftVal !== -1) borderCounts.set(leftVal, (borderCounts.get(leftVal) || 0) + 1);
-                    if (rightVal !== -1) borderCounts.set(rightVal, (borderCounts.get(rightVal) || 0) + 1);
-                }
-
-                // Find the cluster index with the highest frequency on borders
-                let bgClusterIdx = -1;
-                let maxCount = 0;
-                borderCounts.forEach((count, idx) => {
-                    if (count > maxCount) {
-                        maxCount = count;
-                        bgClusterIdx = idx;
-                    }
-                });
-
-                // If a border cluster represents more than 15% of the total border pixels, erase it completely (set to -1)
-                const totalBorderPixels = targetWidth * 2 + targetHeight * 2;
-                if (bgClusterIdx !== -1 && maxCount > totalBorderPixels * 0.15) {
-                    for (let y = 0; y < targetHeight; y++) {
-                        for (let x = 0; x < targetWidth; x++) {
-                            if (grid[y][x] === bgClusterIdx) {
-                                grid[y][x] = -1;
-                            }
-                        }
-                    }
-                }
+            // Cleanup blob URL if we created one
+            if (removeBackground && sourceImage.startsWith('blob:')) {
+                URL.revokeObjectURL(sourceImage);
             }
 
             // Preview conversion is FREE - credits are only deducted on export/editor import
