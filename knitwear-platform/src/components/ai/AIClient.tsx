@@ -217,12 +217,43 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 img.src = sourceImage;
             });
 
+            // Auto-crop to bounding box of non-transparent pixels if background was removed
+            let cropX = 0, cropY = 0, cropW = img.width, cropH = img.height;
+            if (removeBackground) {
+                const trimCanvas = document.createElement('canvas');
+                trimCanvas.width = img.width;
+                trimCanvas.height = img.height;
+                const trimCtx = trimCanvas.getContext('2d', { willReadFrequently: true });
+                if (trimCtx) {
+                    trimCtx.drawImage(img, 0, 0);
+                    const trimData = trimCtx.getImageData(0, 0, img.width, img.height).data;
+                    let minX = img.width, minY = img.height, maxX = 0, maxY = 0;
+                    for (let y = 0; y < img.height; y++) {
+                        for (let x = 0; x < img.width; x++) {
+                            const alpha = trimData[(y * img.width + x) * 4 + 3];
+                            if (alpha > 0) {
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                                if (y < minY) minY = y;
+                                if (y > maxY) maxY = y;
+                            }
+                        }
+                    }
+                    if (maxX >= minX && maxY >= minY) {
+                        cropX = minX;
+                        cropY = minY;
+                        cropW = maxX - minX + 1;
+                        cropH = maxY - minY + 1;
+                    }
+                }
+            }
+
             // Calculate dimensions
             let targetWidth = settings.targetWidth;
             let targetHeight = settings.targetHeight;
 
             if (maintainAspectRatio) {
-                const aspectRatio = img.width / img.height;
+                const aspectRatio = cropW / cropH;
                 targetHeight = Math.round(settings.targetWidth / aspectRatio);
 
                 if (targetHeight > settings.targetHeight) {
@@ -268,7 +299,8 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 tempCtx.filter = 'contrast(1.05) saturate(1.1)';
             }
 
-            tempCtx.drawImage(offscreenCanvas, 0, 0, targetWidth, targetHeight);
+            // Draw with cropping applied
+            tempCtx.drawImage(offscreenCanvas, cropX, cropY, cropW, cropH, 0, 0, targetWidth, targetHeight);
             
             // Reset filter
             tempCtx.filter = 'none';
