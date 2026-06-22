@@ -1,8 +1,8 @@
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 
 export async function getPosts(locale: string = 'ko') {
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    const adminClient = await createAdminClient();
+    const { data, error } = await adminClient
         .from('posts')
         .select(`
             *,
@@ -22,12 +22,12 @@ export async function getPosts(locale: string = 'ko') {
 }
 
 export async function getPopularPosts(limit: number = 5) {
-    const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('posts')
         .select(`
             *,
@@ -56,8 +56,8 @@ export async function getPopularPosts(limit: number = 5) {
 }
 
 export async function getPost(postId: string) {
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    const adminClient = await createAdminClient();
+    const { data, error } = await adminClient
         .from('posts')
         .select(`
             *,

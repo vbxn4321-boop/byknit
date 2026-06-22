@@ -329,7 +329,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
             />
             {/* Header (Back Button) - Mobile Only/Sticky */}
             <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-gray-100 md:hidden">
-                <button onClick={() => router.back()} className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                <button onClick={() => router.push(`/${locale}/marketplace`)} className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
                     <ArrowLeft size={24} className="text-gray-800" />
                 </button>
                 <div className="font-bold text-gray-800 truncate max-w-[200px]">{titleStr}</div>

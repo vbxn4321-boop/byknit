@@ -27,6 +27,8 @@ interface Post {
     profiles: { id: string; display_name: string; email: string };
     likes: { count: number }[];
     comments: { count: number }[];
+    like_count?: number;
+    comment_count?: number;
     views: number;
     images?: string[] | null;
     pattern: {
@@ -45,6 +47,18 @@ interface CommunityClientProps {
     user: User | null;
     locale: string;
 }
+
+const getLikeCount = (post: any) => {
+    if (post.likes && Array.isArray(post.likes) && post.likes.length > 0) return post.likes[0].count || 0;
+    if (typeof post.like_count === 'number') return post.like_count;
+    return 0;
+};
+
+const getCommentCount = (post: any) => {
+    if (post.comments && Array.isArray(post.comments) && post.comments.length > 0) return post.comments[0].count || 0;
+    if (typeof post.comment_count === 'number') return post.comment_count;
+    return 0;
+};
 
 export function CommunityClient({ initialPosts, popularPosts, user, locale }: CommunityClientProps) {
     const t = useTranslations('community');
@@ -92,7 +106,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
             if (listFilter === 'popular') {
                 const notices = posts.filter(p => p.category === 'notice');
                 const populars = posts
-                    .filter(p => p.category !== 'notice' && (p.likes?.[0]?.count || 0) > 0)
+                    .filter(p => p.category !== 'notice' && (getLikeCount(p)) > 0)
                     .sort((a, b) => {
                         const aLikes = a.likes?.[0]?.count || 0;
                         const bLikes = b.likes?.[0]?.count || 0;
@@ -160,7 +174,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
             setPosts(prevPosts => 
                 prevPosts.map(p => {
                     if (p.id === postId) {
-                        const currentLikes = p.likes?.[0]?.count || 0;
+                        const currentLikes = getLikeCount(p);
                         return {
                             ...p,
                             likes: [{ count: isLiking ? currentLikes + 1 : Math.max(0, currentLikes - 1) }]
@@ -423,11 +437,11 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                                 <div className="flex items-center gap-4">
                                                     <button onClick={(e) => handleLike(e, post.id)} className={`flex items-center gap-1.5 transition-colors ${likedSet.has(post.id) ? 'text-rose-500' : 'text-stone-400 hover:text-rose-500'}`}>
                                                         <Heart className={`w-3.5 h-3.5 ${likedSet.has(post.id) ? 'fill-rose-500' : ''}`} />
-                                                        <span className="text-[11px] font-bold">{post.likes?.[0]?.count || 0}</span>
+                                                        <span className="text-[11px] font-bold">{getLikeCount(post)}</span>
                                                     </button>
                                                     <div className="flex items-center gap-1.5 text-stone-400">
                                                         <MessageSquare className="w-3.5 h-3.5" />
-                                                        <span className="text-[11px] font-bold">{post.comments?.[0]?.count || 0}</span>
+                                                        <span className="text-[11px] font-bold">{getCommentCount(post)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 text-stone-400">
                                                         <Eye className="w-3.5 h-3.5" />
@@ -498,9 +512,9 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                                         </span>
                                                     )}
                                                     {/* Comment count badge */}
-                                                    {(post.comments?.[0]?.count || 0) > 0 && (
+                                                    {(getCommentCount(post)) > 0 && (
                                                         <span className="flex-shrink-0 text-[10px] font-bold text-rose-400">
-                                                            [{post.comments[0].count}]
+                                                            [{getCommentCount(post)}]
                                                         </span>
                                                     )}
                                                 </div>
@@ -554,14 +568,14 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                                 }`}
                                             >
                                                 <Heart className={`w-3.5 h-3.5 ${likedSet.has(post.id) ? 'fill-rose-500' : ''}`} />
-                                                <span className="text-[11px] font-bold">{post.likes?.[0]?.count || 0}</span>
+                                                <span className="text-[11px] font-bold">{getLikeCount(post)}</span>
                                             </button>
                                         </div>
 
                                         {/* Comments */}
                                         <div className="flex items-center justify-center gap-1 text-stone-400">
                                             <MessageSquare className="w-3.5 h-3.5" />
-                                            <span className="text-[11px] font-bold">{post.comments?.[0]?.count || 0}</span>
+                                            <span className="text-[11px] font-bold">{getCommentCount(post)}</span>
                                         </div>
 
                                         {/* Views */}
@@ -718,7 +732,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <span className="text-[10px] text-stone-400">{post.profiles?.display_name || '-'}</span>
                                                     <span className="flex items-center gap-0.5 text-[10px] text-rose-400 font-bold">
-                                                        <Heart className="w-2.5 h-2.5" /> {post.likes?.[0]?.count || 0}
+                                                        <Heart className="w-2.5 h-2.5" /> {getLikeCount(post)}
                                                     </span>
                                                 </div>
                                             </div>

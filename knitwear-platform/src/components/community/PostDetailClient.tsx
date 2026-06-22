@@ -293,7 +293,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
             <div className="bg-white border-b border-tan-200 px-6 py-4">
                 <div className="max-w-4xl mx-auto">
                     <button
-                        onClick={() => router.back()}
+                        onClick={() => router.push(`/${locale}/community`)}
                         className="flex items-center gap-2 text-stone-500 hover:text-stone-800 font-bold transition-colors"
                     >
                         <ChevronLeft className="w-5 h-5" />

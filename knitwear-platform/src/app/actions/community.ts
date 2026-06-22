@@ -194,14 +194,18 @@ export async function toggleLike(postId: string) {
         .single();
 
     if (existingLike) {
-        await supabase
+        await adminClient
             .from('post_likes')
             .delete()
             .eq('id', existingLike.id);
     } else {
-        await supabase
+        const { error } = await adminClient
             .from('post_likes')
             .insert({ post_id: postId, user_id: user.id });
+            
+        if (error) {
+            console.error('Failed to insert like:', error);
+        }
 
         // 🔔 게시글 작성자에게 좋아요 알림
         try {
@@ -520,10 +524,11 @@ export async function toggleBookmark(postId: string) {
 // ============================================
 export async function getMyBookmarks() {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('post_bookmarks')
         .select('post_id')
         .eq('user_id', user.id);
@@ -537,10 +542,11 @@ export async function getMyBookmarks() {
 // ============================================
 export async function getMyLikes() {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('post_likes')
         .select('post_id')
         .eq('user_id', user.id);
@@ -557,10 +563,11 @@ export async function getMyLikes() {
 // ============================================
 export async function getMyFollowings() {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('follows')
         .select('following_id')
         .eq('follower_id', user.id);
@@ -577,6 +584,7 @@ export async function getMyFollowings() {
 // ============================================
 export async function getMyActivityStats() {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -584,9 +592,9 @@ export async function getMyActivityStats() {
     }
 
     const [postsRes, likesRes, followersRes] = await Promise.all([
-        supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id)
+        adminClient.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        adminClient.from('post_likes').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        adminClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id)
     ]);
 
     return {
@@ -600,10 +608,10 @@ export async function getMyActivityStats() {
 // 🔍 게시글 검색
 // ============================================
 export async function searchPosts(query: string, locale: string) {
-    const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const searchTerm = `%${query}%`;
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('posts')
         .select(`
             *,
