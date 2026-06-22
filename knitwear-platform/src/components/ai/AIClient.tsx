@@ -102,29 +102,47 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
         maxColors: 8,
     });
 
+    const processFile = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const resultStr = e.target?.result as string;
+            setImage(resultStr);
+            setResult(null);
+
+            // Load image to get initial aspect ratio
+            const img = new Image();
+            img.onload = () => {
+                const ratio = img.width / img.height;
+                setImageAspectRatio(ratio);
+                // Initial sync
+                setSettings(prev => ({
+                    ...prev,
+                    targetHeight: Math.round(prev.targetWidth / ratio)
+                }));
+            };
+            img.src = resultStr;
+        };
+        reader.readAsDataURL(file);
+    };
+
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const resultStr = e.target?.result as string;
-                setImage(resultStr);
-                setResult(null);
+            processFile(file);
+        }
+    };
 
-                // Load image to get initial aspect ratio
-                const img = new Image();
-                img.onload = () => {
-                    const ratio = img.width / img.height;
-                    setImageAspectRatio(ratio);
-                    // Initial sync
-                    setSettings(prev => ({
-                        ...prev,
-                        targetHeight: Math.round(prev.targetWidth / ratio)
-                    }));
-                };
-                img.src = resultStr;
-            };
-            reader.readAsDataURL(file);
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            processFile(file);
         }
     };
 
@@ -912,6 +930,8 @@ function ImageToChartTab({ locale, credits, user }: { locale: string, credits: n
                 <div className="space-y-4">
                     <div
                         onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
                         className={`relative aspect-square rounded-3xl border-2 border-dashed transition-all cursor-pointer ${image
                             ? 'border-rose-300 bg-rose-300/5'
                             : 'border-tan-200 bg-white hover:border-rose-300'
