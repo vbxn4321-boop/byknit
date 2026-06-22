@@ -267,7 +267,18 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                 amount: pattern?.price_usd || 0
             });
             if (res.error) {
-                alert(res.error);
+                if (res.error.includes('크레딧이 부족합니다') || res.error.includes('Credits') || res.error.includes('credits')) {
+                    const confirmCharge = window.confirm(
+                        locale === 'ko' 
+                            ? '보유하신 크레딧이 부족합니다. 크레딧 충전 페이지로 이동하시겠습니까?' 
+                            : 'Insufficient credits. Would you like to go to the credit charging page?'
+                    );
+                    if (confirmCharge) {
+                        router.push(`/${locale}/payments`);
+                    }
+                } else {
+                    alert(res.error);
+                }
             } else {
                 alert(locale === 'ko' ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
                 setCanDownload(true);

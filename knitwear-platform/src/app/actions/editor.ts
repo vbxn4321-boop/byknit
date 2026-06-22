@@ -209,8 +209,8 @@ export async function publishPattern(projectId: string, metadata: {
             yardage: metadata.yardage,
             needles: metadata.needles,
             gauge: gaugeString,
-            // TODO: Uncomment after adding 'hashtags' column to patterns table
-            // hashtags: metadata.hashtags || [],
+            // Added 'hashtags' column to patterns table
+            hashtags: metadata.hashtags || [],
             // Grid data for PDF generation
             grid_data: project.grid_data,
             palette: project.palette,

@@ -141,6 +141,13 @@ export function UserNav({ user }: { user: User | null }) {
 
                     <div className="p-2">
                         <button
+                            onClick={() => { setIsOpen(false); router.push(`/${locale}/payments`); }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all"
+                        >
+                            <Coins size={18} className="text-emerald-500" />
+                            <span>{locale === 'ko' ? '크레딧 충전' : 'Charge Credits'}</span>
+                        </button>
+                        <button
                             onClick={() => { setIsOpen(false); router.push(`/${locale}/profile`); }}
                             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-stone-600 hover:bg-rose-50 hover:text-rose-600 rounded-2xl transition-all"
                         >

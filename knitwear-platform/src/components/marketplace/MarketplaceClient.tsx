@@ -112,7 +112,16 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
             {/* Header */}
             <div className="bg-gradient-to-b from-cream-100 to-cream-50 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-brown-700 mb-4">{t('title')}</h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-brown-700">{t('title')}</h1>
+                        <Link
+                            href={`/${locale}/payments`}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-soft transition-all active:scale-95 whitespace-nowrap self-start sm:self-auto cursor-pointer"
+                        >
+                            <Coins className="w-4 h-4" />
+                            <span>{locale === 'ko' ? '크레딧 충전하기' : 'Charge Credits'}</span>
+                        </Link>
+                    </div>
 
                     {/* Search & Filter Bar */}
                     <div className="flex flex-col gap-4">
