@@ -7,19 +7,17 @@ import { User } from '@supabase/supabase-js';
 
 // 크레딧 충전 상품 정의 (금액 원화 기준)
 const CREDIT_PACKAGES = [
-    { id: 'pkg-5k', name: '5,000 Credits', amount: 5000, credits: 5000, desc: '기본 도안 1~2개 구매 가능' },
-    { id: 'pkg-10k', name: '10,000 Credits', amount: 10000, credits: 10000, desc: '실속형 도안 여러 개 구매 가능' },
-    { id: 'pkg-30k', name: '30,000 Credits', amount: 30000, credits: 30000, desc: '10% 추가 혜택 적용', bonus: 1.1 },
-    { id: 'pkg-50k', name: '50,000 Credits', amount: 50000, credits: 50000, desc: '15% 대량 구매 추가 혜택', bonus: 1.15 },
-    { id: 'pkg-100k', name: '100,000 Credits', amount: 100000, credits: 100000, desc: '20% VIP 보너스 크레딧 제공', bonus: 1.20 }
+    { id: 'pkg-5k', name: '5,000 Credits', amount: 5000, credits: 5000 },
+    { id: 'pkg-10k', name: '10,000 Credits', amount: 10000, credits: 10000 },
+    { id: 'pkg-30k', name: '30,000 Credits', amount: 30000, credits: 30000, bonus: 1.1 },
+    { id: 'pkg-50k', name: '50,000 Credits', amount: 50000, credits: 50000, bonus: 1.15 },
+    { id: 'pkg-100k', name: '100,000 Credits', amount: 100000, credits: 100000, bonus: 1.20 }
 ];
 
 // 결제 수단 정의
 const PAYMENT_METHODS = [
     { id: 'card', name: '신용카드', icon: '💳', engName: 'Credit Card' },
-    { id: 'kakaopay', name: '카카오페이', icon: '💛', engName: 'KakaoPay' },
-    { id: 'naverpay', name: '네이버페이', icon: '💚', engName: 'NaverPay' },
-    { id: 'tosspay', name: '토스페이', icon: '💙', engName: 'TossPay' }
+    { id: 'kakaopay', name: '카카오페이', icon: '💛', engName: 'KakaoPay' }
 ];
 
 export default function PaymentsPage() {
@@ -64,29 +62,25 @@ export default function PaymentsPage() {
         fetchUserData();
     }, [router, locale, supabase]);
 
-    // 2. 포트원 SDK 스크립트 동적 주입
+    // 2. 포트원 V1(아임포트) SDK 스크립트 동적 주입
     useEffect(() => {
         // 이미 로드되었는지 확인
-        if (document.getElementById('portone-sdk')) {
+        if (document.getElementById('iamport-sdk')) {
             setIsSdkLoaded(true);
             return;
         }
 
         const script = document.createElement('script');
-        script.id = 'portone-sdk';
-        script.src = 'https://cdn.portone.io/v2/api.js';
+        script.id = 'iamport-sdk';
+        script.src = 'https://cdn.iamport.kr/v1/iamport.js';
         script.async = true;
         script.onload = () => {
             setIsSdkLoaded(true);
         };
         script.onerror = () => {
-            console.error('PortOne SDK load failed');
+            console.error('Iamport SDK load failed');
         };
         document.body.appendChild(script);
-
-        return () => {
-            // 언마운트 시 제거는 하지 않음 (타 페이지 재이용 시 성능 향상)
-        };
     }, []);
 
     // 3. 결제 요청 핸들러
@@ -102,38 +96,38 @@ export default function PaymentsPage() {
         const orderId = `order-${user.id.substring(0, 8)}-${Date.now()}`;
         const finalCredits = Math.round(selectedPackage.credits * (selectedPackage.bonus ?? 1));
 
-        // 포트원 결제창 띄우기
+        // 포트원 V1 결제창 띄우기
         try {
-            // @ts-ignore (윈도우 객체 전역 SDK 확인)
-            const PortOne = window.PortOne;
-            if (!PortOne) {
-                throw new Error('PortOne SDK not initialized');
+            // @ts-ignore
+            const IMP = window.IMP;
+            if (!IMP) {
+                throw new Error('Iamport SDK not initialized');
             }
 
-            // 결제 요청 객체 구성 (Mock Store ID 사용)
-            const response = await PortOne.requestPayment({
-                storeId: 'store-test-id', // 포트원 가맹점 식별 ID (테스트용 상점 ID)
-                paymentId: orderId,
-                orderName: `${selectedPackage.name} 충전 (byKnit)`,
-                totalAmount: selectedPackage.amount,
-                currency: 'CURRENCY_KRW',
-                payMethod: mapPayMethod(selectedMethod),
-                customer: {
-                    fullName: user.user_metadata?.full_name || '바이닛고객',
-                    email: user.email || '',
-                    phoneNumber: user.user_metadata?.phone || '010-0000-0000',
-                },
-                redirectUrl: `${window.location.origin}/${locale}/payments/success` // 모바일 등 리다이렉트 대응
+            // 가맹점 식별코드 설정
+            // 발급받으신 실제 가맹점 식별코드를 적용했습니다.
+            IMP.init('imp55247668'); 
+
+            // 결제 요청 객체 구성 (V1 규격)
+            IMP.request_pay({
+                pg: mapPgCode(selectedMethod), // pg사 코드 (예: kcp.T0000 등)
+                pay_method: 'card',
+                merchant_uid: orderId,
+                name: `${selectedPackage.name} 충전 (byKnit)`,
+                amount: selectedPackage.amount,
+                buyer_email: user.email || '',
+                buyer_name: user.user_metadata?.full_name || '바이닛고객',
+                buyer_tel: user.user_metadata?.phone || '010-0000-0000',
+                m_redirect_url: `${window.location.origin}/${locale}/payments/success` // 모바일 결제 후 이동할 주소
+            }, (response: any) => {
+                if (response.success) {
+                    // 결제 성공 시 -> 성공 화면에서 서버 액션을 타서 지급하도록 처리
+                    router.push(`/${locale}/payments/success?paymentId=${response.imp_uid}&amount=${selectedPackage.amount}&credits=${finalCredits}`);
+                } else {
+                    router.push(`/${locale}/payments/fail?code=PAY_ERROR&message=${encodeURIComponent(response.error_msg || 'Payment failed')}`);
+                }
+                setIsProcessing(false);
             });
-
-            // 결제 도중 에러가 나거나 실패(취소)한 경우
-            if (response.code !== undefined) {
-                router.push(`/${locale}/payments/fail?code=${response.code}&message=${encodeURIComponent(response.message || 'Payment cancelled')}`);
-                return;
-            }
-
-            // 결제 완료 성공 시 -> 성공 화면에서 서버 액션을 타서 지급하도록 처리
-            router.push(`/${locale}/payments/success?paymentId=${response.paymentId}&amount=${selectedPackage.amount}&credits=${finalCredits}`);
 
         } catch (err: any) {
             console.error('Payment Error:', err);
@@ -143,20 +137,19 @@ export default function PaymentsPage() {
             setTimeout(() => {
                 const mockPaymentId = `mock-${Date.now()}`;
                 router.push(`/${locale}/payments/success?paymentId=${mockPaymentId}&amount=${selectedPackage.amount}&credits=${finalCredits}&isMock=true`);
+                setIsProcessing(false);
             }, 1500);
-        } finally {
-            setIsProcessing(false);
         }
     };
 
-    // 결제 수단 매핑
-    const mapPayMethod = (method: string) => {
+    // PG사 코드 매핑 (V1 전용)
+    const mapPgCode = (method: string) => {
         switch (method) {
-            case 'card': return 'CARD';
-            case 'kakaopay': return 'E_WALLET';
-            case 'naverpay': return 'E_WALLET';
-            case 'tosspay': return 'E_WALLET';
-            default: return 'CARD';
+            case 'card': return 'kcp.T0000'; // KCP 테스트 상점아이디
+            case 'kakaopay': return 'kakaopay.TC0ONETIME'; // 카카오페이 테스트 상점아이디
+            case 'naverpay': return 'naverpay'; // 네이버페이 테스트
+            case 'tosspay': return 'tosspay'; // 토스페이 테스트
+            default: return 'kcp.T0000';
         }
     };
 
@@ -219,7 +212,7 @@ export default function PaymentsPage() {
                                             : 'border-tan-200 bg-white hover:border-tan-400'
                                     }`}
                                 >
-                                    <div className="flex justify-between items-center mb-1">
+                                    <div className="flex justify-between items-center mb-4">
                                         <span className="font-bold text-brown-800 text-lg">{pkg.name}</span>
                                         {pkg.bonus && (
                                             <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -227,7 +220,6 @@ export default function PaymentsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-brown-600 mb-3">{pkg.desc}</p>
                                     <p className="text-xl font-extrabold text-brown-800">
                                         ₩ {pkg.amount.toLocaleString()}
                                     </p>
