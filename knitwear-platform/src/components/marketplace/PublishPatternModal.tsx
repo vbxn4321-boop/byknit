@@ -193,12 +193,12 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 if (field === 'imageUrl' && publishMetadata.imageUrl) return false;
                 if (field === 'category' && publishMetadata.category) return false;
                 if (field === 'craftType' && publishMetadata.craftType) return false;
-                if (field === 'needleSize' && publishMetadata.needles) return false;
+                if (field === 'needleSize' && (publishMetadata.needles || publishMetadata.yarnParts?.some(p => p.needle))) return false;
                 // Strict Yarn Info Validation: Must have at least one defined part OR (legacy) yarn weight and yardage
                 // Per user request "mandatory", we enforce it.
                 if (field === 'yarnInfo' && (publishMetadata.yarnParts.length > 0 || publishMetadata.yarnWeight)) return false;
-                if (field === 'sizes' && (publishMetadata.sizes || publishMetadata.sizeParts.length > 0)) return false;
-                if (field === 'measurements' && publishMetadata.measurements) return false;
+                if (field === 'sizes' && (publishMetadata.sizes || publishMetadata.sizeParts?.some(p => p.name))) return false;
+                if (field === 'measurements' && (publishMetadata.measurements || publishMetadata.sizeParts?.some(p => p.detail))) return false;
                 if (field === 'briefDescription' && publishMetadata.briefDescription) return false;
                 if (field === 'hashtags' && publishMetadata.hashtags.length >= 3) return false;
                 return true;
@@ -258,9 +258,15 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         if (!publishMetadata.title) errors.push('title');
         if (!publishMetadata.category) errors.push('category');
         if (!publishMetadata.subcategory) errors.push('subcategory');
-        if (!publishMetadata.needles) errors.push('needleSize');
-        if (!publishMetadata.sizes) errors.push('sizes');
-        if (!publishMetadata.measurements) errors.push('measurements');
+        const hasNeedles = publishMetadata.needles || publishMetadata.yarnParts?.some(p => p.needle);
+        if (!hasNeedles) errors.push('needleSize');
+
+        const hasSizes = publishMetadata.sizes || publishMetadata.sizeParts?.some(p => p.name);
+        if (!hasSizes) errors.push('sizes');
+
+        const hasMeasurements = publishMetadata.measurements || publishMetadata.sizeParts?.some(p => p.detail);
+        if (!hasMeasurements) errors.push('measurements');
+
         if (!publishMetadata.briefDescription) errors.push('briefDescription');
         if (publishMetadata.hashtags.length < 3) errors.push('hashtags');
 
@@ -320,6 +326,26 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 pdfUrl = publicUrl;
             }
 
+            // Map structured sizeParts and yarnParts to legacy needles, sizes, and measurements for backend/translation compatibility
+            const uniqueNeedles = Array.from(new Set(
+                publishMetadata.yarnParts
+                    ?.map(p => p.needle)
+                    .filter(Boolean)
+            ));
+            const needlesString = uniqueNeedles.length > 0 ? uniqueNeedles.join(', ') : '';
+
+            const uniqueSizes = Array.from(new Set(
+                publishMetadata.sizeParts
+                    ?.map(p => p.name)
+                    .filter(Boolean)
+            ));
+            const sizesString = uniqueSizes.length > 0 ? uniqueSizes.join(', ') : '';
+
+            const measurementsString = publishMetadata.sizeParts
+                ?.map(p => p.name && p.detail ? `${p.name}: ${p.detail}` : p.detail)
+                .filter(Boolean)
+                .join(' | ') || '';
+
             // 2. Call Server Action
             const payload: any = {
                 ...publishMetadata,
@@ -330,8 +356,9 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 gaugeStitches: parseInt(String(publishMetadata.gaugeStitches)) || 0,
                 gaugeRows: 0,
                 yardage: parseInt(String(publishMetadata.yardage)) || 0,
-                sizes: publishMetadata.sizes,
-                measurements: publishMetadata.measurements,
+                needles: needlesString || publishMetadata.needles,
+                sizes: sizesString || publishMetadata.sizes,
+                measurements: measurementsString || publishMetadata.measurements,
                 hashtags: publishMetadata.hashtags || [],
                 yarnParts: publishMetadata.yarnParts || [],
                 sizeParts: publishMetadata.sizeParts || []

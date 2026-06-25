@@ -72,6 +72,13 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
             },
         },
     });
+    
+    // Sync external content changes (e.g. from draft restore) with editor
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content);
+        }
+    }, [content, editor]);
 
     // Close color menu on outside click
     useEffect(() => {
