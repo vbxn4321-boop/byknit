@@ -52,6 +52,7 @@ export function ProductInfoTable({ pattern, locale }: ProductInfoTableProps) {
 
                 // Legacy fallback
                 if (meta.size) return meta.size;
+                if (meta.sizes) return typeof meta.sizes === 'string' ? meta.sizes : (meta.sizes[locale as 'en' | 'ko'] || meta.sizes.en || '-');
                 if (!pattern.sizes) return '-';
                 return typeof pattern.sizes === 'string' ? pattern.sizes : (pattern.sizes[locale as 'en' | 'ko'] || pattern.sizes.en || '-');
             case 'gauge':

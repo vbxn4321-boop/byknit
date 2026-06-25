@@ -51,15 +51,14 @@ export async function createPdfPattern(data: {
         .insert({
             title: translatedMetadata.title,
             description: translatedMetadata.description,
-            price: data.price,
             price_usd: data.price,
+            price_krw: Math.round(data.price * 1450),
             images: [data.imageUrl, ...(data.additionalImages || [])].filter(Boolean),
             category: data.category,
             difficulty: data.difficulty,
             designer_id: user.id,
             status: 'published',
-            sizes: translatedMetadata.sizes,
-            measurements: translatedMetadata.measurements,
+            type: 'internal_pdf',
             content: {
                 type: 'pdf',
                 pdf_url: data.pdfUrl,
@@ -72,7 +71,9 @@ export async function createPdfPattern(data: {
                     gauge: data.gauge || data.gaugeStitches || '',
                     yardage: data.yardage || data.yarnAmount || '',
                     yarnParts: data.yarnParts,
-                    sizeParts: data.sizeParts
+                    sizeParts: data.sizeParts,
+                    sizes: translatedMetadata.sizes,
+                    measurements: translatedMetadata.measurements
                 }
             }
         })
