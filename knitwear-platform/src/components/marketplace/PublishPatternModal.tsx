@@ -279,6 +279,24 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+
+            // Show a clear, descriptive popup alert for the user
+            const errorLabels: Record<string, string> = {
+                title: isKo ? '도안 제목' : 'Pattern Title',
+                category: isKo ? '카테고리' : 'Category',
+                subcategory: isKo ? '서브카테고리' : 'Subcategory',
+                needleSize: isKo ? '사용 바늘' : 'Needle Size',
+                sizes: isKo ? '사이즈 명' : 'Size Name',
+                measurements: isKo ? '상세 치수' : 'Measurements',
+                briefDescription: isKo ? '도안 소개' : 'Brief Description',
+                hashtags: isKo ? '해시태그 (최소 3개)' : 'Hashtags (Min 3)',
+                yarnInfo: isKo ? '실 정보 (최소 1개)' : 'Yarn Info (Min 1)'
+            };
+            const missingList = errors.map(e => errorLabels[e] || e).join('\n- ');
+            alert(isKo 
+                ? `등록하려면 아래 필수 입력 항목들을 채워주셔야 합니다:\n\n- ${missingList}` 
+                : `Please fill in the following required fields to publish:\n\n- ${missingList}`
+            );
             return;
         }
 
