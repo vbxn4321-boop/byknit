@@ -74,18 +74,111 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                 p_random_seed: randomSeed // Pass uniform seed for stable sorting
             });
 
-
-
             if (error) {
                 console.error('Error fetching patterns (Details):', JSON.stringify(error, null, 2));
                 console.error('Error message:', error.message);
                 console.error('Error hint:', error.hint);
                 console.error('Error code:', error.code);
+                throw error;
             } else {
                 setPatterns(data && data.length > 0 ? data : DUMMY_PATTERNS);
             }
         } catch (err) {
-            console.error('Failed to fetch patterns:', err);
+            console.error('Failed to fetch patterns via RPC, falling back to direct table query:', err);
+            try {
+                let query = supabase
+                    .from('patterns')
+                    .select(`
+                        *,
+                        designer:designer_id (
+                            display_name,
+                            avatar_url
+                        ),
+                        pattern_likes (
+                            id,
+                            user_id
+                        ),
+                        reviews (
+                            id,
+                            rating
+                        )
+                    `)
+                    .eq('status', 'published');
+
+                if (filters.category) {
+                    query = query.eq('category', filters.category);
+                }
+                if (filters.difficulty) {
+                    query = query.eq('difficulty', filters.difficulty);
+                }
+                if (filters.freeOnly) {
+                    query = query.eq('price_usd', 0);
+                }
+
+                const { data: dbData, error: dbError } = await query;
+                if (dbError) throw dbError;
+
+                let processed = (dbData || []).map((p: any) => {
+                    const likes = p.pattern_likes || [];
+                    const reviews = p.reviews || [];
+                    const avgRating = reviews.length > 0
+                        ? reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length
+                        : 0;
+
+                    return {
+                        ...p,
+                        author_name: p.designer?.display_name || 'Designer',
+                        author_avatar: p.designer?.avatar_url || null,
+                        like_count: likes.length,
+                        is_liked: currentUser ? likes.some((l: any) => l.user_id === currentUser.id) : false,
+                        review_count: reviews.length,
+                        average_rating: avgRating,
+                        view_count: p.view_count || 0,
+                        download_count: p.download_count || 0
+                    };
+                });
+
+                const activeYarnWeights = filters.yarnWeight;
+                if (activeYarnWeights && activeYarnWeights.length > 0) {
+                    processed = processed.filter((p: any) => activeYarnWeights.includes(p.yarn_weight));
+                }
+
+                if (searchQuery) {
+                    const queryLower = searchQuery.toLowerCase();
+                    processed = processed.filter((p: any) => {
+                        const titleKo = (typeof p.title === 'object' ? p.title?.ko : p.title)?.toLowerCase() || '';
+                        const titleEn = (typeof p.title === 'object' ? p.title?.en : p.title)?.toLowerCase() || '';
+                        const descKo = (typeof p.description === 'object' ? p.description?.ko : p.description)?.toLowerCase() || '';
+                        const descEn = (typeof p.description === 'object' ? p.description?.en : p.description)?.toLowerCase() || '';
+                        return titleKo.includes(queryLower) || titleEn.includes(queryLower) || descKo.includes(queryLower) || descEn.includes(queryLower);
+                    });
+                }
+
+                if (sort === 'newest') {
+                    processed.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                } else if (sort === 'popular') {
+                    processed.sort((a: any, b: any) => {
+                        const scoreA = (a.like_count * 10) + (a.view_count || 0) + (a.review_count * 20);
+                        const scoreB = (b.like_count * 10) + (b.view_count || 0) + (b.review_count * 20);
+                        return scoreB - scoreA;
+                    });
+                } else {
+                    processed.sort((a: any, b: any) => {
+                        const daysA = Math.max(0, 60 - (Date.now() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                        const scoreA = (daysA / 60.0 * 40) + Math.log(1 + (a.view_count || 0) + (a.like_count * 5) + (a.review_count * 10)) * 10;
+                        
+                        const daysB = Math.max(0, 60 - (Date.now() - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                        const scoreB = (daysB / 60.0 * 40) + Math.log(1 + (b.view_count || 0) + (b.like_count * 5) + (b.review_count * 10)) * 10;
+                        
+                        return scoreB - scoreA;
+                    });
+                }
+
+                setPatterns(processed.length > 0 ? processed : DUMMY_PATTERNS);
+            } catch (fallbackErr) {
+                console.error('Fallback query failed:', fallbackErr);
+                setPatterns(DUMMY_PATTERNS);
+            }
         } finally {
             setIsLoading(false);
         }
