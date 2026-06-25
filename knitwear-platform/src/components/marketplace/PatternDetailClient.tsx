@@ -136,7 +136,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                     ]);
                     setIsLiked(likeRes.isLiked);
                     setIsFollowing(followRes.isFollowing);
-                    if (orderRes.data || dbPattern.is_free) {
+                    if (orderRes.data || dbPattern.is_free || data.designer_id === user.id) {
                         setCanDownload(true);
                     }
                 }
@@ -582,6 +582,38 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                         locale === 'ko' ? '구매하기' : 'Buy Now'
                                     )
                                 )}
+                            </button>
+                        )}
+
+                        {user && user.id === pattern.designer_id && (
+                            <button
+                                onClick={async () => {
+                                    const confirmDelete = window.confirm(
+                                        locale === 'ko'
+                                            ? '정말로 이 도안을 마켓플레이스에서 삭제하시겠습니까?'
+                                            : 'Are you sure you want to delete this pattern from the marketplace?'
+                                    );
+                                    if (!confirmDelete) return;
+
+                                    try {
+                                        setIsLoading(true);
+                                        const { deletePattern } = await import('@/app/actions/pattern');
+                                        const res = await deletePattern(patternId);
+                                        if (res.success) {
+                                            alert(locale === 'ko' ? '도안이 삭제되었습니다.' : 'Pattern deleted successfully.');
+                                            window.location.reload();
+                                        } else {
+                                            alert(res.error || 'Failed to delete pattern');
+                                        }
+                                    } catch (e: any) {
+                                        alert(e.message || 'Error occurred');
+                                    } finally {
+                                        setIsLoading(false);
+                                    }
+                                }}
+                                className="w-full mt-2 py-3.5 rounded-xl bg-rose-50 border-2 border-rose-200 hover:bg-rose-100 hover:border-rose-300 text-rose-600 font-bold flex items-center justify-center gap-2 transition-all text-sm relative z-10"
+                            >
+                                {locale === 'ko' ? '도안 삭제하기' : 'Delete Pattern'}
                             </button>
                         )}
                     </div>
