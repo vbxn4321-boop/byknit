@@ -145,6 +145,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
     useEffect(() => {
         if (invalidFields.length > 0) {
             const newInvalid = invalidFields.filter(field => {
+                if (field === 'file' && file) return false;
                 if (field === 'title' && publishMetadata.title) return false;
                 if (field === 'imageUrl' && publishMetadata.imageUrl) return false;
                 if (field === 'category' && publishMetadata.category) return false;
@@ -163,7 +164,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 setInvalidFields(newInvalid);
             }
         }
-    }, [publishMetadata, invalidFields]);
+    }, [publishMetadata, invalidFields, file]);
 
     if (!isOpen) return null;
 
@@ -211,6 +212,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
 
     const handlePublish = async () => {
         const errors: string[] = [];
+        if (!file) errors.push('file');
         if (!publishMetadata.title) errors.push('title');
         if (!publishMetadata.category) errors.push('category');
         if (!publishMetadata.subcategory) errors.push('subcategory');
@@ -237,8 +239,6 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             }
             return;
         }
-
-        if (!file) return; // Should allow publish without file? logic above says file required.
 
         setLoading(true);
 
@@ -325,11 +325,11 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
 
                     {/* File Upload Section (Top, per user request) */}
                     {!file && (
-                        <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 mb-6">
+                        <div id="field-file" className={`bg-stone-50 border ${invalidFields.includes('file') ? 'border-rose-300 bg-rose-50' : 'border-stone-200'} rounded-2xl p-4 mb-6`}>
                             <div className="flex items-center justify-between mb-2">
-                                <label className="text-sm font-bold text-stone-800 flex items-center gap-2">
-                                    <FileText size={16} className="text-stone-500" />
-                                    {isKo ? '도안 파일 (PDF)' : 'Pattern File (PDF)'}
+                                <label className={`text-sm font-bold ${invalidFields.includes('file') ? 'text-rose-500' : 'text-stone-800'} flex items-center gap-2`}>
+                                    <FileText size={16} className={invalidFields.includes('file') ? 'text-rose-500' : 'text-stone-500'} />
+                                    {isKo ? '도안 파일 (PDF)' : 'Pattern File (PDF)'} <span className="text-rose-500">*</span>
                                 </label>
                                 <label className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm transition-all hover:bg-rose-50">
                                     {file ? (isKo ? '파일 변경' : 'Change File') : (isKo ? '파일 업로드' : 'Upload File')}
@@ -342,7 +342,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                                 </label>
                             </div>
                             {!file && (
-                                <div className="text-xs text-stone-400 pl-6">
+                                <div className={`text-xs ${invalidFields.includes('file') ? 'text-rose-500 font-medium' : 'text-stone-400'} pl-6`}>
                                     {isKo ? '판매할 도안 PDF 파일을 업로드해주세요.' : 'Please upload the pattern PDF file to sell.'}
                                 </div>
                             )}
