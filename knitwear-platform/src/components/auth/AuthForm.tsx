@@ -93,7 +93,7 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
         }
         
         if (result?.success) {
-            window.location.href = '/';
+            window.location.href = `/${locale}`;
         }
     };
 

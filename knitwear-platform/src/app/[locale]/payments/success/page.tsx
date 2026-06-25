@@ -11,26 +11,28 @@ export default function PaymentSuccessPage() {
     const locale = (params?.locale as string) || 'ko';
     const isKo = locale === 'ko';
 
-    const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-    const [errorMessage, setErrorMessage] = useState('');
-
     const paymentId = searchParams.get('paymentId');
     const amountStr = searchParams.get('amount');
     const creditsStr = searchParams.get('credits');
 
+    const isValid = !!(paymentId && amountStr && creditsStr);
+
+    const [status, setStatus] = useState<'verifying' | 'success' | 'error'>(
+        isValid ? 'verifying' : 'error'
+    );
+    const [errorMessage, setErrorMessage] = useState(
+        isValid ? '' : (isKo ? '결제 정보가 올바르지 않습니다.' : 'Invalid payment information.')
+    );
+
     useEffect(() => {
-        if (!paymentId || !amountStr || !creditsStr) {
-            setStatus('error');
-            setErrorMessage(isKo ? '결제 정보가 올바르지 않습니다.' : 'Invalid payment information.');
-            return;
-        }
+        if (!isValid) return;
 
         const verify = async () => {
             try {
-                const amount = parseInt(amountStr, 10);
-                const credits = parseInt(creditsStr, 10);
+                const amount = parseInt(amountStr!, 10);
+                const credits = parseInt(creditsStr!, 10);
 
-                const res = await verifyAndChargePayment(paymentId, amount, credits);
+                const res = await verifyAndChargePayment(paymentId!, amount, credits);
 
                 if (res.success) {
                     setStatus('success');
@@ -46,7 +48,7 @@ export default function PaymentSuccessPage() {
         };
 
         verify();
-    }, [paymentId, amountStr, creditsStr, isKo]);
+    }, [isValid, paymentId, amountStr, creditsStr, isKo]);
 
     const handleGoBack = () => {
         router.push(`/${locale}/marketplace`);

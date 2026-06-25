@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { X, Gift, Sparkles } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
@@ -11,6 +12,7 @@ interface CreditPopupManagerProps {
 
 export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
     const router = useRouter();
+    const t = useTranslations('creditPopup');
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [dontShowToday, setDontShowToday] = useState(false);
@@ -119,7 +121,7 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
     const handleActionClick = () => {
         handleClose();
         if (!isAuth) {
-            router.push('/ko/login');
+            router.push('/login');
         }
     };
 
@@ -156,9 +158,9 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                         </div>
                         <h3 className="text-2xl font-bold text-brown-800">
                             {isAuth ? (
-                                isNewUser ? '축하합니다! 1,000 크레딧 지급 완료' : '반가워요! 다시 오셨군요 🧶'
+                                isNewUser ? t('titleNewUser') : t('titleReturningUser')
                             ) : (
-                                '로그인하고 1,000 크레딧 받기'
+                                t('titleGuest')
                             )}
                         </h3>
                     </div>
@@ -166,29 +168,33 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                     <div className="space-y-4 text-brown-600 leading-relaxed text-center">
                         <p>
                             {isAuth ? (
-                                isNewUser ? 'byKnit에 오신 것을 환영합니다!' : '오늘도 byKnit와 함께 나만의 특별한 도안을 디자인해 보세요.'
+                                isNewUser ? t('welcomeMessage') : t('returningMessage')
                             ) : (
-                                'byKnit에 오신 것을 환영합니다!'
+                                t('welcomeMessage')
                             )}
                         </p>
                         <div className="bg-cream-50 p-6 rounded-2xl border border-tan-100 text-sm font-medium">
                             {isAuth ? (
                                 isNewUser ? (
                                     <>
-                                        자유롭게 AI 기능을 체험해 볼 수 있도록 <br/>
-                                        <span className="text-rose-500 text-base font-bold">1,000 크레딧</span>이 지급되었습니다.
+                                        {t('newUserCreditsDesc1')} <br/>
+                                        <span className="text-rose-500 text-base font-bold">{t('newUserCreditsDesc2')}</span>{t('newUserCreditsDesc3')}
                                     </>
                                 ) : (
                                     <>
-                                        현재 보유하신 크레딧은<br/>
-                                        <span className="text-rose-500 text-base font-bold">{credits.toLocaleString()} 크레딧</span>입니다.
+                                        {t('returningUserCreditsDesc1')}<br/>
+                                        <span className="text-rose-500 text-base font-bold">
+                                            {t('returningUserCreditsDesc2', { credits: credits.toLocaleString() })}
+                                        </span>
+                                        {t('returningUserCreditsDesc3')}
                                     </>
                                 )
                             ) : (
                                 <>
-                                    구글 계정 또는 회원가입 및 로그인하시면 <br/>
-                                    AI 분석 기능을 즉시 사용하실 수 있는 <span className="text-rose-500 font-bold text-base">1,000 크레딧</span>을 드립니다.<br/><br/>
-                                    <span className="text-xs text-brown-400">*로그인하지 않은 비회원 상태에서는 크레딧이 지급되지 않습니다.</span>
+                                    {t('guestCreditsDesc1')} <br/>
+                                    {t('guestCreditsDesc2') && <>{t('guestCreditsDesc2')}<br/></>}
+                                    <span className="text-rose-500 font-bold text-base">{t('guestCreditsDesc3')}</span>{t('guestCreditsDesc4')}<br/><br/>
+                                    <span className="text-xs text-brown-400">{t('guestCreditsNotice')}</span>
                                 </>
                             )}
                         </div>
@@ -199,9 +205,9 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                         className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl transition-all shadow-md active:scale-95"
                     >
                         {isAuth ? (
-                            isNewUser ? '감사합니다, 지금 시작하기' : '오늘의 뜨개 시작하기'
+                            isNewUser ? t('actionNewUser') : t('actionReturningUser')
                         ) : (
-                            'Google 계정 또는 가입 / 로그인하기'
+                            t('actionGuest')
                         )}
                     </button>
                 </div>
@@ -223,7 +229,7 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
                             )}
                         </div>
                         <span className="text-sm text-brown-600 font-medium group-hover:text-brown-800 transition-colors select-none">
-                            하루 동안 보지 않기
+                            {t('dontShowToday')}
                         </span>
                     </label>
                 </div>

@@ -1203,5 +1203,27 @@
   "metadata": {
     "title": "byKnit - Smart Knitting & Crochet Pattern Generator & Editor",
     "description": "Turn any photo into a colorwork knitting or crochet chart in 3 seconds. Design, customize, and share your DIY craft patterns on byKnit. Free pattern downloads available."
+  },
+  "creditPopup": {
+    "titleNewUser": "Congratulations! 1,000 Credits Granted",
+    "titleReturningUser": "Welcome Back! 🧶",
+    "titleGuest": "Login to Receive 1,000 Credits",
+    "welcomeMessage": "Welcome to byKnit!",
+    "returningMessage": "Design your own special patterns with byKnit today.",
+    "newUserCreditsDesc1": "We have granted you",
+    "newUserCreditsDesc2": "1,000 credits",
+    "newUserCreditsDesc3": "so you can freely experience our AI features.",
+    "returningUserCreditsDesc1": "Your current balance is",
+    "returningUserCreditsDesc2": "{credits} credits",
+    "returningUserCreditsDesc3": ".",
+    "guestCreditsDesc1": "Sign up or log in with Google to get",
+    "guestCreditsDesc2": "AI analysis tools",
+    "guestCreditsDesc3": "1,000 credits",
+    "guestCreditsDesc4": "which you can immediately use.",
+    "guestCreditsNotice": "*Credits are not granted for unauthenticated guests.",
+    "actionNewUser": "Thank you, start now",
+    "actionReturningUser": "Start knitting today",
+    "actionGuest": "Login / Sign up with Google",
+    "dontShowToday": "Don't show again today"
   }
 }

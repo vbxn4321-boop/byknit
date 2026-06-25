@@ -17,12 +17,6 @@ export default function TutorialsPage() {
     const t = useTranslations('tutorials');
     const [activeTab, setActiveTab] = useState('editor');
 
-    useEffect(() => {
-        if (activeTab && !['editor', 'converter', 'calculator', 'translator'].includes(activeTab)) {
-            setActiveTab('editor');
-        }
-    }, [activeTab]);
-
     const tabs = [
         { id: 'editor', label: t('tabs.editor'), icon: Grid },
         { id: 'converter', label: t('tabs.converter'), icon: ImageIcon },
