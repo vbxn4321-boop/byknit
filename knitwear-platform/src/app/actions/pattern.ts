@@ -249,9 +249,8 @@ export async function deletePattern(patternId: string) {
 
     if (pattern.designer_id !== user.id && !isAdmin) return { success: false, error: 'Unauthorized' };
 
-    // If admin, use adminClient to bypass RLS
-    const clientToUse = isAdmin ? adminClient : supabase;
-    const { error } = await clientToUse
+    // Use adminClient to bypass RLS to ensure status update succeeds
+    const { error } = await adminClient
         .from('patterns')
         .update({ status: 'archived' })
         .eq('id', patternId);

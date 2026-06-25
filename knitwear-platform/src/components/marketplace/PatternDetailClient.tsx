@@ -8,7 +8,7 @@ import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 
 // Icons
-import { ArrowLeft, Share2, ShoppingCart, Heart, ChevronRight, Play, Star, Eye, Download } from 'lucide-react';
+import { ArrowLeft, Share2, ShoppingCart, Heart, ChevronRight, Play, Star, Eye, Download, Trash2 } from 'lucide-react';
 
 // Types and Actions
 import type { Pattern } from '@/types';
@@ -57,6 +57,9 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
     // And ensure imports are added.  Wait, I need to add imports first or replacing file content might miss them if I don't select top.
 
     // ... [Previous state code assumed handling by "unchanged"] ...
+
+    const [authUser, setAuthUser] = useState<User | null>(user);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const [pattern, setPattern] = useState<Pattern | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +116,10 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                 };
                 setPattern(dbPattern);
 
-                setPattern(dbPattern);
+                if (data.status === 'archived') {
+                    setIsLoading(false);
+                    return;
+                }
 
                 // Fetch Designer Profile
                 const targetId = data.designer_id || data.creator_id;
@@ -127,16 +133,32 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                     }
                 }
 
-                // 2. Fetch Social Status (User dependent)
-                if (user) {
+                // 2. Fetch Client User session (handles client-side auth refresh/caching issues)
+                const { data: { user: clientUser } } = await supabase.auth.getUser();
+                let activeUser = clientUser || user;
+                if (clientUser) {
+                    setAuthUser(clientUser);
+                    // Check if admin
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', clientUser.id)
+                        .single();
+                    if (profileData?.role === 'admin') {
+                        setIsAdmin(true);
+                    }
+                }
+
+                // 3. Fetch Social Status (User dependent)
+                if (activeUser) {
                     const [likeRes, followRes, orderRes] = await Promise.all([
                         getLikeStatus(patternId),
                         getFollowStatus(data.designer_id),
-                        supabase.from('orders').select('*').eq('user_id', user.id).eq('pattern_id', patternId).eq('status', 'paid').maybeSingle()
+                        supabase.from('orders').select('*').eq('user_id', activeUser.id).eq('pattern_id', patternId).eq('status', 'paid').maybeSingle()
                     ]);
                     setIsLiked(likeRes.isLiked);
                     setIsFollowing(followRes.isFollowing);
-                    if (orderRes.data || dbPattern.is_free || data.designer_id === user.id) {
+                    if (orderRes.data || dbPattern.is_free || data.designer_id === activeUser.id) {
                         setCanDownload(true);
                     }
                 }
@@ -230,7 +252,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     // Handlers
     const handleLike = async () => {
-        if (!user) return router.push(`/${locale}/login`);
+        if (!authUser) return router.push(`/${locale}/login`);
 
         // Optimistic update
         const newIsLiked = !isLiked;
@@ -244,13 +266,13 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
     };
 
     const handleFollow = async () => {
-        if (!user || !pattern) return router.push(`/${locale}/login`);
+        if (!authUser || !pattern) return router.push(`/${locale}/login`);
         setIsFollowing(!isFollowing); // Optimistic
         await toggleFollow(pattern.designer_id);
     };
 
     const handleBuy = async () => {
-        if (!user) return router.push(`/${locale}/login`);
+        if (!authUser) return router.push(`/${locale}/login`);
 
         // If already purchased/downloadable OR Free, show inline options
         if (canDownload || pattern?.is_free) {
@@ -303,7 +325,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
         const pdfGenerator = new PatternPDFGenerator({
             pattern: pattern!,
-            user,
+            user: authUser,
             targetLocale: lang, // Use selected language
             designerProfile: profile
         });
@@ -311,7 +333,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         await incrementDownloadCount(patternId);
 
         // 🔔 Reward the designer (+10) for download
-        if (pattern.designer_id && pattern.designer_id !== user?.id) {
+        if (pattern.designer_id && pattern.designer_id !== authUser?.id) {
             try {
                 const { addCredits } = await import('@/app/actions/credits');
                 await addCredits(pattern.designer_id, 10, `Marketplace Download Reward (${patternId})`);
@@ -323,6 +345,30 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     if (isLoading || !pattern) {
         return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
+    }
+
+    if (pattern.status === 'archived') {
+        return (
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 mb-4">
+                    <Trash2 size={32} />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                    {locale === 'ko' ? '삭제된 도안입니다.' : 'This pattern has been deleted.'}
+                </h1>
+                <p className="text-gray-500 mb-6 max-w-sm">
+                    {locale === 'ko' 
+                        ? '이 도안은 마켓플레이스에서 삭제되었거나 판매 중지되었습니다.' 
+                        : 'This pattern has been deleted or is no longer available in the marketplace.'}
+                </p>
+                <button
+                    onClick={() => router.push(`/${locale}/marketplace`)}
+                    className="px-6 py-2.5 rounded-full bg-stone-900 text-white font-bold hover:bg-stone-800 transition-colors shadow-soft"
+                >
+                    {locale === 'ko' ? '마켓플레이스로 이동' : 'Go to Marketplace'}
+                </button>
+            </div>
+        );
     }
 
     const titleStr = typeof pattern.title === 'string' ? pattern.title : (locale === 'ko' ? (pattern.title?.ko || pattern.title?.en) : (pattern.title?.en || pattern.title?.ko));
@@ -398,7 +444,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                 {profile?.display_name || profile?.username || `Designer ${pattern.designer_id?.slice(0, 4) || ''}`}
                             </span>
                         </Link>
-                        {user && user.id !== pattern.designer_id && (
+                        {authUser && authUser.id !== pattern.designer_id && (
                             <button
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -585,7 +631,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                             </button>
                         )}
 
-                        {user && user.id === pattern.designer_id && (
+                        {authUser && (authUser.id === pattern.designer_id || isAdmin) && (
                             <button
                                 onClick={async () => {
                                     const confirmDelete = window.confirm(
@@ -601,7 +647,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                         const res = await deletePattern(patternId);
                                         if (res.success) {
                                             alert(locale === 'ko' ? '도안이 삭제되었습니다.' : 'Pattern deleted successfully.');
-                                            window.location.reload();
+                                            router.push(`/${locale}/marketplace`);
                                         } else {
                                             alert(res.error || 'Failed to delete pattern');
                                         }
@@ -652,7 +698,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                         </div>
                     }
                     reviewContent={
-                        <ProductReviews patternId={patternId} locale={locale} user={user} />
+                        <ProductReviews patternId={patternId} locale={locale} user={authUser} />
                     }
                     qnaContent={
                         <ProductInquiries patternId={patternId} locale={locale} />
