@@ -858,13 +858,46 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                                     className="bg-transparent border-none outline-none text-stone-700 font-bold text-lg px-3 py-2 flex-1 min-w-[120px] placeholder:text-stone-300"
                                     placeholder={tPublish('fields.hashtagPlaceholder')}
                                     onKeyDown={e => {
-                                        if (e.key === 'Enter') {
+                                        if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
                                             e.preventDefault();
-                                            const val = e.currentTarget.value.trim().replace(/^#/, '').replace(/,/g, '');
-                                            if (val && !publishMetadata.hashtags.includes(val)) {
-                                                setPublishMetadata(p => ({ ...p, hashtags: [...p.hashtags, val] }));
+                                            const inputVal = e.currentTarget.value;
+                                            const tags = inputVal
+                                                .split(/[\s,]+/)
+                                                .map(t => t.trim().replace(/^#/, '').replace(/,/g, ''))
+                                                .filter(t => t.length > 0);
+
+                                            if (tags.length > 0) {
+                                                setPublishMetadata(p => {
+                                                    const newTags = [...p.hashtags];
+                                                    tags.forEach(tag => {
+                                                        if (!newTags.includes(tag) && newTags.length < 10) {
+                                                            newTags.push(tag);
+                                                        }
+                                                    });
+                                                    return { ...p, hashtags: newTags };
+                                                });
                                                 e.currentTarget.value = '';
                                             }
+                                        }
+                                    }}
+                                    onBlur={e => {
+                                        const inputVal = e.currentTarget.value;
+                                        const tags = inputVal
+                                            .split(/[\s,]+/)
+                                            .map(t => t.trim().replace(/^#/, '').replace(/,/g, ''))
+                                            .filter(t => t.length > 0);
+
+                                        if (tags.length > 0) {
+                                            setPublishMetadata(p => {
+                                                const newTags = [...p.hashtags];
+                                                tags.forEach(tag => {
+                                                    if (!newTags.includes(tag) && newTags.length < 10) {
+                                                        newTags.push(tag);
+                                                    }
+                                                });
+                                                return { ...p, hashtags: newTags };
+                                            });
+                                            e.currentTarget.value = '';
                                         }
                                     }}
                                 />
