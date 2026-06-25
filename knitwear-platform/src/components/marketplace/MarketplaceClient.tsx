@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Search, SlidersHorizontal, X, ChevronDown, Download, Eye, Star, Heart, User as UserIcon, Sparkles, Clock, TrendingUp, Crown, Coins, ChevronRight, Package } from 'lucide-react';
 import { CATEGORY_TAXONOMY, YARN_WEIGHTS } from '@/constants/taxonomy';
 import type { Pattern, PatternFilters, YarnWeight, Technique, Difficulty } from '@/types';
 import { PatternDetailClient } from './PatternDetailClient';
+import { PublishPatternModal } from './PublishPatternModal';
 import { getDesignerProfile } from '@/app/actions/social';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
@@ -21,7 +23,17 @@ type SortOption = 'recommended' | 'newest' | 'popular';
 export function MarketplaceClient({ locale }: MarketplaceClientProps) {
     const t = useTranslations('marketplace');
     const tCommunity = useTranslations('community');
+    const router = useRouter();
+    const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
     const [isCreditsExpanded, setIsCreditsExpanded] = useState(false);
+
+    const handlePublishClick = () => {
+        if (!currentUser) {
+            router.push('/login');
+        } else {
+            setIsPublishModalOpen(true);
+        }
+    };
     const [searchQuery, setSearchQuery] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filters, setFilters] = useState<PatternFilters>({});
@@ -115,13 +127,13 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                         <h1 className="text-3xl sm:text-4xl font-bold text-brown-700">{t('title')}</h1>
                         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                            <Link
-                                href={`/${locale}/marketplace/dashboard`}
+                            <button
+                                onClick={handlePublishClick}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-soft transition-all active:scale-95 whitespace-nowrap cursor-pointer"
                             >
                                 <Package className="w-4 h-4" />
                                 <span>{locale === 'ko' ? '도안 판매 및 등록' : 'Sell & Publish'}</span>
-                            </Link>
+                            </button>
                             <Link
                                 href={`/${locale}/payments`}
                                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-soft transition-all active:scale-95 whitespace-nowrap cursor-pointer"
@@ -448,6 +460,18 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Publish Pattern Modal */}
+            {isPublishModalOpen && (
+                <PublishPatternModal
+                    isOpen={isPublishModalOpen}
+                    onClose={() => {
+                        setIsPublishModalOpen(false);
+                        fetchPatterns(); // Refresh patterns list
+                    }}
+                    locale={locale}
+                />
             )}
         </div>
     );
