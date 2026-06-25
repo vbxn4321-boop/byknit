@@ -1,5 +1,22 @@
 export const DUMMY_PATTERNS = [
     {
+        id: 'beginner-mug-cozy',
+        title: { ko: '입문자용 포근 머그컵 워머 (무료 도안)', en: "Beginner's Cozy Mug Cozy (Free Pattern)" },
+        item_type: 'digital',
+        images: ['/images/mug_cozy_pattern_cover.png'],
+        price_usd: 0,
+        is_free: true,
+        is_on_sale: false,
+        discount_percentage: 0,
+        author_name: 'byKnit Studio',
+        author_avatar: null,
+        average_rating: 5.0,
+        view_count: 10,
+        download_count: 2,
+        like_count: 5,
+        is_liked: false
+    },
+    {
         id: 'dummy-pattern-1',
         title: { ko: '포근한 꽈배기 스웨터 도안', en: 'Cozy Cable Knit Sweater Pattern' },
         item_type: 'digital',
