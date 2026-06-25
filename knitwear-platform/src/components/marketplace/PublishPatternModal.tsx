@@ -210,10 +210,8 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
     };
 
     const handlePublish = async () => {
-        // Validation
         const errors: string[] = [];
         if (!publishMetadata.title) errors.push('title');
-        if (!publishMetadata.imageUrl) errors.push('imageUrl');
         if (!publishMetadata.category) errors.push('category');
         if (!publishMetadata.subcategory) errors.push('subcategory');
         if (!publishMetadata.needles) errors.push('needleSize');
@@ -351,11 +349,11 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                         </div>
                     )}
 
-                    {/* Main Image (Required) */}
+                    {/* Main Image (Optional) */}
                     <div id="field-imageUrl">
                         <div className="flex justify-between items-end mb-2">
                             <label className={`text-sm font-bold ${invalidFields.includes('imageUrl') ? 'text-rose-500' : 'text-stone-800'}`}>
-                                대표 이미지 <span className="text-rose-500">*</span>
+                                대표 이미지 <span className="text-stone-400 font-normal">(선택)</span>
                             </label>
                             <span className="text-xs text-stone-400">권장: 1080x1080px (1:1)</span>
                         </div>
