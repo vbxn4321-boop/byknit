@@ -141,6 +141,49 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         }
     }, [initialFile, file]);
 
+    // Load draft when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            const savedDraft = localStorage.getItem('byknit_publish_draft');
+            if (savedDraft) {
+                try {
+                    const parsed = JSON.parse(savedDraft);
+                    if (parsed.title || parsed.briefDescription || parsed.detailedDescription) {
+                        const confirmLoad = window.confirm(
+                            locale === 'ko' 
+                                ? '이전에 작성 중이던 임시 저장된 도안 정보가 있습니다. 불러오시겠습니까?' 
+                                : 'You have an auto-saved draft. Would you like to restore it?'
+                        );
+                        if (confirmLoad) {
+                            setPublishMetadata(prev => ({ ...prev, ...parsed }));
+                        } else {
+                            localStorage.removeItem('byknit_publish_draft');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load draft:', e);
+                }
+            }
+        }
+    }, [isOpen, locale]);
+
+    const handleClose = () => {
+        const hasContent = publishMetadata.title || publishMetadata.briefDescription || publishMetadata.detailedDescription;
+        if (hasContent) {
+            const saveDraft = window.confirm(
+                locale === 'ko'
+                    ? '작성 중인 내용을 임시 저장하시겠습니까?\n(확인을 누르면 임시 저장되며, 취소를 누르면 삭제됩니다.)'
+                    : 'Save draft before closing?\n(Click OK to save draft, Cancel to discard.)'
+            );
+            if (saveDraft) {
+                localStorage.setItem('byknit_publish_draft', JSON.stringify(publishMetadata));
+            } else {
+                localStorage.removeItem('byknit_publish_draft');
+            }
+        }
+        onClose();
+    };
+
     // Clear invalid status when field changes
     useEffect(() => {
         if (invalidFields.length > 0) {
@@ -212,7 +255,6 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
 
     const handlePublish = async () => {
         const errors: string[] = [];
-        if (!file) errors.push('file');
         if (!publishMetadata.title) errors.push('title');
         if (!publishMetadata.category) errors.push('category');
         if (!publishMetadata.subcategory) errors.push('subcategory');
@@ -243,18 +285,22 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         setLoading(true);
 
         try {
-            // 1. Upload PDF
-            const supabase = createClient();
-            const pdfFilename = `pdf_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-            const { error: uploadError } = await supabase.storage
-                .from('patterns')
-                .upload(pdfFilename, file);
+            // 1. Upload PDF (if file exists)
+            let pdfUrl = '';
+            if (file) {
+                const supabase = createClient();
+                const pdfFilename = `pdf_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('patterns')
+                    .upload(pdfFilename, file);
 
-            if (uploadError) throw uploadError;
+                if (uploadError) throw uploadError;
 
-            const { data: { publicUrl: pdfUrl } } = supabase.storage
-                .from('patterns')
-                .getPublicUrl(pdfFilename);
+                const { data: { publicUrl } } = supabase.storage
+                    .from('patterns')
+                    .getPublicUrl(pdfFilename);
+                pdfUrl = publicUrl;
+            }
 
             // 2. Call Server Action
             const payload: any = {
@@ -274,6 +320,8 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             };
 
             await createPdfPattern(payload);
+
+            localStorage.removeItem('byknit_publish_draft');
 
             alert(locale === 'ko' ? '도안이 성공적으로 출시되었습니다!' : 'Pattern published successfully!');
             onClose();
@@ -297,7 +345,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                     <h2 className="text-3xl font-bold text-brown-800 tracking-tight">
                         {tPublish('title')}
                     </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-tan-100 rounded-full transition-colors">
+                    <button onClick={handleClose} className="p-2 hover:bg-tan-100 rounded-full transition-colors">
                         <X className="w-8 h-8 text-brown-400" />
                     </button>
                 </div>
@@ -325,11 +373,11 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
 
                     {/* File Upload Section (Top, per user request) */}
                     {!file && (
-                        <div id="field-file" className={`bg-stone-50 border ${invalidFields.includes('file') ? 'border-rose-300 bg-rose-50' : 'border-stone-200'} rounded-2xl p-4 mb-6`}>
+                        <div id="field-file" className="bg-stone-50 border border-stone-200 rounded-2xl p-4 mb-6">
                             <div className="flex items-center justify-between mb-2">
-                                <label className={`text-sm font-bold ${invalidFields.includes('file') ? 'text-rose-500' : 'text-stone-800'} flex items-center gap-2`}>
-                                    <FileText size={16} className={invalidFields.includes('file') ? 'text-rose-500' : 'text-stone-500'} />
-                                    {isKo ? '도안 파일 (PDF)' : 'Pattern File (PDF)'} <span className="text-rose-500">*</span>
+                                <label className="text-sm font-bold text-stone-800 flex items-center gap-2">
+                                    <FileText size={16} className="text-stone-500" />
+                                    {isKo ? '도안 파일 (PDF)' : 'Pattern File (PDF)'} <span className="text-stone-400 font-normal">(선택)</span>
                                 </label>
                                 <label className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm transition-all hover:bg-rose-50">
                                     {file ? (isKo ? '파일 변경' : 'Change File') : (isKo ? '파일 업로드' : 'Upload File')}
@@ -342,8 +390,8 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                                 </label>
                             </div>
                             {!file && (
-                                <div className={`text-xs ${invalidFields.includes('file') ? 'text-rose-500 font-medium' : 'text-stone-400'} pl-6`}>
-                                    {isKo ? '판매할 도안 PDF 파일을 업로드해주세요.' : 'Please upload the pattern PDF file to sell.'}
+                                <div className="text-xs text-stone-400 pl-6">
+                                    {isKo ? '판매할 도안 PDF 파일이 있다면 업로드해주세요.' : 'Please upload the pattern PDF file if available.'}
                                 </div>
                             )}
                         </div>
