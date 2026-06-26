@@ -122,7 +122,9 @@ export default function PaymentsPage() {
                 custom_data: {
                     user_id: user.id,
                     credits: finalCredits
-                }
+                },
+                // 포트원 웹훅 수신 주소 동적 지정
+                notice_url: `${window.location.origin}/api/payments/webhook`
             }, (response: any) => {
                 if (response.success) {
                     // 결제 성공 시 -> 성공 화면에서 서버 액션을 타서 지급하도록 처리
