@@ -118,7 +118,11 @@ export default function PaymentsPage() {
                 buyer_email: user.email || '',
                 buyer_name: user.user_metadata?.full_name || '바이닛고객',
                 buyer_tel: user.user_metadata?.phone || '010-0000-0000',
-                m_redirect_url: `${window.location.origin}/${locale}/payments/success` // 모바일 결제 후 이동할 주소
+                m_redirect_url: `${window.location.origin}/${locale}/payments/success`, // 모바일 결제 후 이동할 주소
+                custom_data: {
+                    user_id: user.id,
+                    credits: finalCredits
+                }
             }, (response: any) => {
                 if (response.success) {
                     // 결제 성공 시 -> 성공 화면에서 서버 액션을 타서 지급하도록 처리
