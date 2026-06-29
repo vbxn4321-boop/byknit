@@ -200,23 +200,134 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleDownloadPDF = () => {
+    const handleDownloadPDF = async () => {
         if (!user) {
             handleAuthCheck();
             return;
         }
 
-        const doc = new jsPDF();
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const bottomMargin = 20;
+        const contentWidth = pageWidth - (margin * 2);
 
-        doc.setFont("Helvetica", "normal");
-        doc.setFontSize(20);
-        doc.text("byKnit AI Translated Pattern", 20, 20);
+        // Helper to render Korean text as image in PDF
+        const renderTextAsImage = async (text: string, x: number, y: number, fontSize: number, color: string, isBold: boolean, align: 'left' | 'center' = 'left') => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
 
-        doc.setFontSize(12);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
+            const scale = 4;
+            const fontWeight = isBold ? 'bold' : 'normal';
+            const fontStr = `${fontWeight} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+            ctx.font = fontStr;
 
-        const splitText = doc.splitTextToSize(translatedText, 170);
-        doc.text(splitText, 20, 45);
+            const metrics = ctx.measureText(text);
+            const textWidth = metrics.width / (scale * 3.5);
+
+            let drawX = x;
+            if (align === 'center') drawX = x - (textWidth / 2);
+
+            canvas.width = metrics.width + 40;
+            canvas.height = (fontSize * scale) * 1.5;
+
+            ctx.font = fontStr;
+            ctx.fillStyle = color;
+            ctx.textBaseline = 'top';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillText(text, 10, 0);
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdfW = canvas.width / (scale * 3.5);
+            const pdfH = canvas.height / (scale * 3.5);
+
+            doc.addImage(imgData, 'PNG', drawX, y, pdfW, pdfH);
+        };
+
+        // Helper to draw wrapped multiline text
+        const drawMultilineText = async (plainText: string, startX: number, startY: number, fontSize: number, color: string, maxWidth: number) => {
+            const paragraphs = plainText.split('\n');
+            let currentY = startY;
+            const lineHeight = fontSize * 1.6;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return currentY;
+
+            const scale = 4;
+            const fontStr = `normal ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+            ctx.font = fontStr;
+
+            const canvasMaxWidth = maxWidth * scale * 3.5;
+
+            for (const para of paragraphs) {
+                const trimmed = para.trim();
+                if (trimmed === '') {
+                    currentY += lineHeight;
+                    continue;
+                }
+
+                const lines: string[] = [];
+                let currentLine = '';
+
+                for (let i = 0; i < trimmed.length; i++) {
+                    const char = trimmed[i];
+                    const testLine = currentLine + char;
+                    const metrics = ctx.measureText(testLine);
+
+                    if (metrics.width > canvasMaxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine !== '') {
+                    lines.push(currentLine);
+                }
+
+                for (const line of lines) {
+                    if (currentY + lineHeight > pageHeight - bottomMargin) {
+                        doc.addPage();
+                        currentY = 20;
+                    }
+
+                    await renderTextAsImage(line, startX, currentY, fontSize, color, false);
+                    currentY += lineHeight;
+                }
+            }
+            return currentY;
+        };
+
+        // Draw Title
+        await renderTextAsImage("byKnit AI Translated Pattern", margin, 20, 20, '#543e35', true);
+        
+        // Draw Date
+        const dateStr = `Date: ${new Date().toLocaleDateString()}`;
+        await renderTextAsImage(dateStr, margin, 32, 10, '#8a7366', false);
+
+        // Draw translated text with automatic wrapping and page breaks
+        await drawMultilineText(translatedText, margin, 45, 11, '#333333', contentWidth);
+
+        // Add Watermark & Footer to all pages
+        const pageCount = doc.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            
+            // Draw simple footer
+            await renderTextAsImage(`Page ${i} of ${pageCount} • Powered by byKnit`, pageWidth / 2, pageHeight - 12, 8, '#888888', false, 'center');
+            
+            // Draw simple watermark
+            if (user?.email) {
+                const watermarkText = `Licensed to ${user.email}`;
+                doc.setTextColor(180, 180, 180);
+                doc.setFontSize(8);
+                doc.text(watermarkText, pageWidth / 2, 6, { align: 'center' });
+                doc.text(watermarkText, pageWidth / 2, pageHeight - 6, { align: 'center' });
+            }
+        }
 
         doc.save("byknit-translated-pattern.pdf");
     };
