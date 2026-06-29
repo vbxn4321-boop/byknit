@@ -556,21 +556,29 @@ export class PatternPDFGenerator {
         const canvasMaxWidth = maxWidth * scale * 3.5;
         
         const isBigHeader = (text: string) => {
+            const trimmed = text.trim().replace(/^###\s*/, '');
+            return trimmed.startsWith('시작 부분') || 
+                   trimmed.startsWith('제작 방법') ||
+                   text.trim().startsWith('###');
+        };
+        
+        const isSubHeader = (text: string) => {
             const trimmed = text.trim();
             return /^(?:\d+[\s\.\)]|🔘|✨|⚡|🚀|✦|★|☆|■)/u.test(trimmed) || 
-                   trimmed.startsWith('시작 부분') || 
-                   trimmed.startsWith('제작 방법') ||
                    trimmed.startsWith('단추 달기') ||
-                   trimmed.startsWith('도안 설명');
+                   trimmed.startsWith('도안 설명') ||
+                   trimmed.startsWith('번역 결과');
         };
         
         for (let idx = 0; idx < paragraphs.length; idx++) {
             const para = paragraphs[idx];
-            const isHeader = isBigHeader(para);
+            const isBig = isBigHeader(para);
+            const isSub = isSubHeader(para);
+            const isHeader = isBig || isSub;
             
-            // Spacing before big headers (except the first one)
-            if (isHeader && idx > 0) {
-                currentY += lineHeight * 1.8; // 3-4 lines gap before new sections
+            // Spacing before big headers ONLY (except the first one)
+            if (isBig && idx > 0) {
+                currentY += lineHeight * 1.8; // 3-4 lines gap before new big sections
             }
             
             const fontStr = `${isHeader ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
