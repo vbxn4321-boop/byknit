@@ -90,20 +90,38 @@ export class PatternPDFGenerator {
         doc.line(margin, currentY, margin + 35, currentY);
         currentY += 8;
 
-        // Map Category/Subcategory Labels
+        // Map Category/Subcategory Labels from database column or content.metadata fallback
+        const metadata = (pattern.content as any)?.metadata || {};
+        
         const categoryData = CATEGORY_TAXONOMY[pattern.category as keyof typeof CATEGORY_TAXONOMY];
         const displayCategory = categoryData ? (isTargetKo ? categoryData.label.ko : categoryData.label.en) : (pattern.category || '-');
-        const displaySubcategory = categoryData?.sub?.find((s: any) => s.id === pattern.subcategory)?.label[isTargetKo ? 'ko' : 'en'] || pattern.subcategory || '-';
+        
+        const subcat = pattern.subcategory || metadata.subcategory;
+        const displaySubcategory = categoryData?.sub?.find((s: any) => s.id === subcat)?.label[isTargetKo ? 'ko' : 'en'] || subcat || '-';
+
+        const yarnWt = pattern.yarn_weight || metadata.yarn_weight;
+        const needlesVal = pattern.needles || metadata.needles;
+        const gaugeVal = pattern.gauge || metadata.gauge || (metadata.yarnParts?.[0]?.gauge); // Fallback to first yarn part gauge if main is empty
+        const sizesVal = pattern.sizes || metadata.sizes;
+        const measurementsVal = pattern.measurements || metadata.measurements;
+
+        // Needle size formatting: if it already contains 'mm', don't append it again
+        const formatNeedle = (val: any) => {
+            if (!val) return '-';
+            const str = String(val);
+            if (str.toLowerCase().includes('mm')) return str;
+            return `${str} mm`;
+        };
 
         const details = [
             { label: isTargetKo ? '카테고리' : 'Category', value: displayCategory },
             { label: isTargetKo ? '세부카테고리' : 'Subcategory', value: displaySubcategory },
             { label: isTargetKo ? '난이도' : 'Difficulty', value: isTargetKo ? (pattern.difficulty === 'beginner' ? '초보자' : pattern.difficulty === 'intermediate' ? '중급자' : '상급자') : (pattern.difficulty ? (pattern.difficulty.charAt(0).toUpperCase() + pattern.difficulty.slice(1)) : '-') },
-            { label: isTargetKo ? '실 무게' : 'Yarn Weight', value: Array.isArray(pattern.yarn_weight) ? pattern.yarn_weight.join(', ') : (pattern.yarn_weight || '-') },
-            { label: isTargetKo ? '바늘 크기' : 'Needle Size', value: (pattern.needles || (pattern.needle_size_mm?.length ? `${pattern.needle_size_mm.join(', ')}` : '-')) + ' mm' },
-            { label: isTargetKo ? '게이지' : 'Gauge', value: (pattern.gauge_stitches && pattern.gauge_rows) ? (isTargetKo ? `${pattern.gauge_stitches}코 ${pattern.gauge_rows}단` : `${pattern.gauge_stitches} sts x ${pattern.gauge_rows} rows`) : (pattern.gauge || (pattern.gauge_stitches ? `${pattern.gauge_stitches} sts / 10cm` : (isTargetKo ? '기재되지 않음' : 'Not specified'))) },
-            { label: isTargetKo ? '사이즈' : 'Sizes', value: pattern.sizes ? (isTargetKo ? (pattern.sizes.ko || pattern.sizes.en) : (pattern.sizes.en || pattern.sizes.ko)) : '-' },
-            { label: isTargetKo ? '실측' : 'Measurements', value: pattern.measurements ? (isTargetKo ? (pattern.measurements.ko || pattern.measurements.en) : (pattern.measurements.en || pattern.measurements.ko)) : '-' },
+            { label: isTargetKo ? '실 무게' : 'Yarn Weight', value: Array.isArray(yarnWt) ? yarnWt.join(', ') : (yarnWt || '-') },
+            { label: isTargetKo ? '바늘 크기' : 'Needle Size', value: formatNeedle(needlesVal) },
+            { label: isTargetKo ? '게이지' : 'Gauge', value: (pattern.gauge_stitches && pattern.gauge_rows) ? (isTargetKo ? `${pattern.gauge_stitches}코 ${pattern.gauge_rows}단` : `${pattern.gauge_stitches} sts x ${pattern.gauge_rows} rows`) : (gaugeVal || (pattern.gauge_stitches ? `${pattern.gauge_stitches} sts / 10cm` : (isTargetKo ? '기재되지 않음' : 'Not specified'))) },
+            { label: isTargetKo ? '사이즈' : 'Sizes', value: sizesVal ? (isTargetKo ? (sizesVal.ko || sizesVal.en) : (sizesVal.en || sizesVal.ko)) : '-' },
+            { label: isTargetKo ? '실측' : 'Measurements', value: measurementsVal ? (isTargetKo ? (measurementsVal.ko || measurementsVal.en) : (measurementsVal.en || measurementsVal.ko)) : '-' },
         ];
 
         for (const item of details) {
@@ -506,8 +524,84 @@ export class PatternPDFGenerator {
         }
     }
 
+    private async drawMultilineText(htmlText: string, startX: number, startY: number, fontSize: number, color: string, maxWidth: number): Promise<number> {
+        const { doc } = this;
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const bottomMargin = 20; // Footer margin
+        
+        let cleanText = htmlText
+            .replace(/<p[^>]*>/gi, '')
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<li>/gi, '• ')
+            .replace(/<\/li>/gi, '\n')
+            .replace(/<[^>]+>/g, '') // Strip any remaining HTML tags
+            .replace(/&nbsp;/gi, ' ')
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
+            .replace(/&amp;/gi, '&');
+            
+        const paragraphs = cleanText.split('\n');
+        let currentY = startY;
+        const lineHeight = fontSize * 1.6; // Line height in mm
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return currentY;
+        
+        const scale = 4;
+        const fontStr = `normal ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+        ctx.font = fontStr;
+        
+        // Conversion factor from mm to canvas pixels (matching renderTextAsImage)
+        const canvasMaxWidth = maxWidth * scale * 3.5;
+        
+        for (const para of paragraphs) {
+            const trimmed = para.trim();
+            if (trimmed === '') {
+                currentY += lineHeight;
+                continue;
+            }
+            
+            // Wrap text
+            const lines: string[] = [];
+            let currentLine = '';
+            
+            for (let i = 0; i < trimmed.length; i++) {
+                const char = trimmed[i];
+                const testLine = currentLine + char;
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > canvasMaxWidth && currentLine !== '') {
+                    lines.push(currentLine);
+                    currentLine = char;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            if (currentLine !== '') {
+                lines.push(currentLine);
+            }
+            
+            for (const line of lines) {
+                if (currentY + lineHeight > pageHeight - bottomMargin) {
+                    doc.addPage();
+                    currentY = 25; // Start below watermark
+                }
+                
+                await this.renderTextAsImage(line, startX, currentY, fontSize, color, false, 'left');
+                currentY += lineHeight;
+            }
+        }
+        
+        return currentY;
+    }
+
     private async drawTranslatedText(text: string, x: number, y: number, fontSize: number, color: string, maxWidth?: number) {
-        return this.renderTextAsImage(text, x, y, fontSize, color, false, 'left', maxWidth);
+        if (maxWidth) {
+            return this.drawMultilineText(text, x, y, fontSize, color, maxWidth);
+        }
+        return this.renderTextAsImage(text, x, y, fontSize, color, false, 'left');
     }
 
     private async renderTextAsImage(text: string, x: number, y: number, fontSize: number, color: string, isBold: boolean, align: 'left' | 'right' | 'center' = 'left', maxWidth?: number) {

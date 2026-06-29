@@ -28,12 +28,31 @@ export async function createPdfPattern(data: {
     measurements?: string;
     yarnParts?: any[];
     sizeParts?: any[];
+    isOfficial?: boolean;
+    itemType?: 'digital' | 'physical';
+    purchaseUrl?: string;
 }) {
     const supabase = await createClient();
+    const adminClient = await createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         throw new Error('Unauthorized');
+    }
+
+    // Check if user is an admin
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+    const isAdmin = profile?.role === 'admin';
+
+    // Strict validation: Only admin can publish physical or official items
+    if (!isAdmin) {
+        if (data.isOfficial === true || data.itemType === 'physical') {
+            throw new Error('Unauthorized: Only administrators can publish physical products or official items.');
+        }
     }
 
     // Translate metadata if needed
@@ -45,6 +64,8 @@ export async function createPdfPattern(data: {
         sizes: data.sizes,
         measurements: data.measurements
     });
+
+    const isPhysical = isAdmin && data.itemType === 'physical';
 
     const { data: pattern, error } = await supabase
         .from('patterns')
@@ -58,11 +79,15 @@ export async function createPdfPattern(data: {
             difficulty: data.difficulty,
             designer_id: user.id,
             status: 'published',
-            type: 'internal_pdf',
+            type: isPhysical ? 'external_link' : 'internal_pdf',
+            origin_url: isPhysical ? (data.purchaseUrl || null) : null,
+            is_official: isAdmin ? (data.isOfficial || false) : false,
+            item_type: isAdmin ? (data.itemType || 'digital') : 'digital',
+            purchase_url: isAdmin ? (data.purchaseUrl || null) : null,
             content: {
-                type: 'pdf',
-                pdf_url: data.pdfUrl,
-                original_filename: data.title + '.pdf',
+                type: isPhysical ? 'external' : 'pdf',
+                pdf_url: isPhysical ? null : data.pdfUrl,
+                original_filename: isPhysical ? null : (data.title + '.pdf'),
                 metadata: {
                     craft_type: data.craftType,
                     subcategory: data.subcategory,
@@ -85,11 +110,13 @@ export async function createPdfPattern(data: {
         throw new Error(error.message);
     }
 
-    // Award credits for uploading a pattern
-    try {
-        await addCredits(user.id, 100, 'Pattern Upload Reward');
-    } catch (creditError) {
-        console.error('Failed to award credits:', creditError);
+    // Award credits for uploading a pattern (only for creator digital patterns)
+    if (!isPhysical) {
+        try {
+            await addCredits(user.id, 100, 'Pattern Upload Reward');
+        } catch (creditError) {
+            console.error('Failed to award credits:', creditError);
+        }
     }
 
     revalidatePath('/marketplace');
@@ -103,6 +130,9 @@ export async function updatePattern(data: {
     description: string;
     price: number;
     locale: string;
+    isOfficial?: boolean;
+    itemType?: 'digital' | 'physical';
+    purchaseUrl?: string;
 }) {
     const supabase = await createClient();
     const adminClient = await createAdminClient();
@@ -130,6 +160,13 @@ export async function updatePattern(data: {
         .eq('id', user.id)
         .single();
     const isAdmin = profile?.role === 'admin';
+
+    // Strict validation: Only admin can edit or create physical or official items
+    if (!isAdmin) {
+        if (data.isOfficial === true || data.itemType === 'physical' || existing.is_official || existing.item_type === 'physical') {
+            throw new Error('Unauthorized: Only administrators can update physical products or official items.');
+        }
+    }
 
     // Check ownership (support both designer_id and author_id for backward compatibility)
     const isOwner = existing.designer_id === user.id || (existing as any).author_id === user.id || isAdmin;
@@ -161,6 +198,23 @@ export async function updatePattern(data: {
     if (priceChanged) {
         updatePayload.previous_price = existing.price_usd;
         updatePayload.price_updated_at = new Date().toISOString();
+    }
+
+    // If admin, update admin fields
+    if (isAdmin) {
+        if (data.isOfficial !== undefined) {
+            updatePayload.is_official = data.isOfficial;
+        }
+        if (data.itemType !== undefined) {
+            updatePayload.item_type = data.itemType;
+            updatePayload.type = data.itemType === 'physical' ? 'external_link' : 'internal_pdf';
+        }
+        if (data.purchaseUrl !== undefined) {
+            updatePayload.purchase_url = data.purchaseUrl;
+            if (updatePayload.item_type === 'physical' || existing.item_type === 'physical') {
+                updatePayload.origin_url = data.purchaseUrl || null;
+            }
+        }
     }
 
     // If admin, use adminClient to bypass RLS

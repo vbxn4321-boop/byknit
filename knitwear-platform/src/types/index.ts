@@ -62,6 +62,9 @@ export interface Pattern {
     measurements?: { ko: string; en: string };
     // Product Type distinction
     item_type?: 'digital' | 'physical';
+    is_official?: boolean;
+    purchase_url?: string | null;
+    origin_url?: string | null;
     // Grid editor data for PDF generation
     grid_data?: number[][] | any[][];
     palette?: string[];

@@ -8,7 +8,7 @@ import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 
 // Icons
-import { ArrowLeft, Share2, ShoppingCart, Heart, ChevronRight, Play, Star, Eye, Download, Trash2 } from 'lucide-react';
+import { ArrowLeft, Share2, ShoppingCart, Heart, ChevronRight, Play, Star, Eye, Download, Trash2, Crown } from 'lucide-react';
 
 // Types and Actions
 import type { Pattern } from '@/types';
@@ -432,31 +432,44 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                     {/* Designer - Moved Up */}
                     {/* Designer - Moved Up */}
                     <div className="flex items-center gap-3 mb-6 w-fit">
-                        <Link href={`/${locale}/profile/${pattern.designer_id}`} className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs uppercase overflow-hidden">
-                                {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    (profile?.display_name || profile?.username || 'D')?.[0]
-                                )}
+                        {pattern.is_official ? (
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center text-white shadow-soft">
+                                    <Crown className="w-4 h-4 fill-amber-100" />
+                                </div>
+                                <span className="text-sm font-black text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                    {locale === 'ko' ? 'byKnit 공식' : 'byKnit Official'}
+                                </span>
                             </div>
-                            <span className="text-sm font-semibold text-stone-500 group-hover:text-stone-800 transition-colors">
-                                {profile?.display_name || profile?.username || `Designer ${pattern.designer_id?.slice(0, 4) || ''}`}
-                            </span>
-                        </Link>
-                        {authUser && authUser.id !== pattern.designer_id && (
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleFollow();
-                                }}
-                                className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${isFollowing
-                                    ? 'bg-white border-stone-300 text-stone-500 hover:border-red-200 hover:text-red-500'
-                                    : 'bg-stone-800 border-stone-800 text-white hover:bg-stone-700'
-                                    }`}
-                            >
-                                {isFollowing ? (locale === 'ko' ? '팔로잉' : 'Following') : (locale === 'ko' ? '팔로우' : 'Follow')}
-                            </button>
+                        ) : (
+                            <>
+                                <Link href={`/${locale}/profile/${pattern.designer_id}`} className="flex items-center gap-2 group">
+                                    <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs uppercase overflow-hidden">
+                                        {profile?.avatar_url ? (
+                                            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            (profile?.display_name || profile?.username || 'D')?.[0]
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-semibold text-stone-500 group-hover:text-stone-800 transition-colors">
+                                        {profile?.display_name || profile?.username || `Designer ${pattern.designer_id?.slice(0, 4) || ''}`}
+                                    </span>
+                                </Link>
+                                {authUser && authUser.id !== pattern.designer_id && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleFollow();
+                                        }}
+                                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all border ${isFollowing
+                                            ? 'bg-white border-stone-300 text-stone-500 hover:border-red-200 hover:text-red-500'
+                                            : 'bg-stone-800 border-stone-800 text-white hover:bg-stone-700'
+                                            }`}
+                                    >
+                                        {isFollowing ? (locale === 'ko' ? '팔로잉' : 'Following') : (locale === 'ko' ? '팔로우' : 'Follow')}
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -531,8 +544,8 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                 <Heart size={20} className={isLiked ? 'fill-rose-500' : ''} />
                                 {isLiked ? (locale === 'ko' ? '찜함' : 'Liked') : (locale === 'ko' ? '찜하기' : 'Like')}
                             </button>
-                            {/* Cart Button - Only show if PAID and NOT owned */}
-                            {!pattern.is_free && !canDownload && (
+                            {/* Cart Button - Only show if PAID and NOT owned and NOT physical */}
+                            {!pattern.is_free && !canDownload && pattern.item_type !== 'physical' && (
                                 <button
                                     onClick={() => alert('Add to cart')}
                                     className="flex-1 py-3 rounded-xl bg-white border-2 border-stone-200 hover:bg-stone-50 hover:border-stone-300 text-stone-600 font-bold flex items-center justify-center gap-2 transition-all"
@@ -608,6 +621,15 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                     </div>
                                 )}
                             </div>
+                        ) : pattern.item_type === 'physical' ? (
+                            <a
+                                href={pattern.purchase_url || pattern.origin_url || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-rose-100 text-center block transition-all text-lg relative z-10"
+                            >
+                                {locale === 'ko' ? '구매 사이트로 이동' : 'Go to Shop'}
+                            </a>
                         ) : (
                             <button
                                 onClick={() => {

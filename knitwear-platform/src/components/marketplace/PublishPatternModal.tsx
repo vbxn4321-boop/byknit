@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Upload, X, Check, Loader2, FileText, Image as ImageIcon, Plus, HelpCircle } from 'lucide-react';
+import { Upload, X, Check, Loader2, FileText, Image as ImageIcon, Plus, HelpCircle, Crown, Package, Sparkles } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -108,6 +108,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
     // UI State
     const [yardageUnit, setYardageUnit] = useState<'m' | 'yd'>('m');
     const [invalidFields, setInvalidFields] = useState<string[]>([]);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     // Metadata State (Matching GridEditor structure)
     const [publishMetadata, setPublishMetadata] = useState({
@@ -132,7 +133,12 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         hashtags: [] as string[],
 
         yarnParts: [] as YarnPart[],
-        sizeParts: [] as { id: string; name: string; detail: string }[]
+        sizeParts: [] as { id: string; name: string; detail: string }[],
+        
+        // Admin options
+        isOfficial: false,
+        itemType: 'digital' as 'digital' | 'physical',
+        purchaseUrl: ''
     });
 
     useEffect(() => {
@@ -140,6 +146,31 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             setFile(initialFile);
         }
     }, [initialFile, file]);
+
+    // Check if user is admin
+    useEffect(() => {
+        const checkAdmin = async () => {
+            try {
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+                    if (profile?.role === 'admin') {
+                        setIsAdmin(true);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check admin role:', e);
+            }
+        };
+        if (isOpen) {
+            checkAdmin();
+        }
+    }, [isOpen]);
 
     // Load draft when modal opens
     useEffect(() => {
@@ -254,6 +285,12 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
     };
 
     const handlePublish = async () => {
+        // Validation for admin physical product external link
+        if (isAdmin && publishMetadata.itemType === 'physical' && !publishMetadata.purchaseUrl) {
+            alert(isKo ? '실물 상품의 경우 외부 구매 링크 입력이 필수입니다.' : 'External purchase link is required for physical goods.');
+            return;
+        }
+
         const errors: string[] = [];
         if (!publishMetadata.title) errors.push('title');
         if (!publishMetadata.category) errors.push('category');
@@ -361,7 +398,10 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 measurements: measurementsString || publishMetadata.measurements,
                 hashtags: publishMetadata.hashtags || [],
                 yarnParts: publishMetadata.yarnParts || [],
-                sizeParts: publishMetadata.sizeParts || []
+                sizeParts: publishMetadata.sizeParts || [],
+                isOfficial: publishMetadata.isOfficial,
+                itemType: publishMetadata.itemType,
+                purchaseUrl: publishMetadata.purchaseUrl
             };
 
             await createPdfPattern(payload);
@@ -396,6 +436,99 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-8 pb-10 custom-scrollbar space-y-10 pt-4">
+                    {/* Admin settings */}
+                    {isAdmin && (
+                        <div className="bg-rose-50/40 border border-rose-100 rounded-3xl p-6 space-y-6">
+                            <div className="flex items-center justify-between border-b border-rose-100/50 pb-4">
+                                <h3 className="text-lg font-black text-rose-800 flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-rose-500" />
+                                    {isKo ? '관리자 전용 설정' : 'Admin Settings'}
+                                </h3>
+                                <span className="px-2.5 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider">
+                                    Admin
+                                </span>
+                            </div>
+                            
+                            {/* Official Toggle */}
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <label className="text-sm font-bold text-brown-800 flex items-center gap-1.5">
+                                        <Crown className="w-4 h-4 text-amber-500 fill-amber-400" />
+                                        {isKo ? 'byKnit 공식 상품으로 등록' : 'Register as byKnit Official'}
+                                    </label>
+                                    <p className="text-xs text-brown-500">
+                                        {isKo ? '이 상품에 공식 왕관 배지를 표시하고 판매자 프로필을 공식 계정으로 고정합니다.' : 'Display official crown badge and pin the seller profile to the official account.'}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setPublishMetadata(prev => ({ ...prev, isOfficial: !prev.isOfficial }))}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        publishMetadata.isOfficial ? 'bg-rose-500' : 'bg-stone-300'
+                                    }`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                            publishMetadata.isOfficial ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
+                            {/* Item Type Selector */}
+                            <div className="space-y-3">
+                                <label className="text-sm font-bold text-brown-800">
+                                    {isKo ? '상품 유형' : 'Product Type'}
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPublishMetadata(prev => ({ ...prev, itemType: 'digital' }))}
+                                        className={`py-3 px-4 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                                            publishMetadata.itemType === 'digital'
+                                                ? 'bg-rose-500 border-rose-500 text-white shadow-soft'
+                                                : 'bg-white border-tan-200 text-brown-700 hover:border-rose-300'
+                                        }`}
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        {isKo ? '디지털 도안 (PDF)' : 'Digital Pattern (PDF)'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPublishMetadata(prev => ({ ...prev, itemType: 'physical' }))}
+                                        className={`py-3 px-4 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                                            publishMetadata.itemType === 'physical'
+                                                ? 'bg-rose-500 border-rose-500 text-white shadow-soft'
+                                                : 'bg-white border-tan-200 text-brown-700 hover:border-rose-300'
+                                        }`}
+                                    >
+                                        <Package className="w-4 h-4" />
+                                        {isKo ? '실물 상품 (패키지/부자재)' : 'Physical Goods (Kits/Yarn)'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Purchase URL Field (Only for Physical) */}
+                            {publishMetadata.itemType === 'physical' && (
+                                <div className="space-y-2 animate-in slide-in-from-top-1 duration-200">
+                                    <label className="text-sm font-bold text-brown-800 flex items-center gap-1.5">
+                                        {isKo ? '외부 구매 링크 (상세 주소)' : 'External Purchase Link'}
+                                        <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://smartstore.naver.com/..."
+                                        value={publishMetadata.purchaseUrl || ''}
+                                        onChange={(e) => setPublishMetadata(prev => ({ ...prev, purchaseUrl: e.target.value }))}
+                                        className="w-full px-4 py-3 rounded-xl border border-tan-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-sm"
+                                    />
+                                    <p className="text-xs text-stone-400">
+                                        {isKo ? '스마트스토어 등 실물 상품을 실제로 구매할 수 있는 외부 URL을 입력해주세요.' : 'Enter the external shop URL where users can purchase this physical product.'}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {/* PDF File Section (Read-onlyish since it was uploaded) */}
                     {file && (
                         <div className="bg-sage-50 border border-sage-200 rounded-xl p-4 flex items-center justify-between">

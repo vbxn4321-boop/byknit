@@ -41,6 +41,7 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
     const [patterns, setPatterns] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedPatternId, setSelectedPatternId] = useState<string | null>(null);
+    const [scopeFilter, setScopeFilter] = useState<'all' | 'official' | 'creators'>('all');
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     // Stable random seed for the session (resets on refresh/navigation)
     const [randomSeed] = useState(() => Math.random());
@@ -407,26 +408,83 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                 <div className="grid lg:grid-cols-[1fr_320px] gap-6">
                     {/* Main Results */}
                     <div>
-                        <div className="mb-4 text-sm text-brown-600 flex items-center justify-between">
-                            <span>{patterns.length} {t('itemsFound')}</span>
-                            {isLoading && <span className="text-brown-400 animate-pulse">Loading...</span>}
+                        {/* Scope Filter Tabs */}
+                        <div className="flex border-b border-tan-200 mb-6 gap-6">
+                            <button
+                                onClick={() => setScopeFilter('all')}
+                                className={`pb-3 font-bold text-sm relative transition-all ${
+                                    scopeFilter === 'all' 
+                                        ? 'text-brown-800' 
+                                        : 'text-stone-400 hover:text-stone-600'
+                                }`}
+                            >
+                                {locale === 'ko' ? '전체 상품' : 'All Items'}
+                                {scopeFilter === 'all' && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500 rounded-full animate-in fade-in duration-200" />
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setScopeFilter('official')}
+                                className={`pb-3 font-bold text-sm relative transition-all flex items-center gap-1.5 ${
+                                    scopeFilter === 'official' 
+                                        ? 'text-rose-600 font-extrabold' 
+                                        : 'text-stone-400 hover:text-stone-600'
+                                }`}
+                            >
+                                <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                                {locale === 'ko' ? 'byKnit 공식' : 'byKnit Official'}
+                                {scopeFilter === 'official' && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500 rounded-full animate-in fade-in duration-200" />
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setScopeFilter('creators')}
+                                className={`pb-3 font-bold text-sm relative transition-all ${
+                                    scopeFilter === 'creators' 
+                                        ? 'text-brown-800' 
+                                        : 'text-stone-400 hover:text-stone-600'
+                                }`}
+                            >
+                                {locale === 'ko' ? '작가 도안' : 'Creator Patterns'}
+                                {scopeFilter === 'creators' && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500 rounded-full animate-in fade-in duration-200" />
+                                )}
+                            </button>
                         </div>
 
-                        {isLoading && patterns.length === 0 ? (
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                                    <div key={i} className="aspect-[3/4] bg-tan-100/50 rounded-2xl animate-pulse" />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {patterns.map((pattern) => (
-                                    <div key={pattern.id} onClick={() => setSelectedPatternId(pattern.id)} className="cursor-pointer">
-                                        <PatternCard pattern={pattern} locale={locale} />
+                        {/* Results Summary */}
+                        {(() => {
+                            const filteredPatterns = patterns.filter(pattern => {
+                                if (scopeFilter === 'official') return pattern.is_official === true;
+                                if (scopeFilter === 'creators') return !pattern.is_official;
+                                return true;
+                            });
+
+                            return (
+                                <>
+                                    <div className="mb-4 text-sm text-brown-600 flex items-center justify-between">
+                                        <span>{filteredPatterns.length} {t('itemsFound')}</span>
+                                        {isLoading && <span className="text-brown-400 animate-pulse">Loading...</span>}
                                     </div>
-                                ))}
-                            </div>
-                        )}
+
+                                    {isLoading && filteredPatterns.length === 0 ? (
+                                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                                <div key={i} className="aspect-[3/4] bg-tan-100/50 rounded-2xl animate-pulse" />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {filteredPatterns.map((pattern) => (
+                                                <div key={pattern.id} onClick={() => setSelectedPatternId(pattern.id)} className="cursor-pointer">
+                                                    <PatternCard pattern={pattern} locale={locale} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
 
                     {/* Sidebar */}
@@ -587,6 +645,12 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
 
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                    {pattern.is_official && (
+                        <span className="bg-gradient-to-r from-rose-500 to-amber-500 text-white px-2 py-0.5 rounded shadow-sm font-black text-[9px] uppercase tracking-wider flex items-center gap-1">
+                            <Crown className="w-3 h-3 text-amber-300 fill-amber-300" />
+                            {locale === 'ko' ? '공식' : 'Official'}
+                        </span>
+                    )}
                     <span className={`px-2 py-1 rounded shadow-sm font-bold text-[10px] ${
                         pattern.item_type === 'physical' 
                             ? 'bg-sage-600 text-white border border-sage-500'
@@ -618,8 +682,12 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
             {/* Content - Overlapping Avatar for Density */}
             <div className="p-4 pt-5 flex-1 flex flex-col justify-between relative">
                 {/* Floating Avatar */}
-                <div className="absolute -top-6 left-4 w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-soft z-20 bg-cream-100">
-                    {pattern.author_avatar ? (
+                <div className="absolute -top-6 left-4 w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-soft z-20 bg-cream-100 flex items-center justify-center">
+                    {pattern.is_official ? (
+                        <div className="w-full h-full bg-gradient-to-br from-rose-400 to-amber-400 flex items-center justify-center text-white">
+                            <Crown className="w-5 h-5 fill-amber-100" />
+                        </div>
+                    ) : pattern.author_avatar ? (
                         <img src={pattern.author_avatar} alt="" className="w-full h-full object-cover" />
                     ) : (
                         <UserIcon className="w-full h-full p-2 text-brown-400" />
@@ -628,7 +696,9 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
 
                 <div className="space-y-1 mt-1">
                     <div className="flex justify-end mb-1">
-                        <span className="text-[10px] text-brown-400 font-medium">{pattern.author_name || 'Designer'}</span>
+                        <span className="text-[10px] text-brown-400 font-medium">
+                            {pattern.is_official ? (locale === 'ko' ? 'byKnit 공식' : 'byKnit Official') : (pattern.author_name || 'Designer')}
+                        </span>
                     </div>
                     <h3 className="font-bold text-brown-800 text-lg leading-tight group-hover:text-rose-500 transition-colors line-clamp-1">
                         {title || 'Untitled Pattern'}
