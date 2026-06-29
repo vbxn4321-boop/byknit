@@ -578,7 +578,7 @@ export class PatternPDFGenerator {
             
             // Spacing before big headers ONLY (except the first one)
             if (isBig && idx > 0) {
-                currentY += lineHeight * 1.8; // 3-4 lines gap before new big sections
+                currentY += lineHeight * 1.2; // 2-3 lines gap before new big sections
             }
             
             const fontStr = `${isHeader ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
