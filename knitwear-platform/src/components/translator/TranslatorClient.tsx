@@ -317,9 +317,6 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                     await renderTextAsImage(line, startX, currentY, fontSize, color, isHeader);
                     currentY += lineHeight;
                 }
-
-                // Small spacing after each paragraph (approx 1 line height total when combined with next line)
-                currentY += lineHeight * 0.4;
             }
             return currentY;
         };
