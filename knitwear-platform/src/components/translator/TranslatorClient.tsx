@@ -248,7 +248,8 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
 
         // Helper to draw wrapped multiline text
         const drawMultilineText = async (plainText: string, startX: number, startY: number, fontSize: number, color: string, maxWidth: number) => {
-            const paragraphs = plainText.split('\n');
+            // Filter out empty lines to control spacing programmatically
+            const paragraphs = plainText.split('\n').map(p => p.trim()).filter(Boolean);
             let currentY = startY;
             const lineHeight = fontSize * 1.6;
 
@@ -257,23 +258,35 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
             if (!ctx) return currentY;
 
             const scale = 4;
-            const fontStr = `normal ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
-            ctx.font = fontStr;
-
             const canvasMaxWidth = maxWidth * scale * 3.5;
 
-            for (const para of paragraphs) {
-                const trimmed = para.trim();
-                if (trimmed === '') {
-                    currentY += lineHeight;
-                    continue;
+            const isBigHeader = (text: string) => {
+                const trimmed = text.trim();
+                return /^(?:\d+[\s\.\)]|🔘|✨|⚡|🚀|✦|★|☆|■)/u.test(trimmed) || 
+                       trimmed.startsWith('시작 부분') || 
+                       trimmed.startsWith('제작 방법') ||
+                       trimmed.startsWith('단추 달기') ||
+                       trimmed.startsWith('도안 설명') ||
+                       trimmed.startsWith('번역 결과');
+            };
+
+            for (let idx = 0; idx < paragraphs.length; idx++) {
+                const para = paragraphs[idx];
+                const isHeader = isBigHeader(para);
+
+                // Spacing before big headers (except the first one)
+                if (isHeader && idx > 0) {
+                    currentY += lineHeight * 1.8; // 3-4 lines gap before new sections
                 }
+
+                const fontStr = `${isHeader ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+                ctx.font = fontStr;
 
                 const lines: string[] = [];
                 let currentLine = '';
 
-                for (let i = 0; i < trimmed.length; i++) {
-                    const char = trimmed[i];
+                for (let i = 0; i < para.length; i++) {
+                    const char = para[i];
                     const testLine = currentLine + char;
                     const metrics = ctx.measureText(testLine);
 
@@ -294,9 +307,12 @@ export function TranslatorClient({ locale, user, isTabMode = false }: Translator
                         currentY = 20;
                     }
 
-                    await renderTextAsImage(line, startX, currentY, fontSize, color, false);
+                    await renderTextAsImage(line, startX, currentY, fontSize, color, isHeader);
                     currentY += lineHeight;
                 }
+
+                // Small spacing after each paragraph (approx 1 line height total when combined with next line)
+                currentY += lineHeight * 0.4;
             }
             return currentY;
         };

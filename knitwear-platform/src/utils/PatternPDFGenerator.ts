@@ -541,7 +541,8 @@ export class PatternPDFGenerator {
             .replace(/&gt;/gi, '>')
             .replace(/&amp;/gi, '&');
             
-        const paragraphs = cleanText.split('\n');
+        // Filter out empty lines to control spacing programmatically
+        const paragraphs = cleanText.split('\n').map(p => p.trim()).filter(Boolean);
         let currentY = startY;
         const lineHeight = fontSize * 1.6; // Line height in mm
         
@@ -550,25 +551,37 @@ export class PatternPDFGenerator {
         if (!ctx) return currentY;
         
         const scale = 4;
-        const fontStr = `normal ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
-        ctx.font = fontStr;
         
-        // Conversion factor from mm to canvas pixels (matching renderTextAsImage)
+        // Conversion factor from mm to canvas pixels
         const canvasMaxWidth = maxWidth * scale * 3.5;
         
-        for (const para of paragraphs) {
-            const trimmed = para.trim();
-            if (trimmed === '') {
-                currentY += lineHeight;
-                continue;
+        const isBigHeader = (text: string) => {
+            const trimmed = text.trim();
+            return /^(?:\d+[\s\.\)]|🔘|✨|⚡|🚀|✦|★|☆|■)/u.test(trimmed) || 
+                   trimmed.startsWith('시작 부분') || 
+                   trimmed.startsWith('제작 방법') ||
+                   trimmed.startsWith('단추 달기') ||
+                   trimmed.startsWith('도안 설명');
+        };
+        
+        for (let idx = 0; idx < paragraphs.length; idx++) {
+            const para = paragraphs[idx];
+            const isHeader = isBigHeader(para);
+            
+            // Spacing before big headers (except the first one)
+            if (isHeader && idx > 0) {
+                currentY += lineHeight * 1.8; // 3-4 lines gap before new sections
             }
+            
+            const fontStr = `${isHeader ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+            ctx.font = fontStr;
             
             // Wrap text
             const lines: string[] = [];
             let currentLine = '';
             
-            for (let i = 0; i < trimmed.length; i++) {
-                const char = trimmed[i];
+            for (let i = 0; i < para.length; i++) {
+                const char = para[i];
                 const testLine = currentLine + char;
                 const metrics = ctx.measureText(testLine);
                 
@@ -589,9 +602,12 @@ export class PatternPDFGenerator {
                     currentY = 25; // Start below watermark
                 }
                 
-                await this.renderTextAsImage(line, startX, currentY, fontSize, color, false, 'left');
+                await this.renderTextAsImage(line, startX, currentY, fontSize, color, isHeader, 'left');
                 currentY += lineHeight;
             }
+            
+            // Small spacing after each paragraph (approx 1 line height total when combined with next line)
+            currentY += lineHeight * 0.4;
         }
         
         return currentY;
