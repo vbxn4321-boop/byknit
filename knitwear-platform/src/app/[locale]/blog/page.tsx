@@ -73,7 +73,7 @@ export default function BlogPage() {
                 ? '도안 속 외계어 같은 겉뜨기, 안뜨기, 기호들 때문에 머리가 아프신가요? 가장 자주 사용되는 대바늘 기호의 의미와 뜨는 법을 동영상 설명과 함께 쉽게 정리해 드립니다.'
                 : 'Confused by knitting charts and symbols? We explain the most common knitting symbols and abbreviations with easy explanations.',
             date: '2026. 06. 30',
-            imageUrl: 'https://images.unsplash.com/photo-1584992236310-6edddc085ffb?w=600&auto=format&fit=crop'
+            imageUrl: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&auto=format&fit=crop'
         }
     ];
 

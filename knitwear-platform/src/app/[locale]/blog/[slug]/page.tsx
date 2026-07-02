@@ -193,7 +193,7 @@ const getPostData = (slug: string, locale: string) => {
                 ? '초보 니터를 위한 대바늘 기호 완벽 가이드: 겉뜨기부터 되돌아뜨기까지'
                 : 'A Complete Guide to Knitting Symbols for Beginners: From Knit to Short Rows',
             date: '2026. 06. 30',
-            imageUrl: 'https://images.unsplash.com/photo-1584992236310-6edddc085ffb?w=600&auto=format&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&auto=format&fit=crop',
             content: locale === 'ko'
                 ? `
                     <p>뜨개질 차트를 처음 펼쳤을 때 마주하는 낯선 기호들 때문에 뜨개질을 시작하기도 전에 포기하신 적이 있으신가요? 차트 속 기호는 뜨개의 국룰이자 만국공통어입니다.</p>
