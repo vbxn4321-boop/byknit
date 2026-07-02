@@ -19,6 +19,32 @@ export default function HomeBlogSection({ locale }: HomeBlogSectionProps) {
 
     const posts = [
         {
+            id: 'summer-yarn-guide',
+            slug: 'summer-yarn-guide',
+            category: 'tip',
+            title: locale === 'ko'
+                ? '여름 뜨개실의 모든 것: 린넨, 라피아, 코튼 비교 가이드'
+                : 'All About Summer Yarn: Comparing Linen, Raffia, and Cotton',
+            excerpt: locale === 'ko'
+                ? '여름 뜨개질을 준비하는 니터들을 위한 필수 가이드! 시원하고 가벼운 린넨, 여름 모자의 정석 라피아, 그리고 부드러운 코튼 실의 특징과 세탁법을 완벽 비교합니다.'
+                : 'Essential guide for knitters preparing summer projects! We compare cool linen, classic raffia for hats, and soft cotton yarn including washing tips.',
+            date: '2026. 07. 01',
+            imageUrl: 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?w=600&auto=format&fit=crop'
+        },
+        {
+            id: 'knitting-symbols-guide',
+            slug: 'knitting-symbols-guide',
+            category: 'tutorial',
+            title: locale === 'ko'
+                ? '초보 니터를 위한 대바늘 기호 완벽 가이드: 겉뜨기부터 되돌아뜨기까지'
+                : 'A Complete Guide to Knitting Symbols for Beginners: From Knit to Short Rows',
+            excerpt: locale === 'ko'
+                ? '도안 속 외계어 같은 겉뜨기, 안뜨기, 기호들 때문에 머리가 아프신가요? 가장 자주 사용되는 대바늘 기호의 의미와 뜨는 법을 동영상 설명과 함께 쉽게 정리해 드립니다.'
+                : 'Confused by knitting charts and symbols? We explain the most common knitting symbols and abbreviations with easy explanations.',
+            date: '2026. 06. 30',
+            imageUrl: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&auto=format&fit=crop'
+        },
+        {
             id: 'launch-announcement',
             slug: 'launch-announcement',
             category: 'news',
