@@ -26,6 +26,7 @@ import { ProductImageGallery } from './detail/ProductImageGallery';
 import { ProductInfoTable } from './detail/ProductInfoTable';
 import { ProductRecommendationRow } from './detail/ProductRecommendationRow';
 import { DownloadOptionModal } from './detail/DownloadOptionModal';
+import { CheckoutModal } from './detail/CheckoutModal';
 
 // Review Components (Keep existing or refactor later, for now import usually or inline)
 
@@ -82,6 +83,8 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
     const [showDownloadOptions, setShowDownloadOptions] = useState(false); // New inline state
     const [tempAgreed, setTempAgreed] = useState(false); // New agreement state
     const [isAdCompleted, setIsAdCompleted] = useState(false); // New ad completion state
+    const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+    const [userCredits, setUserCredits] = useState<number>(0);
 
     // Mock tags since DB might not have them yet, or use keywords
     const tags = ['Pattern', 'Knitting', 'DIY', ...(pattern?.category ? [pattern.category] : [])];
@@ -160,6 +163,16 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                     setIsFollowing(followRes.isFollowing);
                     if (orderRes.data || dbPattern.is_free || data.designer_id === activeUser.id) {
                         setCanDownload(true);
+                    }
+                    
+                    const { data: profileRes } = await supabase
+                        .from('profiles')
+                        .select('credits')
+                        .eq('id', activeUser.id)
+                        .single();
+                        
+                    if (profileRes) {
+                        setUserCredits(profileRes.credits ?? 0);
                     }
                 }
 
@@ -277,40 +290,11 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         // If already purchased/downloadable OR Free, show inline options
         if (canDownload || pattern?.is_free) {
             setShowDownloadOptions(!showDownloadOptions);
-            // Scroll to action box? Optional.
             return;
         }
 
-        // If paid, start purchase flow
-        try {
-            setIsLoading(true);
-            const res = await createOrder({
-                patternId,
-                amount: pattern?.price_usd || 0
-            });
-            if (res.error) {
-                if (res.error.includes('크레딧이 부족합니다') || res.error.includes('Credits') || res.error.includes('credits')) {
-                    const confirmCharge = window.confirm(
-                        locale === 'ko' 
-                            ? '보유하신 크레딧이 부족합니다. 크레딧 충전 페이지로 이동하시겠습니까?' 
-                            : 'Insufficient credits. Would you like to go to the credit charging page?'
-                    );
-                    if (confirmCharge) {
-                        router.push(`/${locale}/payments`);
-                    }
-                } else {
-                    alert(res.error);
-                }
-            } else {
-                alert(locale === 'ko' ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
-                setCanDownload(true);
-                setShowDownloadOptions(true);
-            }
-        } catch (e: any) {
-            alert(e.message || 'Error occurred');
-        } finally {
-            setIsLoading(false);
-        }
+        // Open Checkout Modal
+        setShowCheckoutModal(true);
     };
 
     const handleActualDownload = async (lang: 'ko' | 'en') => {
@@ -383,7 +367,25 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                 onClose={() => setShowDownloadModal(false)}
                 onDownload={handleActualDownload}
                 locale={locale}
+                isFree={pattern.is_free}
             />
+            {/* Checkout Modal */}
+            {pattern && (
+                <CheckoutModal
+                    isOpen={showCheckoutModal}
+                    onClose={() => setShowCheckoutModal(false)}
+                    pattern={pattern}
+                    currentCredits={userCredits}
+                    locale={locale}
+                    user={authUser}
+                    onSuccess={() => {
+                        setCanDownload(true);
+                        setShowDownloadOptions(true);
+                        // Refresh credits dynamically after purchase
+                        setUserCredits(prev => Math.max(0, prev - (pattern.price_usd || 0)));
+                    }}
+                />
+            )}
             {/* Header (Back Button) - Mobile Only/Sticky */}
             <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-gray-100 md:hidden">
                 <button onClick={() => router.push(`/${locale}/marketplace`)} className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">

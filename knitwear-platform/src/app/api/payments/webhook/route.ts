@@ -95,13 +95,81 @@ export async function POST(request: NextRequest) {
                 console.error('[Webhook] Failed to parse customData:', e.message, paymentData.customData);
             }
 
-            if (!customDataObj || !customDataObj.user_id || !customDataObj.credits) {
-                console.error('[Webhook] Missing user_id or credits in custom_data of payment:', JSON.stringify(paymentData.customData));
-                return NextResponse.json({ error: 'Missing user_id or credits in custom_data' }, { status: 400 });
+            if (!customDataObj || !customDataObj.user_id) {
+                console.error('[Webhook] Missing user_id in custom_data of payment:', JSON.stringify(paymentData.customData));
+                return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
             }
 
-            const { user_id: userId, credits: creditAmount } = customDataObj;
+            const userId = customDataObj.user_id;
+            const patternId = customDataObj.pattern_id;
+            const creditAmount = customDataObj.credits || 0;
             const amountVal = paymentData.amount?.total || paymentData.amount?.paid || 0;
+
+            if (patternId) {
+                console.log(`[Webhook] Direct pattern purchase. User: ${userId}, Pattern: ${patternId}, Amount: ${amountVal}`);
+                
+                // Fetch pattern details to get seller_id and pricing
+                const { data: pattern, error: patternErr } = await supabase
+                    .from('patterns')
+                    .select('designer_id, title, price_usd')
+                    .eq('id', patternId)
+                    .single();
+
+                if (patternErr || !pattern) {
+                    console.error('[Webhook] Pattern not found for direct purchase:', patternErr?.message);
+                    return NextResponse.json({ error: 'Pattern not found' }, { status: 400 });
+                }
+
+                const sellerId = pattern.designer_id;
+                const priceUsd = pattern.price_usd || 0;
+
+                // 주문(orders) 테이블에 이력 로깅
+                const { error: orderError } = await supabase.from('orders').insert({
+                    user_id: userId,
+                    pattern_id: patternId,
+                    seller_id: sellerId,
+                    amount: amountVal,
+                    amount_usd: priceUsd,
+                    status: 'paid',
+                    payment_provider: 'portone',
+                    transaction_id: paymentId
+                });
+
+                if (orderError) {
+                    console.error('[Webhook] Direct purchase orders logging failed:', orderError.message);
+                    return NextResponse.json({ error: 'Failed to log direct order' }, { status: 500 });
+                }
+
+                // Notify seller
+                try {
+                    const patternTitle = (pattern.title as any)?.en || 'your pattern';
+                    await supabase.from('notifications').insert({
+                        user_id: sellerId,
+                        sender_id: userId,
+                        type: 'purchase',
+                        reference_id: paymentId,
+                        message: JSON.stringify({
+                            key: 'purchase',
+                            params: {
+                                title: patternTitle,
+                                price: priceUsd
+                            }
+                        }),
+                        read: false
+                    });
+                } catch (notiError: any) {
+                    console.warn('[Webhook] Warning: Failed to send direct purchase notification:', notiError.message);
+                }
+
+                console.log(`[Webhook] Success! Direct pattern purchase recorded for user ${userId}, pattern ${patternId}`);
+                return NextResponse.json({ status: 'success', message: 'Direct pattern purchase processed successfully' });
+            }
+
+            // Otherwise, credit charge flow
+            if (!creditAmount) {
+                console.error('[Webhook] Missing credits in custom_data of credit charging payment');
+                return NextResponse.json({ error: 'Missing credits in custom_data' }, { status: 400 });
+            }
 
             console.log(`[Webhook] Proceeding to charge. User: ${userId}, Credits: ${creditAmount}, Amount: ${amountVal}`);
 
@@ -224,13 +292,39 @@ export async function POST(request: NextRequest) {
                 console.error('[Webhook] Failed to parse customData:', e.message);
             }
 
-            if (!customDataObj || !customDataObj.user_id || !customDataObj.credits) {
-                console.error('[Webhook] Missing user_id or credits in custom_data of payment:', JSON.stringify(paymentData.customData));
-                return NextResponse.json({ error: 'Missing user_id or credits in custom_data' }, { status: 400 });
+            if (!customDataObj || !customDataObj.user_id) {
+                console.error('[Webhook] Missing user_id in custom_data of payment:', JSON.stringify(paymentData.customData));
+                return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
             }
 
-            const { user_id: userId, credits: creditAmount } = customDataObj;
+            const userId = customDataObj.user_id;
+            const patternId = customDataObj.pattern_id;
+            const creditAmount = customDataObj.credits || 0;
             const amountVal = paymentData.amount?.total || paymentData.amount?.paid || 0;
+
+            if (patternId) {
+                console.log(`[Webhook] Direct pattern purchase refund. User: ${userId}, Pattern: ${patternId}`);
+                
+                // 주문(orders) 테이블 상태를 refunded로 업데이트
+                const { error: orderError } = await supabase
+                    .from('orders')
+                    .update({ status: 'refunded' })
+                    .eq('transaction_id', paymentId);
+
+                if (orderError) {
+                    console.error('[Webhook] Direct purchase refund status update failed:', orderError.message);
+                    return NextResponse.json({ error: 'Failed to update order status to refunded' }, { status: 500 });
+                }
+
+                console.log(`[Webhook] Success! Refunded direct pattern purchase for user ${userId}, pattern ${patternId}`);
+                return NextResponse.json({ status: 'success', message: 'Direct purchase refund processed' });
+            }
+
+            // Otherwise, credit refund flow
+            if (!creditAmount) {
+                console.error('[Webhook] Missing credits in custom_data of credit refund payment');
+                return NextResponse.json({ error: 'Missing credits in custom_data' }, { status: 400 });
+            }
 
             console.log(`[Webhook] Proceeding to deduct credits for refund. User: ${userId}, Credits: ${creditAmount}, Amount: ${amountVal}`);
 

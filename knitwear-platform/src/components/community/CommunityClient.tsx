@@ -67,6 +67,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const [posts, setPosts] = useState<Post[]>(initialPosts && initialPosts.length > 0 ? initialPosts : DUMMY_COMMUNITY_POSTS as any);
     const [activeTab, setActiveTab] = useState(locale);
     const [listFilter, setListFilter] = useState<'latest' | 'popular' | 'my_activity'>('latest');
+    const [langFilter, setLangFilter] = useState<'locale' | 'all'>('locale');
     const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
@@ -94,9 +95,14 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
     const displayPosts = searchResults !== null 
         ? searchResults 
         : (() => {
+            let filtered = posts;
+            if (langFilter === 'locale') {
+                filtered = posts.filter(p => p.locale === locale);
+            }
+
             if (listFilter === 'my_activity') {
                 if (!user) return [];
-                return posts.filter(p => 
+                return filtered.filter(p => 
                     p.profiles?.id === user.id || 
                     likedSet.has(p.id) || 
                     bookmarkSet.has(p.id)
@@ -104,8 +110,8 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
             }
 
             if (listFilter === 'popular') {
-                const notices = posts.filter(p => p.category === 'notice');
-                const populars = posts
+                const notices = filtered.filter(p => p.category === 'notice');
+                const populars = filtered
                     .filter(p => p.category !== 'notice' && (getLikeCount(p)) > 0)
                     .sort((a, b) => {
                         const aLikes = a.likes?.[0]?.count || 0;
@@ -116,8 +122,8 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
             }
 
             // latest filter
-            const notices = posts.filter(p => p.category === 'notice');
-            const regulars = posts.filter(p => p.category !== 'notice');
+            const notices = filtered.filter(p => p.category === 'notice');
+            const regulars = filtered.filter(p => p.category !== 'notice');
             return [...notices, ...regulars];
         })();
 
@@ -320,6 +326,32 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                     </div>
                                 </div>
                                 <Package className="absolute -right-4 -bottom-4 w-20 h-20 text-white/5 pointer-events-none" />
+                            </div>
+                        </div>
+
+                        {/* Language Selector Switcher */}
+                        <div className="flex justify-end mb-4">
+                            <div className="inline-flex bg-stone-100 p-0.5 rounded-lg border border-stone-200/50 text-[11px] font-bold">
+                                <button
+                                    onClick={() => setLangFilter('locale')}
+                                    className={`px-3 py-1 rounded-md transition-all ${
+                                        langFilter === 'locale'
+                                            ? 'bg-white text-stone-800 shadow-sm'
+                                            : 'text-stone-500 hover:text-stone-800'
+                                    }`}
+                                >
+                                    {locale === 'ko' ? '한국어 게시글만' : 'English Posts Only'}
+                                </button>
+                                <button
+                                    onClick={() => setLangFilter('all')}
+                                    className={`px-3 py-1 rounded-md transition-all ${
+                                        langFilter === 'all'
+                                            ? 'bg-white text-stone-800 shadow-sm'
+                                            : 'text-stone-500 hover:text-stone-800'
+                                    }`}
+                                >
+                                    {locale === 'ko' ? '전체 게시글' : 'Show All Languages'}
+                                </button>
                             </div>
                         </div>
 

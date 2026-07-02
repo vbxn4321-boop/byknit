@@ -22,8 +22,12 @@ export default function HomeBlogSection({ locale }: HomeBlogSectionProps) {
             id: 'launch-announcement',
             slug: 'launch-announcement',
             category: 'news',
-            title: 'byKnit 정식 오픈! 모눈종이 없는 디지털 뜨개질의 시작',
-            excerpt: '뜨개인들의 필수 플랫폼, byKnit이 드디어 런칭했습니다. 나만의 도안을 만들고, 색상을 입히고, 전 세계 니터들과 공유해 보세요.',
+            title: locale === 'ko'
+                ? 'byKnit 정식 오픈! 모눈종이 없는 디지털 뜨개질의 시작'
+                : 'Official Launch of byKnit! The End of Graph Paper, The Start of Digital Knitting',
+            excerpt: locale === 'ko'
+                ? '뜨개인들의 필수 플랫폼, byKnit이 드디어 런칭했습니다. 나만의 도안을 만들고, 색상을 입히고, 전 세계 니터들과 공유해 보세요.'
+                : 'The essential platform for knitters, byKnit, is finally here! Design your own patterns, customize colors, and share them with knitters worldwide.',
             date: '2026. 05. 21',
             imageUrl: '/blog/thumbnail-1.png'
         },
@@ -31,8 +35,12 @@ export default function HomeBlogSection({ locale }: HomeBlogSectionProps) {
             id: 'ai-translator-tips',
             slug: 'ai-translator-tips',
             category: 'tip',
-            title: '복잡한 k2tog, ssk? AI로 영문 도안 완벽하게 번역하는 꿀팁',
-            excerpt: '라벨리에서 산 예쁜 영문 도안, 기호가 너무 복잡해서 포기하셨나요? byKnit의 AI 번역기를 활용하여 10초 만에 한국어 도안으로 바꾸는 방법을 소개합니다.',
+            title: locale === 'ko'
+                ? '복잡한 k2tog, ssk? AI로 영문 도안 완벽하게 번역하는 꿀팁'
+                : 'Struggling with k2tog and ssk? Tips to Perfectly Translate Knitting Patterns with AI',
+            excerpt: locale === 'ko'
+                ? '라벨리에서 산 예쁜 영문 도안, 기호가 너무 복잡해서 포기하셨나요? byKnit의 AI 번역기를 활용하여 10초 만에 한국어 도안으로 바꾸는 방법을 소개합니다.'
+                : "Bought a beautiful pattern but gave up because of complex abbreviations? Here is how to use byKnit's AI Translator to convert it into your language in 10 seconds.",
             date: '2026. 05. 20',
             imageUrl: '/blog/thumbnail-2.png'
         },
@@ -40,8 +48,12 @@ export default function HomeBlogSection({ locale }: HomeBlogSectionProps) {
             id: 'pet-colorwork',
             slug: 'pet-colorwork',
             category: 'tutorial',
-            title: '내 반려동물 사진을 배색 차트로 바꾸는 마법 같은 방법',
-            excerpt: '우리 집 강아지, 고양이 얼굴로 니트 스웨터를 떠보고 싶다면? 이미지 업로드 한 번으로 완벽한 인타르시아 배색 차트를 얻는 과정을 따라해 보세요.',
+            title: locale === 'ko'
+                ? '내 반려동물 사진을 배색 차트로 바꾸는 마법 같은 방법'
+                : "A Magical Way to Turn Your Pet's Photo Into a Knitting Colorwork Chart",
+            excerpt: locale === 'ko'
+                ? '우리 집 강아지, 고양이 얼굴로 니트 스웨터를 떠보고 싶다면? 이미지 업로드 한 번으로 완벽한 인타르시아 배색 차트를 얻는 과정을 따라해 보세요.'
+                : "Want to knit a sweater or cushion with your dog's or cat's face on it? Follow this guide to get a perfect intarsia colorwork chart in one click.",
             date: '2026. 05. 18',
             imageUrl: '/blog/thumbnail-3.png'
         }
