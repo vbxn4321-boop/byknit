@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { createPost, getMyPatterns } from '@/app/actions/community';
 import { createClient } from '@/utils/supabase/client';
+import { PollCreator } from '@/components/community/PollCreator';
 
 interface PatternItem {
     id: string;
@@ -30,6 +31,7 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
     const [showPatternPicker, setShowPatternPicker] = useState(false);
     const [loadingPatterns, setLoadingPatterns] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [pollData, setPollData] = useState<any>(null);
 
     const [user, setUser] = useState<any>(null);
     const [userRole, setUserRole] = useState<string>('knitter');
@@ -101,6 +103,11 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
 
         if (selectedPatternId) {
             formData.append('pattern_id', selectedPatternId);
+        }
+
+        if (pollData) {
+            formData.append('poll_question', pollData.question);
+            formData.append('poll_options', JSON.stringify(pollData.options));
         }
 
         try {
@@ -344,6 +351,9 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                             className="w-full text-xl text-stone-950 leading-relaxed placeholder:text-stone-500 outline-none border-none bg-transparent resize-none"
                         />
                     </div>
+
+                    {/* Poll Creator */}
+                    <PollCreator onChange={setPollData} locale={locale} />
                     
                     {/* Image Attachment (Compact style) */}
                     <div className="pt-6 border-t border-tan-100 space-y-3">

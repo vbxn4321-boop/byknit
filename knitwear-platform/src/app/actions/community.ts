@@ -139,13 +139,55 @@ export async function createPost(formData: FormData) {
         }
     }
 
-    const { error } = await supabase
+    const { data: newPost, error } = await supabase
         .from('posts')
-        .insert(insertData);
+        .insert(insertData)
+        .select()
+        .single();
 
-    if (error) {
+    if (error || !newPost) {
         console.error('Error creating post:', error);
         throw new Error('Failed to create post');
+    }
+
+    // Handle Poll Creation if present
+    const pollQuestion = formData.get('poll_question') as string | null;
+    const pollOptionsStr = formData.get('poll_options') as string | null;
+
+    if (pollQuestion && pollOptionsStr) {
+        try {
+            const pollOptions = JSON.parse(pollOptionsStr) as string[];
+            
+            // Insert into polls
+            const { data: poll, error: pollError } = await supabase
+                .from('polls')
+                .insert({
+                    post_id: newPost.id,
+                    question: pollQuestion
+                })
+                .select()
+                .single();
+                
+            if (pollError) {
+                console.error('Error inserting poll:', pollError);
+            } else if (poll) {
+                // Insert into poll_options
+                const optionsToInsert = pollOptions.map(opt => ({
+                    poll_id: poll.id,
+                    option_text: opt
+                }));
+                
+                const { error: optionsError } = await supabase
+                    .from('poll_options')
+                    .insert(optionsToInsert);
+                    
+                if (optionsError) {
+                    console.error('Error inserting poll options:', optionsError);
+                }
+            }
+        } catch (pollException) {
+            console.error('Failed to process poll data:', pollException);
+        }
     }
 
     // 도안을 첨부한 게시글이면 +50 크레딧 보상 (서버 사이드에서만 처리)

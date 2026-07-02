@@ -12,6 +12,7 @@ import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, upd
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { PollRenderer } from './PollRenderer';
 
 interface Comment {
     id: string;
@@ -471,9 +472,12 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                 className="w-full text-stone-700 text-lg leading-relaxed mb-8 outline-none border-2 border-rose-100 focus:border-rose-300 rounded-xl p-4 bg-stone-50/50 resize-none"
                             />
                         ) : (
-                            <div className="text-stone-700 text-lg leading-relaxed whitespace-pre-wrap mb-8">
-                                {translatedPost ? translatedPost.content : post.content}
-                            </div>
+                            <>
+                                <div className="text-stone-700 text-lg leading-relaxed whitespace-pre-wrap mb-8">
+                                    {translatedPost ? translatedPost.content : post.content}
+                                </div>
+                                <PollRenderer postId={post.id} locale={locale} user={user} />
+                            </>
                         )}
 
                         {/* Attachments & Patterns Section */}
