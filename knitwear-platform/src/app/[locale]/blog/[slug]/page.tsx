@@ -5,6 +5,67 @@ import type { Metadata } from 'next';
 // Localized blog content helper
 const getPostData = (slug: string, locale: string) => {
     const posts: Record<string, any> = {
+        'summer-flower-coaster': {
+            category: 'tutorial',
+            title: locale === 'ko'
+                ? '30분 만에 완성하는 감성 가득 여름 린넨 꽃 티코스터 도안'
+                : 'Design a Summer Linen Flower Coaster in Just 30 Minutes',
+            date: '2026. 07. 03',
+            imageUrl: '/blog/thumbnail-4.png',
+            content: locale === 'ko'
+                ? `
+                    <p>더운 여름철, 시원한 아이스 아메리카노나 차가운 음료를 마실 때 컵 표면에 맺히는 물방울 때문에 테이블이 흥건해지곤 하죠? 이럴 때 필요한 것이 바로 실용성과 감성을 모두 잡은 <strong>티코스터(컵받침)</strong>입니다.</p>
+                    <br/>
+                    <p>오늘은 여름철 대표 소재인 <strong>린넨(Linen) 실</strong>을 사용하여 코바늘로 간단하고 빠르게 뜰 수 있는 <strong>꽃 모양 티코스터 도안</strong>을 소개해 드립니다. 초보자분들도 약 30분이면 뚝딱 완성할 수 있을 만큼 쉽고 직관적인 과정이랍니다!</p>
+                    <br/>
+                    <h2>준비물 소개</h2>
+                    <ul>
+                        <li><strong>실</strong>: 린넨 혹은 코튼/린넨 혼방실 (베이지, 크림 계열의 내추럴한 컬러 추천)</li>
+                        <li><strong>바늘</strong>: 코바늘 5/0호 (3.0mm)</li>
+                        <li><strong>기타</strong>: 돋바늘, 가위</li>
+                    </ul>
+                    <br/>
+                    <h2>바이니트가 제안하는 단계별 뜨개 과정</h2>
+                    <ol>
+                        <li><strong>1단 (시작코와 기둥코)</strong>: 매직링을 만들고 사슬코 3개(한길긴뜨기 1코에 해당)를 세운 뒤, 링 안에 한길긴뜨기 11코를 더 떠서 총 12코를 만들어 빼뜨기합니다.</li>
+                        <li><strong>2단 (코 늘리기)</strong>: 1단의 모든 코에 한길긴뜨기 코늘림(한 코에 두 코씩 뜨기)을 진행하여 총 24코를 만듭니다.</li>
+                        <li><strong>3단 (꽃잎 무늬 만들기)</strong>: 사슬코 1개로 기둥을 세운 뒤 <code>[한 코 건너뛰고 다음 코에 한길긴뜨기 5코(조개무늬), 한 코 건너뛰고 다음 코에 짧은뜨기 1코]</code> 패턴을 반복합니다. 자연스럽게 봉긋한 6개의 예쁜 꽃잎이 완성됩니다!</li>
+                    </ol>
+                    <br/>
+                    <h2>여름 린넨 편물의 완성도를 높이는 한 끗, '블로킹(Blocking)'</h2>
+                    <p>린넨 실은 뜨고 난 직후에는 다소 울퉁불퉁하거나 꽃잎 모양이 찌그러져 보일 수 있습니다. 이때 완성된 코스터에 물을 살짝 뿌리거나 스팀다리미의 스팀을 멀리서 쐬어준 뒤, 핀으로 모양을 둥글게 고정해 건조시키는 <strong>블로킹 과정</strong>을 거치면 편물이 편평하고 정갈하게 펴지면서 샵에서 파는 듯한 퀄리티로 재탄생합니다.</p>
+                    <br/>
+                    <p>지금 바로 마켓플레이스에서 <strong>[여름 린넨 꽃 티코스터]</strong> 무료 도안을 다운로드하여 나만의 감성 여름 테이블을 완성해 보세요!</p>
+                    <br/>
+                    <p>👉 <a href="/ko/marketplace">여름 린넨 꽃 티코스터 무료 도안 다운로드하러 가기</a></p>
+                `
+                : `
+                    <p>During the hot summer, ice-cold beverages leave condensation that puddles on your table. What you need is a beautiful and functional <strong>tea coaster</strong> that captures both utility and aesthetic appeal.</p>
+                    <br/>
+                    <p>Today, we introduce a <strong>crochet flower coaster pattern</strong> made of summer-friendly <strong>linen yarn</strong>. It is simple enough for beginners to finish in under 30 minutes!</p>
+                    <br/>
+                    <h2>Materials needed</h2>
+                    <ul>
+                        <li><strong>Yarn</strong>: Linen or cotton/linen blend (natural beige or cream tones recommended)</li>
+                        <li><strong>Hook</strong>: Crochet hook 5/0 (3.0mm)</li>
+                        <li><strong>Notions</strong>: Tapestry needle, scissors</li>
+                    </ul>
+                    <br/>
+                    <h2>Step-by-Step Tutorial</h2>
+                    <ol>
+                        <li><strong>Round 1 (Magic Ring)</strong>: Start with a magic ring. Chain 3 (counts as first dc), work 11 double crochets into the ring. Slip stitch to join (12 sts).</li>
+                        <li><strong>Round 2 (Increase)</strong>: Chain 3, work 2 double crochets into each stitch around. Slip stitch to join (24 sts).</li>
+                        <li><strong>Round 3 (Flower Petals)</strong>: Chain 1, <code>[skip 1 stitch, work 5 double crochets into the next stitch (shell stitch), skip 1 stitch, slip stitch/single crochet into the next stitch]</code>. Repeat this pattern to create 6 lovely rounded flower petals!</li>
+                    </ol>
+                    <br/>
+                    <h2>Pro Tip: Block Your Linen Projects</h2>
+                    <p>Linen pieces can look a bit crinkled or uneven right after crocheting. Spritzing the coaster with water or applying steam gently from a distance, then pinning it flat to dry (blocking) will smooth out the stitches and make your coaster look professionally crafted.</p>
+                    <br/>
+                    <p>Download the free <strong>[Summer Linen Flower Coaster]</strong> pattern in our marketplace now and dress up your summer coffee table!</p>
+                    <br/>
+                    <p>👉 <a href="/en/marketplace">Download Free Summer Linen Flower Coaster Pattern</a></p>
+                `
+        },
         'launch-announcement': {
             category: 'news',
             title: locale === 'ko' 

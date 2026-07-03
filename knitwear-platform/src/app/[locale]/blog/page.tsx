@@ -11,6 +11,19 @@ export default function BlogPage() {
 
     const posts = [
         {
+            id: 'summer-flower-coaster',
+            slug: 'summer-flower-coaster',
+            category: 'tutorial',
+            title: locale === 'ko'
+                ? '30분 만에 완성하는 감성 가득 여름 린넨 꽃 티코스터 도안'
+                : 'Design a Summer Linen Flower Coaster in Just 30 Minutes',
+            excerpt: locale === 'ko'
+                ? '여름 테이블을 싱그럽게 연출해 줄 꽃 모양 티코스터! 시원하고 내추럴한 린넨 실로 코바늘을 이용해 초보자도 30분 만에 완성할 수 있는 무료 도안과 단계별 꿀팁을 전해드립니다.'
+                : 'Create a flower-shaped tea coaster to freshen up your summer table! Here is a free crochet pattern and step-by-step tips to finish it in 30 minutes using cool linen yarn.',
+            date: '2026. 07. 03',
+            imageUrl: '/blog/thumbnail-4.png'
+        },
+        {
             id: 'launch-announcement',
             slug: 'launch-announcement',
             category: 'news',

@@ -6,13 +6,14 @@ import { useTranslations } from 'next-intl';
 import { User } from '@supabase/supabase-js';
 import {
     Upload, Image as ImageIcon, MessageSquare, Sparkles,
-    AlertTriangle, Send, Loader2, Download, Settings2, PenTool, Coins, Lock
+    AlertTriangle, Send, Loader2, Download, Settings2, PenTool, Coins, Lock, ArrowLeft
 } from 'lucide-react';
 import { useEditorPersistence } from '@/hooks/useEditorPersistence';
 import { jsPDF } from 'jspdf';
 import { quantizeImage } from '@/utils/imageProcessing';
 import { createClient } from '@/utils/supabase/client';
 import { deductCredits } from '@/app/actions/credits';
+import FabricToPatternTab from './FabricToPatternTab';
 
 interface ConversionResult {
     grid: number[][];
@@ -36,7 +37,7 @@ interface AIClientProps {
 export function AIClient({ locale, user, initialCredits }: AIClientProps) {
     const t = useTranslations('ai');
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'image' | 'chat'>('image');
+    const [mode, setMode] = useState<'select' | 'chart' | 'written'>('select');
     const [credits, setCredits] = useState(initialCredits || 0);
 
     // Realtime credit updates
@@ -58,6 +59,30 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
         return () => { supabase.removeChannel(channel); };
     }, [user]);
 
+    const handleBack = () => setMode('select');
+
+    const getHeaderInfo = () => {
+        if (mode === 'chart') {
+            return {
+                title: t('imageToChart.title'),
+                subtitle: t('imageToChart.description')
+            };
+        }
+        if (mode === 'written') {
+            return {
+                title: t('fabricToPattern.title'),
+                subtitle: t('fabricToPattern.description')
+            };
+        }
+        return {
+            title: t('title'),
+            subtitle: t('fabricToPattern.selectBranchDesc')
+        };
+    };
+
+    const header = getHeaderInfo();
+    const isKo = locale === 'ko';
+
     return (
         <div className="min-h-screen bg-cream-50 pb-20 relative">
             {/* Header */}
@@ -67,14 +92,93 @@ export function AIClient({ locale, user, initialCredits }: AIClientProps) {
                         <Sparkles className="w-4 h-4 text-sage-400" />
                         <span className="text-sm text-brown-600 font-medium">AI-Powered</span>
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-brown-700 mb-6">{t('title')}</h1>
-                    <p className="text-brown-600 text-lg mb-8">{t('imageToChart.description')}</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-brown-700 mb-6">{header.title}</h1>
+                    <p className="text-brown-600 text-lg mb-4">{header.subtitle}</p>
                 </div>
             </div>
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <ImageToChartTab locale={locale} credits={credits} user={user} />
+                {mode === 'select' && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                        {/* Credits Balance Display */}
+                        <div className="flex justify-end">
+                            <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full border border-tan-200 shadow-soft text-sm text-brown-700 font-bold">
+                                <Coins className="w-4.5 h-4.5 text-amber-500" />
+                                <span>{credits} {isKo ? '크레딧 보유 중' : 'Credits Available'}</span>
+                            </div>
+                        </div>
+
+                        {/* Side-by-side Selection Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Card 1: Grid Colorwork Chart */}
+                            <div 
+                                onClick={() => setMode('chart')}
+                                className="group card-cozy bg-white border border-tan-200 rounded-3xl p-8 hover:shadow-soft-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer text-left"
+                            >
+                                <div>
+                                    <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 mb-6 shadow-sm group-hover:scale-105 transition-transform">
+                                        <ImageIcon className="w-7 h-7" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-brown-800 mb-3 group-hover:text-rose-500 transition-colors">
+                                        {t('fabricToPattern.cardChartTitle')}
+                                    </h3>
+                                    <p className="text-sm text-brown-500 leading-relaxed">
+                                        {t('fabricToPattern.cardChartDesc')}
+                                    </p>
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 text-rose-500 font-bold hover:text-rose-600 transition-colors text-sm mt-8">
+                                    <span>{isKo ? '바로 가기' : 'Get Started'}</span>
+                                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                </div>
+                            </div>
+
+                            {/* Card 2: Fabric Written Pattern */}
+                            <div 
+                                onClick={() => setMode('written')}
+                                className="group card-cozy bg-white border border-tan-200 rounded-3xl p-8 hover:shadow-soft-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer text-left"
+                            >
+                                <div>
+                                    <div className="w-14 h-14 rounded-2xl bg-sage-50 border border-sage-100 flex items-center justify-center text-sage-600 mb-6 shadow-sm group-hover:scale-105 transition-transform">
+                                        <PenTool className="w-7 h-7" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-brown-800 mb-3 group-hover:text-sage-600 transition-colors">
+                                        {t('fabricToPattern.cardWrittenTitle')}
+                                    </h3>
+                                    <p className="text-sm text-brown-500 leading-relaxed">
+                                        {t('fabricToPattern.cardWrittenDesc')}
+                                    </p>
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 text-sage-600 font-bold hover:text-sage-700 transition-colors text-sm mt-8">
+                                    <span>{isKo ? '바로 가기' : 'Get Started'}</span>
+                                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {mode === 'chart' && (
+                    <div className="space-y-6">
+                        <button
+                            onClick={handleBack}
+                            className="inline-flex items-center gap-2 text-brown-600 hover:text-rose-500 font-bold transition-colors cursor-pointer mb-2"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <span>{t('fabricToPattern.backToSelect')}</span>
+                        </button>
+                        <ImageToChartTab locale={locale} credits={credits} user={user} />
+                    </div>
+                )}
+
+                {mode === 'written' && (
+                    <FabricToPatternTab 
+                        locale={locale} 
+                        credits={credits} 
+                        user={user} 
+                        onBack={handleBack} 
+                    />
+                )}
             </div>
         </div>
     );
