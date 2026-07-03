@@ -5,6 +5,89 @@ import type { Metadata } from 'next';
 // Localized blog content helper
 const getPostData = (slug: string, locale: string) => {
     const posts: Record<string, any> = {
+        'taiyaki-keyring-pouch': {
+            category: 'tutorial',
+            title: locale === 'ko'
+                ? '바느질 없이 완성하는 귀여운 코바늘 붕어빵 키링 파우치 무료 도안'
+                : 'How to Crochet a Cute Mini Taiyaki Keyring Pouch - Free Pattern',
+            date: '2026. 07. 03',
+            imageUrl: '/blog/thumbnail-5.png',
+            content: locale === 'ko'
+                ? `
+                    <p>가을, 겨울의 대표 길거리 간식인 붕어빵을 언제 어디서나 소장할 수 있는 귀여운 악세서리, <strong>대롱대롱 한 입 붕어빵 키링 파우치</strong> 도안입니다.</p>
+                    <br/>
+                    <p>이 도안은 타원형 짧은뜨기 기법으로 몸체를 납작하고 통통하게 올린 뒤, 지느러미와 꼬리를 덧대어 실물 붕어빵의 디테일을 구현합니다. 에어팟이나 립밤, 카드 등을 보관하기 좋아 실용적인 열쇠고리 패션 소품으로 제격입니다.</p>
+                    <br/>
+                    <h2>기본 도안 사양</h2>
+                    <ul>
+                        <li><strong>난이도</strong>: ★★☆☆☆ (초급~중급 추천 / 가방 키링 소품)</li>
+                        <li><strong>완성 사이즈</strong>: 가로 약 12cm, 세로 약 7cm (꼬리지느러미 포함)</li>
+                        <li><strong>권장 바늘</strong>: 코바늘 5/0호 (3.0mm)</li>
+                        <li><strong>권장 실</strong>: 부드러운 코튼 실 (아이돌 실, 해피코튼 등) 황토색/연갈색 약 30g, 소량의 블랙 비즈 또는 검은색 실</li>
+                        <li><strong>게이지</strong>: 짧은뜨기 기준 20코 x 22단 = 10 x 10 cm</li>
+                    </ul>
+                    <br/>
+                    <blockquote>
+                        <strong>⚠️ 주의 및 팁:</strong><br/>
+                        붕어빵 특유의 노릇하고 통통한 질감을 살리기 위해 실을 너무 단단하지도 느슨하지도 않게 적당한 장력으로 유지하며 짧은뜨기를 진행해 주세요. 눈을 표현할 때는 검은색 비즈(5mm)를 달아주는 것이 가장 입체적이고 귀엽지만, 비즈가 없을 경우 검은 실로 프렌치 너트 스티치(매듭자수)를 놓아 표현해도 좋습니다.
+                    </blockquote>
+                    <br/>
+                    <h2>단계별 제작 방법</h2>
+                    <h3>시작 부분 (Cast On)</h3>
+                    <p>코바늘 5/0호와 황토색/연갈색 실을 준비합니다. 기초 사슬뜨기 15코를 잡습니다.</p>
+                    <br/>
+                    <h3>1. 타원형 몸통 뜨기 (Oval Body)</h3>
+                    <p>바늘에서 2번째 사슬부터 짧은뜨기를 각 코에 1코씩 13코 떱니다. 마지막 사슬코에는 짧은뜨기 3코를 모아 떠서 곡선 회전을 만듭니다. 사슬의 반대편(바닥쪽)으로 돌아오며 짧은뜨기 12코를 뜨고, 마지막 코에 짧은뜨기 2코를 떠서 첫 코에 빼뜨기합니다. (총 30코) 2단부터 10단까지 늘림 없이 평단 짧은뜨기를 떠서 원통형 자루 모양을 올립니다.</p>
+                    <br/>
+                    <h3>2. 조임 구멍 및 입구 마감 (Opening & Drawstring)</h3>
+                    <p>11단에서 기둥 사슬 3코(한길긴뜨기 1코)를 올리고 [사슬 1코, 1코 건너뛰고 한길긴뜨기 1코]를 반복하여 끈 구멍단을 만듭니다. 12단은 각 코마다 짧은뜨기 1코씩 떠서 입구를 깔끔하게 마감하고 실을 끊어 정리합니다.</p>
+                    <br/>
+                    <h3>3. 꼬리 지느러미 만들기 (Tail Fin)</h3>
+                    <p>몸통의 1단(사슬 시작 부분) 납작한 꼬리 쪽 중앙 6코 위치에 새 실을 겁니다. 기둥 사슬 3코를 올린 뒤 한길긴뜨기 6코를 떱니다. 2단은 편물을 뒤집어 사슬 3코 세운 뒤 양쪽 끝 코에서 코늘림을 진행하여 8코를 만듭니다. 3단에서 [사슬 3코, 두길긴뜨기 2코 모아뜨기, 사슬 3코로 빼뜨기] 패턴을 양쪽 갈래로 나누어 떠서 물고기 모양 꼬리를 완성합니다.</p>
+                    <br/>
+                    <h3>4. 옆 지느러미 및 조립 (Assembly)</h3>
+                    <p>몸통 양옆 적당한 위치에 실을 걸어 한 자리에 [짧은뜨기, 긴뜨기, 한길긴뜨기, 긴뜨기, 짧은뜨기]를 모아 떠서 둥근 옆 지느러미를 떱니다. 11단의 구멍 사이로 끈(사슬 45코)을 끼워 당겨서 입구를 조이고, 붕어빵 앞부분에 검은 비즈로 눈을 달고 앤틱 키링 고리를 걸어 완성합니다.</p>
+                    <br/>
+                    <p>👉 <a href="/ko/marketplace">한 입 붕어빵 키링 파우치 무료 도안 다운로드하러 가기</a></p>
+                `
+                : `
+                    <p>Keep the warmth of winter close with this cute accessory, the <strong>Mini Taiyaki Keyring Pouch</strong> pattern.</p>
+                    <br/>
+                    <p>This pattern uses flat oval single crochet stitches for the body, adding textured fins and tails to create a realistic taiyaki look. It is perfect for storing AirPods, coins, or cards as a stylish keyring accessory.</p>
+                    <br/>
+                    <h2>Pattern Specifications</h2>
+                    <ul>
+                        <li><strong>Difficulty</strong>: ★★☆☆☆ (Easy to Intermediate / Bag Keyring Accessory)</li>
+                        <li><strong>Finished Size</strong>: Approx. 12cm x 7cm (including tail fin)</li>
+                        <li><strong>Recommended Hook</strong>: Crochet hook 5/0 (3.0mm)</li>
+                        <li><strong>Recommended Yarn</strong>: Soft cotton yarn (brown or beige, approx. 30g), black beads for eyes</li>
+                        <li><strong>Gauge</strong>: 20 sts x 22 rows = 10 x 10 cm in single crochet</li>
+                    </ul>
+                    <br/>
+                    <blockquote>
+                        <strong>⚠️ Notice & Tips:</strong><br/>
+                        Keep a consistent tension to give the taiyaki a plump, bakery-fresh texture. Black beads (5mm) make the cutiest eyes, but if you don't have them, you can embroider french knots using black yarn instead.
+                    </blockquote>
+                    <br/>
+                    <h2>Step-by-Step Instructions</h2>
+                    <h3>Cast On</h3>
+                    <p>Prepare crochet hook 5/0 (3.0mm) and light brown yarn. Make a foundation chain of 15 stitches.</p>
+                    <br/>
+                    <h3>1. Body Square</h3>
+                    <p>Work 1 single crochet in each chain across starting from 2nd ch from hook (13 sc). Work 3 sc into the last chain to turn. Continue along the opposite side of the chain, crocheting 12 sc, and work 2 sc in the last ch. Slip stitch to join (30 sts). From Round 2 to 10, work sc around without increasing to build a pocket.</p>
+                    <br/>
+                    <h3>2. Opening & Drawstring</h3>
+                    <p>Round 11: Ch 3 (counts as dc), *ch 1, skip 1 st, dc in next st; repeat from * to make drawstring holes. Round 12: Work sc in each stitch around to finish, fasten off.</p>
+                    <br/>
+                    <h3>3. Tail Fin</h3>
+                    <p>Attach yarn to the center 6 stitches of the flat tail end (cast-on row). Ch 3, work 6 dc across. Row 2: Turn, ch 3, increase on both edge stitches (8 sts). Row 3: [ch 3, work 2 double-treble crochet together, slip stitch with ch 3] twice on both halves to create the split fish tail.</p>
+                    <br/>
+                    <h3>4. Assembly & Fins</h3>
+                    <p>Attach yarn to both sides of the body and work [sc, hdc, dc, hdc, sc] in one space to make side fins. Thread a crochet chain (45 chs) through the Round 11 holes as drawstring. Sew black beads for eyes and attach a metal keyring to complete.</p>
+                    <br/>
+                    <p>👉 <a href="/en/marketplace">Download Free Mini Taiyaki Keyring Pouch Pattern</a></p>
+                `
+        },
         'summer-flower-coaster': {
             category: 'tutorial',
             title: locale === 'ko'

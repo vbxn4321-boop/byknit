@@ -19,6 +19,19 @@ export default function HomeBlogSection({ locale }: HomeBlogSectionProps) {
 
     const posts = [
         {
+            id: 'taiyaki-keyring-pouch',
+            slug: 'taiyaki-keyring-pouch',
+            category: 'tutorial',
+            title: locale === 'ko'
+                ? '바느질 없이 완성하는 귀여운 코바늘 붕어빵 키링 파우치 무료 도안'
+                : 'How to Crochet a Cute Mini Taiyaki Keyring Pouch - Free Pattern',
+            excerpt: locale === 'ko'
+                ? '가방에 매달고 다니기 딱 좋은 물고기 모양 미니 붕어빵 키링 파우치입니다. 에어팟이나 동전 수납이 가능하며 초보자도 1시간 만에 완성할 수 있는 상세 코바늘 가이드를 소개합니다.'
+                : 'Crochet a cute fish-shaped mini taiyaki keyring pouch to store coins, lip balm, or AirPods. Easy-to-follow row-by-row tutorial for beginners.',
+            date: '2026. 07. 03',
+            imageUrl: '/blog/thumbnail-5.png'
+        },
+        {
             id: 'summer-flower-coaster',
             slug: 'summer-flower-coaster',
             category: 'tutorial',
