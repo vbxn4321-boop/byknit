@@ -357,10 +357,10 @@
       "backToSelect": "목록으로 돌아가기",
       "selectBranchTitle": "바이니트 AI 도구 선택",
       "selectBranchDesc": "원하시는 AI 도안 변환 방식을 선택해 주세요.",
-      "cardChartTitle": "격자 배색 차트 변환",
-      "cardChartDesc": "사진을 모눈종이 형태의 배색 도안으로 변환하고 격자 에디터에서 바로 편집할 수 있습니다.",
-      "cardWrittenTitle": "서술형 줄글 도안 변환",
-      "cardWrittenDesc": "실물 편물 사진을 분석하여 단수별/코수별로 쓰여진 상세 서술형 뜨개 도안을 생성합니다."
+      "cardChartTitle": "사진/그림을 도안 차트로 만들기",
+      "cardChartDesc": "올리고 싶은 캐릭터나 사진을 격자 무늬(모눈종이) 배색 도안으로 바꾸고, 색상 에디터에서 자유롭게 편집할 수 있습니다.",
+      "cardWrittenTitle": "뜨개 사진으로 설명글 도안 만들기 (AI 분석)",
+      "cardWrittenDesc": "완성된 뜨개 옷이나 무늬 사진을 올리면, AI가 어떤 뜨개 조직인지 분석하여 몇 단 몇 코로 뜨는지 상세 설명서(도안)로 만들어 줍니다."
     }
   },
   "auth": {

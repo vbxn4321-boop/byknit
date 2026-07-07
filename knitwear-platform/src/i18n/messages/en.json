@@ -356,10 +356,10 @@
       "backToSelect": "Back to Tool Selection",
       "selectBranchTitle": "byKnit AI Tool Selection",
       "selectBranchDesc": "Select the conversion method you want to use.",
-      "cardChartTitle": "Grid Colorwork Chart",
-      "cardChartDesc": "Convert photos to a grid-based colorwork chart and edit directly in the pattern editor.",
-      "cardWrittenTitle": "Written Pattern Recipe",
-      "cardWrittenDesc": "Analyze the fabric stitch texture from a photo and generate row-by-row written instructions."
+      "cardChartTitle": "Turn Photo/Image into Chart Pattern",
+      "cardChartDesc": "Convert any illustration or photo into a grid-based colorwork chart and customize colors in the pattern editor.",
+      "cardWrittenTitle": "Turn Photo into Written Pattern (AI Analysis)",
+      "cardWrittenDesc": "Upload a photo of finished knitwear or stitches. AI will analyze the stitch texture and generate step-by-step written instructions."
     }
   },
   "auth": {
