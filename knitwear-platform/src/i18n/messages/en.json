@@ -358,7 +358,7 @@
       "selectBranchDesc": "Select the conversion method you want to use.",
       "cardChartTitle": "Turn Photo/Image into Chart Pattern",
       "cardChartDesc": "Convert any illustration or photo into a grid-based colorwork chart and customize colors in the pattern editor.",
-      "cardWrittenTitle": "Turn Photo into Written Pattern (AI Analysis)",
+      "cardWrittenTitle": "Turn Photo into Written Pattern",
       "cardWrittenDesc": "Upload a photo of finished knitwear or stitches. AI will analyze the stitch texture and generate step-by-step written instructions."
     }
   },
