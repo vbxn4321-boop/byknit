@@ -6,9 +6,9 @@ import {
     ChevronLeft, Heart, MessageSquare, Send,
     User as UserIcon, UserPlus, UserCheck,
     Package, Trash2, CornerDownRight, Coins,
-    Bookmark, Edit3, X, Save
+    Bookmark, Edit3, X, Save, Image as ImageIcon, Check
 } from 'lucide-react';
-import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, updatePost, toggleBookmark, getMyLikes } from '@/app/actions/community';
+import { toggleLike, toggleFollow, createComment, deleteComment, deletePost, updatePost, toggleBookmark, getMyLikes, getMyPatterns } from '@/app/actions/community';
 import { User } from '@supabase/supabase-js';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -72,6 +72,29 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
     const [editCategory, setEditCategory] = useState(post.category);
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likes?.[0]?.count || 0);
+
+    const [selectedPatternId, setSelectedPatternId] = useState<string | null>(post.pattern?.id || null);
+    const [editImageFile, setEditImageFile] = useState<File | null>(null);
+    const [editImagePreview, setEditImagePreview] = useState<string | null>(post.images?.[0] || null);
+    const [removeImage, setRemoveImage] = useState(false);
+    const [myPatterns, setMyPatterns] = useState<any[]>([]);
+    const [showPatternPicker, setShowPatternPicker] = useState(false);
+    const [loadingPatterns, setLoadingPatterns] = useState(false);
+
+    useEffect(() => {
+        if (isEditing && myPatterns.length === 0) {
+            setLoadingPatterns(true);
+            getMyPatterns().then(patterns => {
+                setMyPatterns(patterns);
+                setLoadingPatterns(false);
+            }).catch(e => {
+                console.error(e);
+                setLoadingPatterns(false);
+            });
+        }
+    }, [isEditing, myPatterns.length]);
+
+    const selectedPattern = myPatterns.find(p => p.id === selectedPatternId) || post.pattern;
 
     useEffect(() => {
         if (user) {
@@ -258,6 +281,19 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
             formData.append('title', editTitle);
             formData.append('content', editContent);
             formData.append('category', editCategory);
+            
+            if (selectedPatternId) {
+                formData.append('pattern_id', selectedPatternId);
+            } else {
+                formData.append('pattern_id', 'none');
+            }
+            
+            if (removeImage) {
+                formData.append('remove_image', 'true');
+            } else if (editImageFile) {
+                formData.append('image', editImageFile);
+            }
+            
             await updatePost(post.id, formData);
             setIsEditing(false);
             router.refresh();
@@ -339,6 +375,64 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                         )}
 
                         {/* Title */}
+                        {isEditing && (
+                            <div className="relative mb-6">
+                                <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-2">도안 첨부</label>
+                                {selectedPatternId ? (
+                                    <div className="flex items-center gap-4 p-4 bg-stone-50 border border-stone-200 rounded-2xl">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-stone-700 text-sm truncate">
+                                                📎 {selectedPattern ? getPatternTitle(selectedPattern.title) : '첨부된 도안'}
+                                            </p>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setSelectedPatternId(null)}
+                                            className="text-rose-500 hover:text-rose-700 font-bold transition-colors text-xs cursor-pointer"
+                                        >
+                                            제거
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPatternPicker(!showPatternPicker)}
+                                        className="w-full flex items-center gap-2 p-3 bg-stone-50 border border-dashed border-stone-200 rounded-xl hover:bg-rose-50/20 text-stone-500 font-bold text-xs justify-center transition-all cursor-pointer"
+                                    >
+                                        <Package className="w-4 h-4" /> 도안 첨부하기
+                                    </button>
+                                )}
+                                {showPatternPicker && (
+                                    <div className="absolute left-0 right-0 z-50 mt-2 bg-white border border-stone-200 rounded-2xl shadow-xl overflow-hidden max-h-72 overflow-y-auto">
+                                        {loadingPatterns ? (
+                                            <div className="p-8 text-center text-stone-400 font-bold">불러오는 중...</div>
+                                        ) : myPatterns.length === 0 ? (
+                                            <div className="p-8 text-center text-stone-500 font-bold">등록된 도안이 없습니다.</div>
+                                        ) : (
+                                            myPatterns.map(pattern => (
+                                                <button
+                                                    key={pattern.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedPatternId(pattern.id);
+                                                        setShowPatternPicker(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-none cursor-pointer"
+                                                >
+                                                    <div className="flex-1 text-left min-w-0">
+                                                        <p className="font-bold text-stone-800 text-sm truncate">
+                                                            {getPatternTitle(pattern.title)}
+                                                        </p>
+                                                    </div>
+                                                    {selectedPatternId === pattern.id && <Check className="w-4 h-4 text-rose-500" />}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {isEditing ? (
                             <input
                                 value={editTitle}
@@ -465,12 +559,77 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
 
                         {/* Body */}
                         {isEditing ? (
-                            <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                rows={12}
-                                className="w-full text-stone-700 text-lg leading-relaxed mb-8 outline-none border-2 border-rose-100 focus:border-rose-300 rounded-xl p-4 bg-stone-50/50 resize-none"
-                            />
+                            <>
+                                <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    rows={12}
+                                    className="w-full text-stone-700 text-lg leading-relaxed mb-4 outline-none border-2 border-rose-100 focus:border-rose-300 rounded-xl p-4 bg-stone-50/50 resize-none animate-in fade-in duration-200"
+                                />
+                                <div className="pt-4 border-t border-stone-100 space-y-3 mb-8">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        name="image" 
+                                        id="edit-cover-image-input" 
+                                        className="hidden" 
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setEditImageFile(file);
+                                                setRemoveImage(false);
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                    setEditImagePreview(reader.result as string);
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider">사진 첨부 (선택)</p>
+                                    
+                                    {editImagePreview && !removeImage ? (
+                                        <div className="flex items-center gap-4 p-4 bg-stone-50 border border-stone-200 rounded-2xl">
+                                            <img 
+                                                src={editImagePreview} 
+                                                alt="Selected preview" 
+                                                className="w-12 h-12 rounded-xl object-cover border border-stone-100"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-bold text-stone-700 truncate">
+                                                    📎 첨부된 사진 파일
+                                                </p>
+                                                <p className="text-[10px] text-stone-400 mt-0.5">저장 버튼을 누르면 이 사진이 게시글에 적용됩니다.</p>
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditImageFile(null);
+                                                    setEditImagePreview(null);
+                                                    setRemoveImage(true);
+                                                }}
+                                                className="text-rose-500 hover:text-rose-700 font-bold transition-colors text-xs cursor-pointer"
+                                            >
+                                                제거
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => document.getElementById('edit-cover-image-input')?.click()}
+                                            className="flex items-center gap-4 w-full p-4 bg-stone-50 border-2 border-dashed border-stone-200 rounded-2xl hover:border-rose-300 hover:bg-rose-50/20 transition-all cursor-pointer"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                                                <ImageIcon className="w-5 h-5 text-stone-400" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-bold text-stone-700 text-sm">사진 첨부하기</p>
+                                                <p className="text-xs text-stone-400 mt-0.5">게시글에 함께 첨부할 사진이나 이미지를 선택하세요.</p>
+                                            </div>
+                                        </button>
+                                    )}
+                                </div>
+                            </>
                         ) : (
                             <>
                                 <div className="text-stone-700 text-lg leading-relaxed whitespace-pre-wrap mb-8">

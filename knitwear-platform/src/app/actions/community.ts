@@ -707,12 +707,55 @@ export async function updatePost(postId: string, formData: FormData) {
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
     const category = formData.get('category') as string;
+    const patternId = formData.get('pattern_id') as string | null;
+    const removeImage = formData.get('remove_image') === 'true';
+    const imageFile = formData.get('image') as File | null;
+
+    const updateData: any = {
+        title,
+        content,
+        category
+    };
+
+    // pattern_id 처리
+    if (patternId === 'none' || !patternId) {
+        updateData.pattern_id = null;
+    } else {
+        updateData.pattern_id = patternId;
+    }
+
+    // image_url 처리
+    if (removeImage) {
+        updateData.image_url = null;
+    } else if (imageFile && typeof imageFile === 'object' && 'size' in imageFile && imageFile.size > 0) {
+        try {
+            const fileExt = imageFile.name.split('.').pop() || 'png';
+            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+            const filePath = `post_${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('community-images')
+                .upload(filePath, imageFile, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
+
+            if (!uploadError) {
+                const { data: { publicUrl } } = supabase.storage
+                    .from('community-images')
+                    .getPublicUrl(filePath);
+                updateData.image_url = publicUrl;
+            }
+        } catch (uploadException) {
+            console.error('Failed to handle image upload on update:', uploadException);
+        }
+    }
 
     // 관리자라면 adminClient(service_role)를 사용하여 RLS 우회 수정
     const clientToUse = isAdmin ? adminClient : supabase;
     const { error } = await clientToUse
         .from('posts')
-        .update({ title, content, category })
+        .update(updateData)
         .eq('id', postId);
 
     if (error) {
