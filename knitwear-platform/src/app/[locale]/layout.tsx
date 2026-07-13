@@ -88,6 +88,8 @@ export default async function LocaleLayout({
     return (
         <html lang={locale} suppressHydrationWarning>
             <head>
+                {/* Naver Search Advisor Verification */}
+                <meta name="naver-site-verification" content="df5f7db3144b5b1714440e6b00c5d46336608816" />
                 {/* PortOne SDK for KakaoPay */}
                 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
                 {/* Google Consent Mode v2 Initialization */}

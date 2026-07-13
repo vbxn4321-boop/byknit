@@ -20,8 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     }
 
     const titleStr = post.title || '커뮤니티 게시글';
-    const descStr = post.content 
-        ? (post.content.length > 150 ? post.content.substring(0, 150) + '...' : post.content)
+    const plainText = post.content ? post.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() : '';
+    const descStr = plainText 
+        ? (plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText)
         : '바이니트 커뮤니티에서 유익한 뜨개질 이야기를 확인해 보세요.';
 
     return {

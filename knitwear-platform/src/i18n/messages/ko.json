@@ -1060,6 +1060,7 @@
     "categories": {
       "all": "전체",
       "notice": "공지사항",
+      "notice_unpinned": "공지사항",
       "event": "이벤트",
       "general": "자유",
       "showcase": "자랑",

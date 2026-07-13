@@ -1058,6 +1058,7 @@
     "categories": {
       "all": "All",
       "notice": "Notice",
+      "notice_unpinned": "Notice",
       "event": "Event",
       "general": "Free Talk",
       "showcase": "Showcase",

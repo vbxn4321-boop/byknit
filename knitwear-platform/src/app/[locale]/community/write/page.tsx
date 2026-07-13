@@ -33,6 +33,9 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [pollData, setPollData] = useState<any>(null);
 
+    const [selectedCategory, setSelectedCategory] = useState<string>('general');
+    const [isPinned, setIsPinned] = useState<boolean>(true);
+
     const [user, setUser] = useState<any>(null);
     const [userRole, setUserRole] = useState<string>('knitter');
     const [loadingAuth, setLoadingAuth] = useState(true);
@@ -48,7 +51,9 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                     .select('role')
                     .eq('id', user.id)
                     .single();
-                setUserRole(profile?.role || 'knitter');
+                const role = profile?.role || 'knitter';
+                setUserRole(role);
+                setSelectedCategory(role === 'admin' ? 'notice' : 'general');
             }
             setLoadingAuth(false);
         }
@@ -100,6 +105,11 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
         setIsSubmitting(true);
         const formData = new FormData(e.currentTarget);
         formData.append('locale', locale);
+
+        const categoryValue = selectedCategory === 'notice' 
+            ? (isPinned ? 'notice' : 'notice_unpinned') 
+            : selectedCategory;
+        formData.set('category', categoryValue);
 
         if (selectedPatternId) {
             formData.append('pattern_id', selectedPatternId);
@@ -201,31 +211,48 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                 <div className="bg-white border-l border-r border-tan-200 min-h-screen px-10 sm:px-16 py-12">
                 <form id="write-form" onSubmit={handleSubmit} className="space-y-12">
                     {/* Category Selection */}
-                    <div className="flex flex-wrap gap-3">
-                        {(userRole === 'admin'
-                            ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip']
-                            : ['general', 'showcase', 'qna', 'tip']
-                        ).map((cat) => (
-                            <label key={cat} className="cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    name="category" 
-                                    value={cat} 
-                                    className="hidden peer" 
-                                    defaultChecked={cat === (userRole === 'admin' ? 'notice' : 'general')} 
-                                />
-                                <span className={`px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-bold text-sm transition-all
-                                    peer-checked:text-white transition-all
-                                    ${cat === 'notice' 
-                                        ? 'peer-checked:bg-emerald-600 peer-checked:border-emerald-600' 
-                                        : cat === 'event'
-                                        ? 'peer-checked:bg-rose-500 peer-checked:border-rose-500'
-                                        : 'peer-checked:bg-stone-800 peer-checked:border-stone-800'
-                                    }`}>
-                                    #{cat === 'notice' ? '공지사항' : cat === 'event' ? '이벤트' : cat === 'general' ? '자유' : cat === 'qna' ? '질문' : cat === 'showcase' ? '자랑' : '팁'}
-                                </span>
-                            </label>
-                        ))}
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap gap-3">
+                            {(userRole === 'admin'
+                                ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip']
+                                : ['general', 'showcase', 'qna', 'tip']
+                            ).map((cat) => (
+                                <label key={cat} className="cursor-pointer">
+                                    <input 
+                                        type="radio" 
+                                        name="category_select" 
+                                        value={cat} 
+                                        className="hidden peer" 
+                                        checked={selectedCategory === cat}
+                                        onChange={() => setSelectedCategory(cat)}
+                                    />
+                                    <span className={`px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-bold text-sm transition-all
+                                        peer-checked:text-white transition-all
+                                        ${cat === 'notice' 
+                                            ? 'peer-checked:bg-emerald-600 peer-checked:border-emerald-600' 
+                                            : cat === 'event'
+                                            ? 'peer-checked:bg-rose-500 peer-checked:border-rose-500'
+                                            : 'peer-checked:bg-stone-800 peer-checked:border-stone-800'
+                                        }`}>
+                                        #{cat === 'notice' ? '공지사항' : cat === 'event' ? '이벤트' : cat === 'general' ? '자유' : cat === 'qna' ? '질문' : cat === 'showcase' ? '자랑' : '팁'}
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
+
+                        {selectedCategory === 'notice' && (
+                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50/50 border border-emerald-100 rounded-xl w-fit animate-in fade-in slide-in-from-top-2 duration-200">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm font-bold text-emerald-800">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={isPinned} 
+                                        onChange={(e) => setIsPinned(e.target.checked)} 
+                                        className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                    />
+                                    <span>📌 상단 고정 (압정 달기)</span>
+                                </label>
+                            </div>
+                        )}
                     </div>
 
                     {/* ========== 도안 첨부 섹션 ========== */}

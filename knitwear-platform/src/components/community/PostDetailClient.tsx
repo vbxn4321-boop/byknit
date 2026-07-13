@@ -69,7 +69,8 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(post.title);
     const [editContent, setEditContent] = useState(post.content);
-    const [editCategory, setEditCategory] = useState(post.category);
+    const [editCategory, setEditCategory] = useState(post.category === 'notice_unpinned' ? 'notice' : post.category);
+    const [editPinned, setEditPinned] = useState(post.category === 'notice');
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likes?.[0]?.count || 0);
 
@@ -196,6 +197,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
     const getCategoryColor = (cat: string) => {
         const map: Record<string, string> = {
             notice: 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200',
+            notice_unpinned: 'bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200',
             event: 'bg-rose-500 text-white font-extrabold',
             general: 'bg-stone-100 text-stone-600',
             showcase: 'bg-rose-50 text-rose-600',
@@ -280,7 +282,11 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
             const formData = new FormData();
             formData.append('title', editTitle);
             formData.append('content', editContent);
-            formData.append('category', editCategory);
+            
+            const categoryValue = editCategory === 'notice' 
+                ? (editPinned ? 'notice' : 'notice_unpinned') 
+                : editCategory;
+            formData.append('category', categoryValue);
             
             if (selectedPatternId) {
                 formData.append('pattern_id', selectedPatternId);
@@ -345,28 +351,43 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                     <div className="p-8">
                         {/* Category */}
                         {isEditing ? (
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {(isAdmin 
-                                    ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip'] 
-                                    : ['general', 'showcase', 'qna', 'tip']
-                                ).map((cat) => (
-                                    <button
-                                        key={cat}
-                                        type="button"
-                                        onClick={() => setEditCategory(cat)}
-                                        className={`px-4 py-1.5 rounded-full border text-xs font-bold transition-all ${
-                                            editCategory === cat 
-                                                ? (cat === 'notice' 
-                                                    ? 'bg-emerald-600 text-white border-emerald-600 font-extrabold' 
-                                                    : cat === 'event'
-                                                    ? 'bg-rose-500 text-white border-rose-500 font-extrabold'
-                                                    : 'bg-stone-800 text-white border-stone-800') 
-                                                : 'border-stone-200 text-stone-500'
-                                        }`}
-                                    >
-                                        #{t(`categories.${cat}`, { defaultValue: cat })}
-                                    </button>
-                                ))}
+                            <div className="space-y-3 mb-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {(isAdmin 
+                                        ? ['notice', 'event', 'general', 'showcase', 'qna', 'tip'] 
+                                        : ['general', 'showcase', 'qna', 'tip']
+                                    ).map((cat) => (
+                                        <button
+                                            key={cat}
+                                            type="button"
+                                            onClick={() => setEditCategory(cat)}
+                                            className={`px-4 py-1.5 rounded-full border text-xs font-bold transition-all ${
+                                                editCategory === cat 
+                                                    ? (cat === 'notice' 
+                                                        ? 'bg-emerald-600 text-white border-emerald-600 font-extrabold' 
+                                                        : cat === 'event'
+                                                        ? 'bg-rose-500 text-white border-rose-500 font-extrabold'
+                                                        : 'bg-stone-800 text-white border-stone-800') 
+                                                    : 'border-stone-200 text-stone-500'
+                                            }`}
+                                        >
+                                            #{t(`categories.${cat}`, { defaultValue: cat })}
+                                        </button>
+                                    ))}
+                                </div>
+                                {editCategory === 'notice' && (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/50 border border-emerald-100 rounded-lg w-fit">
+                                        <label className="flex items-center gap-2 cursor-pointer text-[11px] font-bold text-emerald-800">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={editPinned} 
+                                                onChange={(e) => setEditPinned(e.target.checked)} 
+                                                className="w-3.5 h-3.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                            />
+                                            <span>📌 상단 고정 (압정 달기)</span>
+                                        </label>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold mb-4 ${getCategoryColor(post.category)}`}>
@@ -547,7 +568,13 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                             <Save className="w-4 h-4" /> {isSubmitting ? t('detail.saving') : t('detail.save')}
                                         </button>
                                         <button
-                                            onClick={() => { setIsEditing(false); setEditTitle(post.title); setEditContent(post.content); setEditCategory(post.category); }}
+                                            onClick={() => { 
+                                                setIsEditing(false); 
+                                                setEditTitle(post.title); 
+                                                setEditContent(post.content); 
+                                                setEditCategory(post.category === 'notice_unpinned' ? 'notice' : post.category); 
+                                                setEditPinned(post.category === 'notice');
+                                            }}
                                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 text-stone-400 hover:text-stone-600 transition-all"
                                         >
                                             <X className="w-4 h-4" /> {t('detail.cancel')}
