@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { updateSession } from '@/utils/supabase/middleware';
 import { locales, defaultLocale } from './i18n/request';
@@ -10,6 +10,17 @@ const handleI18n = createMiddleware({
 });
 
 export default async function middleware(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+
+    // 💡 Naver site verification, robots.txt, sitemap.xml should bypass I18n locale redirection
+    if (
+        pathname === '/robots.txt' || 
+        pathname === '/sitemap.xml' || 
+        pathname.startsWith('/naver')
+    ) {
+        return NextResponse.next();
+    }
+
     // 1. Run I18n middleware to get the localized response (rewrites/redirects)
     const i18nResponse = handleI18n(request);
 
