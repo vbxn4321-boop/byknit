@@ -330,6 +330,30 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
         }
     };
 
+    const renderContentWithLinks = (content: string) => {
+        if (!content) return null;
+        
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = content.split(urlRegex);
+        
+        return parts.map((part, index) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-rose-500 hover:underline break-all"
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
+
     return (
         <div className="min-h-screen bg-cream-50 pb-20">
             {/* Header */}
@@ -660,7 +684,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                         ) : (
                             <>
                                 <div className="text-stone-700 text-lg leading-relaxed whitespace-pre-wrap mb-8">
-                                    {translatedPost ? translatedPost.content : post.content}
+                                    {renderContentWithLinks(translatedPost ? translatedPost.content : post.content)}
                                 </div>
                                 <PollRenderer postId={post.id} locale={locale} user={user} />
                             </>
@@ -783,7 +807,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                                     <span className="text-[10px] text-stone-400">{formatDate(comment.created_at)}</span>
                                                 </div>
                                                 <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">
-                                                    {translatedComments[comment.id] || comment.content}
+                                                    {renderContentWithLinks(translatedComments[comment.id] || comment.content)}
                                                 </p>
                                                 <div className="flex items-center gap-3 mt-3">
                                                     {user && (
@@ -863,7 +887,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                                                 <span className="text-[10px] text-stone-400">{formatDate(reply.created_at)}</span>
                                                             </div>
                                                             <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">
-                                                                {translatedComments[reply.id] || reply.content}
+                                                                {renderContentWithLinks(translatedComments[reply.id] || reply.content)}
                                                             </p>
                                                             <div className="flex items-center gap-3 mt-2">
                                                                 {/* Translate Reply */}
