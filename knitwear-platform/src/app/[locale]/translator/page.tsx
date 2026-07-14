@@ -4,11 +4,12 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
-    const t = await getTranslations({ locale, namespace: 'nav' });
 
     return {
-        title: locale === 'ko' ? 'AI 뜨개 도안 번역기 - byKnit' : 'AI Pattern Translator - byKnit',
-        description: '구글도 못 번역하는 서술형 영문 뜨개 도안을 표준 한국어 뜨개 약어와 해설로 완벽하게 번역해 주는 전문 AI 번역기입니다.',
+        title: locale === 'ko' ? '영문 뜨개 도안 번역기 (약어 자동 한글 번역) - byKnit' : 'AI Knitting Pattern Translator - byKnit',
+        description: locale === 'ko' 
+            ? '서술형 영문 뜨개 도안의 어려운 약어(k2tog, ssk 등)와 설명글을 표준 한국어 뜨개 용어와 해설로 1초 만에 완벽하게 무료로 번역해 주는 전문 AI 번역기입니다.'
+            : 'Translate descriptive English knitting patterns into standard symbols and Korean explanations in just 1 second using our free specialized AI translator.',
     };
 }
 
