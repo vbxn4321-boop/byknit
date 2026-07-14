@@ -35,11 +35,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         openGraph: {
             title: t('title'),
             description: t('description'),
-            url: 'https://byknit.com',
+            url: 'https://by-knit.com',
             siteName: 'byKnit',
             images: [
                 {
-                    url: 'https://byknit.com/og-image.png',
+                    url: 'https://by-knit.com/og-image.png',
                     width: 1200,
                     height: 630,
                     alt: 'byKnit Open Graph Image',
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             card: 'summary_large_image',
             title: t('title'),
             description: t('description'),
-            images: ['https://byknit.com/og-image.png'],
+            images: ['https://by-knit.com/og-image.png'],
         },
     };
 }

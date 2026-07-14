@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/api/', '/studio/', '/onboarding/', '/reset-password/', '/payments/'],
         },
-        sitemap: 'https://byknit.com/sitemap.xml',
+        sitemap: 'https://by-knit.com/sitemap.xml',
     };
 }
