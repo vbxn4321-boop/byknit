@@ -109,8 +109,7 @@ export default function PaymentsPage() {
             IMP.init('imp55247668'); 
 
             // 결제 요청 객체 구성 (V1 규격)
-            IMP.request_pay({
-                pg: mapPgCode(selectedMethod), // pg사 코드 (예: kcp.T0000 등)
+            const paymentParams: any = {
                 pay_method: 'card',
                 merchant_uid: orderId,
                 name: `${selectedPackage.name} 충전 (byKnit)`,
@@ -123,9 +122,16 @@ export default function PaymentsPage() {
                     user_id: user.id,
                     credits: finalCredits
                 },
-                // 포트원 웹훅 수신 주소 동적 지정
                 notice_url: `${window.location.origin}/api/payments/webhook`
-            }, (response: any) => {
+            };
+
+            if (selectedMethod === 'card') {
+                paymentParams.channelKey = 'channel-key-ccac91e6-13a8-485b-8871-c1e819b6868c';
+            } else {
+                paymentParams.pg = mapPgCode(selectedMethod);
+            }
+
+            IMP.request_pay(paymentParams, (response: any) => {
                 if (response.success) {
                     // 결제 성공 시 -> 성공 화면에서 서버 액션을 타서 지급하도록 처리
                     router.push(`/${locale}/payments/success?paymentId=${response.imp_uid}&amount=${selectedPackage.amount}&credits=${finalCredits}`);

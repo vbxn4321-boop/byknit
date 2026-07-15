@@ -109,10 +109,7 @@ export function CheckoutModal({
 
             IMP.init('imp55247668'); // Sandbox merchant id
 
-            const pgCode = selectedMethod === 'kakaopay' ? 'kakaopay.TC0ONETIME' : 'html5_inicis.INIpayTest';
-
-            IMP.request_pay({
-                pg: pgCode,
+            const paymentParams: any = {
                 pay_method: 'card',
                 merchant_uid: orderId,
                 name: `${patternTitle} 구매 (byKnit)`,
@@ -126,7 +123,15 @@ export function CheckoutModal({
                     credits: 0 // direct purchase indicates no credit addition
                 },
                 notice_url: `${window.location.origin}/api/payments/webhook`
-            }, async (response: any) => {
+            };
+
+            if (selectedMethod === 'kakaopay') {
+                paymentParams.pg = 'kakaopay.TC0ONETIME';
+            } else {
+                paymentParams.channelKey = 'channel-key-ccac91e6-13a8-485b-8871-c1e819b6868c';
+            }
+
+            IMP.request_pay(paymentParams, async (response: any) => {
                 if (response.success) {
                     const paymentId = response.imp_uid;
                     const verifyRes = await verifyAndRecordDirectPurchase(paymentId, priceKrw, pattern.id);
