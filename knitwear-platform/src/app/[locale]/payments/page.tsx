@@ -151,11 +151,11 @@ export default function PaymentsPage() {
     // PG사 코드 매핑 (V1 전용)
     const mapPgCode = (method: string) => {
         switch (method) {
-            case 'card': return 'kcp.T0000'; // KCP 테스트 상점아이디
+            case 'card': return 'html5_inicis.INIpayTest'; // KG이니시스 테스트 상점아이디
             case 'kakaopay': return 'kakaopay.TC0ONETIME'; // 카카오페이 테스트 상점아이디
             case 'naverpay': return 'naverpay'; // 네이버페이 테스트
             case 'tosspay': return 'tosspay'; // 토스페이 테스트
-            default: return 'kcp.T0000';
+            default: return 'html5_inicis.INIpayTest';
         }
     };
 

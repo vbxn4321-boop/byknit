@@ -110,7 +110,7 @@ export function CheckoutModal({
 
             IMP.init('imp55247668'); // Sandbox merchant id
 
-            const pgCode = selectedMethod === 'kakaopay' ? 'kakaopay.TC0ONETIME' : 'kcp.T0000';
+            const pgCode = selectedMethod === 'kakaopay' ? 'kakaopay.TC0ONETIME' : 'html5_inicis.INIpayTest';
 
             IMP.request_pay({
                 pg: pgCode,

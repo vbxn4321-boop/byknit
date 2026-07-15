@@ -712,12 +712,34 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
                             {/* Refund Policy (Static) */}
                             <div className="bg-gray-50 p-6 rounded-xl text-sm text-gray-500 leading-relaxed mb-10 border border-gray-100">
-                                <h4 className="font-bold text-gray-700 mb-2">
-                                    {locale === 'ko' ? '교환/환불 안내' : 'Refund Policy'}
+                                <h4 className="font-bold text-gray-700 mb-3">
+                                    {locale === 'ko' ? '[디지털 상품 배송 및 환불 규정]' : '[Digital Product Delivery & Refund Policy]'}
                                 </h4>
-                                {locale === 'ko'
-                                    ? '본 상품은 PDF 디지털 파일로, 교환 및 환불이 불가합니다. 도안에 오류나 수정사항이 있는 경우 구매 내역에서 업데이트된 파일을 다운로드받으실 수 있으며, 기재해주신 메일로 안내가 발송됩니다.'
-                                    : 'This product is a digital PDF file and is non-refundable. If there are errors or updates, you can download the updated file from your purchase history.'}
+                                {locale === 'ko' ? (
+                                    <div className="space-y-3">
+                                        <p><strong>배송 안내:</strong> 본 상품은 결제 완료 즉시 마이페이지를 통해 다운로드 링크가 제공되는 무배송 디지털 상품입니다. (배송 소요 시간: 즉시)</p>
+                                        <p><strong>교환 및 반품 불가 안내:</strong> 디지털 상품의 특성상 결제 후 다운로드(열람 포함)를 진행한 경우, 전자상거래 등에서의 소비자보호에 관한 법률 제17조 제2항 제5호에 따라 교환 및 반품(청약철회)이 불가능합니다.</p>
+                                        <div>
+                                            <p><strong>환불 프로세스:</strong></p>
+                                            <ul className="list-disc pl-5 mt-1 space-y-1">
+                                                <li>결제 후 다운로드를 받지 않은 상태에서 7일 이내에 환불을 요청하실 경우 100% 환불이 가능합니다.</li>
+                                                <li>제공된 파일이 손상되었거나 사이트 오류로 인해 다운로드가 불가능한 경우, 고객센터로 접수해 주시면 확인 후 전액 환불 또는 정상 파일로 재발송해 드립니다.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <p><strong>Delivery Info:</strong> This product is a digital download file that is provided immediately via My Page after payment completion (No shipping required, delivery time: Instant).</p>
+                                        <p><strong>Exchanges & Returns Restriction:</strong> Due to the nature of digital goods, once a download (including viewing) has occurred, exchanges and returns (withdrawal of subscription) are not possible under Article 17, Paragraph 2, Item 5 of the Act on the Consumer Protection in Electronic Commerce, etc.</p>
+                                        <div>
+                                            <p><strong>Refund Process:</strong></p>
+                                            <ul className="list-disc pl-5 mt-1 space-y-1">
+                                                <li>A 100% refund is available if requested within 7 days of payment, provided the file has not been downloaded.</li>
+                                                <li>If the provided file is damaged or cannot be downloaded due to a site error, please contact customer support for a full refund or file re-delivery.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     }

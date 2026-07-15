@@ -74,7 +74,7 @@ export function Footer() {
                     <div className="mb-12 space-y-6 text-[11px] leading-relaxed text-stone-500">
                         <div className="space-y-1">
                             <h4 className="font-bold text-brown-800 text-sm mb-2">{tFooter('businessInfo.companyName')}</h4>
-                            <p>{tFooter('businessInfo.representative')} | {tFooter('businessInfo.businessLicense')}</p>
+                            <p>{tFooter('businessInfo.representative')} | {tFooter('businessInfo.businessLicense')} | {tFooter('businessInfo.telecommunicationsLicense')}</p>
                             <p>{tFooter('businessInfo.address')}</p>
                             <p>{tFooter('businessInfo.cpo')}</p>
                             <p>{tFooter('businessInfo.contact')} | {tFooter('businessInfo.hosting')}</p>
