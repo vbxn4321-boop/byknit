@@ -24,8 +24,7 @@ export async function createOrder(data: {
     if (patternError || !pattern) return { error: 'Pattern not found' };
 
     // 2. Process Credit Payment if paid pattern
-    // 2. Process Credit Payment if paid pattern
-    const price = (pattern.price_usd || 0) * 1450;
+    const price = (pattern.price_usd || 0) * 1000;
     if (price > 0) {
         const { getUserCredits, deductCredits, addCredits } = await import('./credits');
         const buyerCredits = await getUserCredits(user.id);

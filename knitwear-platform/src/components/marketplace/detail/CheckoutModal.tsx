@@ -33,12 +33,11 @@ export function CheckoutModal({
 }: CheckoutModalProps) {
     const isKo = locale === 'ko';
     
-    // Default prices if not set in DB
     const priceKrw = pattern.price_krw || (pattern.price_usd ? pattern.price_usd * 1450 : 0);
-    const priceUsd = pattern.price_usd || Math.round(priceKrw / 1450);
+    const priceCredits = (pattern.price_usd || 0) * 1000;
     
     // User needs enough credits to use credit payment
-    const canPayWithCredits = currentCredits >= priceKrw;
+    const canPayWithCredits = currentCredits >= priceCredits;
 
     const [paymentOption, setPaymentOption] = useState<'credit' | 'direct'>(
         canPayWithCredits ? 'credit' : 'direct'
@@ -75,7 +74,7 @@ export function CheckoutModal({
             try {
                 const res = await createOrder({
                     patternId: pattern.id,
-                    amount: priceKrw
+                    amount: priceCredits
                 });
 
                 if (res.error) {
@@ -193,7 +192,7 @@ export function CheckoutModal({
                             <span className="text-xs text-stone-500">{isKo ? '가격' : 'Price'}</span>
                             <div className="text-right">
                                 <p className="text-lg font-black text-stone-900">₩ {priceKrw.toLocaleString()}</p>
-                                <p className="text-[11px] text-stone-400">({priceKrw.toLocaleString()} Credits)</p>
+                                <p className="text-[11px] text-stone-400">({priceCredits.toLocaleString()} Credits)</p>
                             </div>
                         </div>
                     </div>
@@ -225,11 +224,11 @@ export function CheckoutModal({
                                             {currentCredits.toLocaleString()} Credits 보유
                                         </span>
                                     </div>
-                                    <p className="text-xs text-stone-500 mt-1 leading-normal">
+                                    <div className="text-xs text-stone-500 mt-1 leading-normal">
                                         {isKo 
-                                            ? `보유하신 크레딧에서 ${priceKrw.toLocaleString()} 크레딧이 즉시 차감됩니다.`
-                                            : `${priceKrw.toLocaleString()} credits will be deducted from your balance.`}
-                                    </p>
+                                            ? `보유하신 크레딧에서 ${priceCredits.toLocaleString()} 크레딧이 즉시 차감됩니다.`
+                                            : `${priceCredits.toLocaleString()} credits will be deducted from your balance.`}
+                                    </div>
                                     {!canPayWithCredits && (
                                         <div className="mt-2 flex items-center gap-2">
                                             <span className="inline-block text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">
@@ -325,7 +324,7 @@ export function CheckoutModal({
                             <>
                                 <ShieldCheck size={18} />
                                 {paymentOption === 'credit' 
-                                    ? (isKo ? `${priceKrw.toLocaleString()} 크레딧 결제하기` : `Pay ${priceKrw.toLocaleString()} Credits`)
+                                    ? (isKo ? `${priceCredits.toLocaleString()} 크레딧 결제하기` : `Pay ${priceCredits.toLocaleString()} Credits`)
                                     : (isKo ? `₩ ${priceKrw.toLocaleString()} 안전 결제하기` : `Pay ₩ ${priceKrw.toLocaleString()}`)
                                 }
                             </>

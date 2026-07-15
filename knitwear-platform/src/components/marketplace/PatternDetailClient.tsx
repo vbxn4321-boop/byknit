@@ -357,7 +357,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     const titleStr = typeof pattern.title === 'string' ? pattern.title : (locale === 'ko' ? (pattern.title?.ko || pattern.title?.en) : (pattern.title?.en || pattern.title?.ko));
     const descStr = typeof pattern.description === 'string' ? pattern.description : (locale === 'ko' ? (pattern.description?.ko || pattern.description?.en) : (pattern.description?.en || pattern.description?.ko));
-    const creditPrice = (pattern.price_usd ? pattern.price_usd * 1450 : 0);
+    const creditPrice = (pattern.price_usd ? pattern.price_usd * 1000 : 0);
     const priceStr = pattern.is_free || creditPrice === 0 ? (locale === 'ko' ? '무료' : 'Free') : (locale === 'ko' ? `${creditPrice.toLocaleString()} 크레딧` : `${creditPrice.toLocaleString()} Credits`);
 
     return (
