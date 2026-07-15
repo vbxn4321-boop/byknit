@@ -357,7 +357,8 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     const titleStr = typeof pattern.title === 'string' ? pattern.title : (locale === 'ko' ? (pattern.title?.ko || pattern.title?.en) : (pattern.title?.en || pattern.title?.ko));
     const descStr = typeof pattern.description === 'string' ? pattern.description : (locale === 'ko' ? (pattern.description?.ko || pattern.description?.en) : (pattern.description?.en || pattern.description?.ko));
-    const priceStr = pattern.is_free ? (locale === 'ko' ? '무료' : 'Free') : (locale === 'ko' ? `${pattern.price_usd} 크레딧` : `${pattern.price_usd} Credits`);
+    const creditPrice = (pattern.price_usd ? pattern.price_usd * 1450 : 0);
+    const priceStr = pattern.is_free || creditPrice === 0 ? (locale === 'ko' ? '무료' : 'Free') : (locale === 'ko' ? `${creditPrice.toLocaleString()} 크레딧` : `${creditPrice.toLocaleString()} Credits`);
 
     return (
         <div className="bg-white min-h-screen relative pt-12">
@@ -382,7 +383,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                         setCanDownload(true);
                         setShowDownloadOptions(true);
                         // Refresh credits dynamically after purchase
-                        setUserCredits(prev => Math.max(0, prev - (pattern.price_usd || 0)));
+                        setUserCredits(prev => Math.max(0, prev - creditPrice));
                     }}
                 />
             )}

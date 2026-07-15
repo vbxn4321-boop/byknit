@@ -24,12 +24,13 @@ export async function createOrder(data: {
     if (patternError || !pattern) return { error: 'Pattern not found' };
 
     // 2. Process Credit Payment if paid pattern
-    const price = pattern.price_usd || 0;
+    // 2. Process Credit Payment if paid pattern
+    const price = (pattern.price_usd || 0) * 1450;
     if (price > 0) {
         const { getUserCredits, deductCredits, addCredits } = await import('./credits');
         const buyerCredits = await getUserCredits(user.id);
         if (buyerCredits < price) {
-            return { error: `크레딧이 부족합니다. (필요: ${price} 크레딧, 보유: ${buyerCredits} 크레딧)` };
+            return { error: `크레딧이 부족합니다. (필요: ${price.toLocaleString()} 크레딧, 보유: ${buyerCredits.toLocaleString()} 크레딧)` };
         }
 
         try {
@@ -53,7 +54,7 @@ export async function createOrder(data: {
         pattern_id: data.patternId,
         seller_id: pattern.designer_id, // Important for analytics
         amount: price,
-        amount_usd: price, // Ensure this column is populated if it exists/is used
+        amount_usd: pattern.price_usd || 0, // Ensure this column is populated if it exists/is used
         status: 'paid', // Assuming success for this mock/sandbox flow
         payment_provider: price > 0 ? 'credit' : 'free',
         transaction_id: data.paymentKey || `${price > 0 ? 'credit' : 'free'}_${Date.now()}`
