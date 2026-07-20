@@ -80,7 +80,7 @@ export function Footer() {
                             <p>{tFooter('businessInfo.contact')} | {tFooter('businessInfo.hosting')}</p>
                             <div className="pt-1">
                                 <a
-                                    href="http://www.ftc.go.kr/bizCommPop.do?wrkr_no=20190895"
+                                    href="https://www.ftc.go.kr/bizCommPop.do?wrkr_no=7541200298"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="underline hover:text-rose-500 transition-colors"

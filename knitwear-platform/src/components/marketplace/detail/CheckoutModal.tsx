@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, CreditCard, Sparkles, ShieldCheck } from 'lucide-react';
-import { verifyAndRecordDirectPurchase } from '@/app/actions/payment';
+import { useState } from 'react';
+import { X, Sparkles, ShieldCheck } from 'lucide-react';
 import { createOrder } from '@/app/actions/order';
 import { User } from '@supabase/supabase-js';
 
@@ -33,140 +32,35 @@ export function CheckoutModal({
 }: CheckoutModalProps) {
     const isKo = locale === 'ko';
     
-    const priceKrw = pattern.price_krw || (pattern.price_usd ? pattern.price_usd * 1450 : 0);
     const priceCredits = (pattern.price_usd || 0) * 1000;
     
     // User needs enough credits to use credit payment
     const canPayWithCredits = currentCredits >= priceCredits;
 
-    const [paymentOption, setPaymentOption] = useState<'credit' | 'direct'>(
-        canPayWithCredits ? 'credit' : 'direct'
-    );
-    const [selectedMethod, setSelectedMethod] = useState<'card' | 'kakaopay'>('card');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isSdkLoaded, setIsSdkLoaded] = useState(false);
-
-    // Load PortOne (Iamport) SDK
-    useEffect(() => {
-        if (!isOpen) return;
-
-        if (document.getElementById('iamport-sdk')) {
-            setIsSdkLoaded(true);
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.id = 'iamport-sdk';
-        script.src = 'https://cdn.iamport.kr/v1/iamport.js';
-        script.async = true;
-        script.onload = () => setIsSdkLoaded(true);
-        script.onerror = () => console.error('Iamport SDK load failed');
-        document.body.appendChild(script);
-    }, [isOpen]);
 
     if (!isOpen || !user) return null;
 
     const handleCheckout = async () => {
         setIsProcessing(true);
 
-        // Option A: Pay with Credits
-        if (paymentOption === 'credit') {
-            try {
-                const res = await createOrder({
-                    patternId: pattern.id,
-                    amount: priceCredits
-                });
-
-                if (res.error) {
-                    alert(res.error);
-                } else {
-                    alert(isKo ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
-                    onSuccess();
-                    onClose();
-                }
-            } catch (err: any) {
-                alert(err.message || 'Error occurred');
-            } finally {
-                setIsProcessing(false);
-            }
-            return;
-        }
-
-        // Option B: Direct PortOne checkout
-        if (!isSdkLoaded) {
-            alert(isKo ? '결제 모듈을 로딩 중입니다. 잠시만 기다려 주세요.' : 'Loading payment module. Please wait.');
-            setIsProcessing(false);
-            return;
-        }
-
-        const orderId = `direct-${user.id.substring(0, 8)}-${pattern.id.substring(0, 4)}-${Date.now()}`;
-        const patternTitle = pattern.title?.[locale] || pattern.title?.ko || pattern.title?.en || 'Pattern';
-
         try {
-            // @ts-ignore
-            const IMP = window.IMP;
-            if (!IMP) throw new Error('Iamport SDK not initialized');
-
-            IMP.init('imp55247668'); // Sandbox merchant id
-
-            const paymentParams: any = {
-                pay_method: 'card',
-                merchant_uid: orderId,
-                name: `${patternTitle} 구매 (byKnit)`,
-                amount: priceKrw,
-                buyer_email: user.email || '',
-                buyer_name: user.user_metadata?.full_name || '바이닛고객',
-                m_redirect_url: `${window.location.origin}/${locale}/marketplace/${pattern.id}?directPaymentId=${orderId}`, // mobile fallback
-                custom_data: {
-                    user_id: user.id,
-                    pattern_id: pattern.id,
-                    credits: 0 // direct purchase indicates no credit addition
-                },
-                notice_url: `${window.location.origin}/api/payments/webhook`
-            };
-
-            if (selectedMethod === 'kakaopay') {
-                paymentParams.pg = 'kakaopay.TC0ONETIME';
-            } else {
-                paymentParams.channelKey = 'channel-key-ccac91e6-13a8-485b-8871-c1e819b6868c';
-            }
-
-            IMP.request_pay(paymentParams, async (response: any) => {
-                if (response.success) {
-                    const paymentId = response.imp_uid;
-                    const verifyRes = await verifyAndRecordDirectPurchase(paymentId, priceKrw, pattern.id);
-
-                    if (verifyRes.success) {
-                        alert(isKo ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
-                        onSuccess();
-                        onClose();
-                    } else {
-                        alert(verifyRes.error || (isKo ? '결제 검증에 실패했습니다.' : 'Payment verification failed.'));
-                    }
-                } else {
-                    alert(response.error_msg || 'Payment cancelled');
-                }
-                setIsProcessing(false);
+            const res = await createOrder({
+                patternId: pattern.id,
+                amount: priceCredits
             });
 
+            if (res.error) {
+                alert(res.error);
+            } else {
+                alert(isKo ? '도안 구매가 완료되었습니다!' : 'Pattern purchased successfully!');
+                onSuccess();
+                onClose();
+            }
         } catch (err: any) {
-            console.error('Payment Direct Flow Error:', err);
-            
-            // Simulation Sandbox backup
-            console.log('Falling back to direct sandbox simulation...');
-            setTimeout(async () => {
-                const mockPaymentId = `mock-direct-${Date.now()}`;
-                const verifyRes = await verifyAndRecordDirectPurchase(mockPaymentId, priceKrw, pattern.id);
-                
-                if (verifyRes.success) {
-                    alert(isKo ? '[시뮬레이션] 결제가 성공적으로 승인되었습니다!' : '[Simulation] Payment successfully processed!');
-                    onSuccess();
-                    onClose();
-                } else {
-                    alert(verifyRes.error || 'Verification failed');
-                }
-                setIsProcessing(false);
-            }, 1500);
+            alert(err.message || 'Error occurred');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -196,148 +90,69 @@ export function CheckoutModal({
                         <div className="flex justify-between items-baseline mt-1">
                             <span className="text-xs text-stone-500">{isKo ? '가격' : 'Price'}</span>
                             <div className="text-right">
-                                <p className="text-lg font-black text-stone-900">₩ {priceKrw.toLocaleString()}</p>
-                                <p className="text-[11px] text-stone-400">({priceCredits.toLocaleString()} Credits)</p>
+                                <p className="text-lg font-black text-stone-900">{priceCredits.toLocaleString()} Credits</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Choose Payment Option */}
-                    <div className="space-y-4 mb-6">
-                        {/* Option 1: Credit Pay */}
-                        <label 
-                            className={`block p-4 rounded-2xl border transition-all duration-200 ${
-                                paymentOption === 'credit'
-                                    ? 'border-orange-500 bg-orange-50/20 ring-2 ring-orange-500/10'
-                                    : 'border-stone-200 bg-white hover:border-stone-300'
-                            } ${!canPayWithCredits ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
-                        >
-                            <div className="flex items-start gap-3">
-                                <input 
-                                    type="radio" 
-                                    name="paymentOption" 
-                                    value="credit"
-                                    checked={paymentOption === 'credit'}
-                                    disabled={!canPayWithCredits}
-                                    onChange={() => setPaymentOption('credit')}
-                                    className="w-4.5 h-4.5 mt-0.5 text-orange-500 border-stone-300 focus:ring-orange-500 cursor-pointer"
-                                />
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-baseline">
-                                        <span className="font-extrabold text-sm text-stone-800">{isKo ? '보유 크레딧으로 결제' : 'Pay with Credits'}</span>
-                                        <span className="text-xs font-bold text-emerald-600">
-                                            {currentCredits.toLocaleString()} Credits 보유
-                                        </span>
-                                    </div>
-                                    <div className="text-xs text-stone-500 mt-1 leading-normal">
-                                        {isKo 
-                                            ? `보유하신 크레딧에서 ${priceCredits.toLocaleString()} 크레딧이 즉시 차감됩니다.`
-                                            : `${priceCredits.toLocaleString()} credits will be deducted from your balance.`}
-                                    </div>
-                                    {!canPayWithCredits && (
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <span className="inline-block text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">
-                                                ⚠️ {isKo ? '크레딧 부족' : 'Insufficient Credits'}
-                                            </span>
-                                            <a 
-                                                href={`/${locale}/payments`}
-                                                className="text-xs font-bold text-orange-500 underline hover:text-orange-600 transition-colors"
-                                            >
-                                                {isKo ? '크레딧 충전하기 ➔' : 'Charge Credits ➔'}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </label>
-
-                        {/* Option 2: Direct PortOne Pay */}
-                        <label 
-                            className={`block p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                                paymentOption === 'direct'
-                                    ? 'border-orange-500 bg-orange-50/20 ring-2 ring-orange-500/10'
-                                    : 'border-stone-200 bg-white hover:border-stone-300'
-                            }`}
-                        >
-                            <div className="flex items-start gap-3">
-                                <input 
-                                    type="radio" 
-                                    name="paymentOption" 
-                                    value="direct"
-                                    checked={paymentOption === 'direct'}
-                                    onChange={() => setPaymentOption('direct')}
-                                    className="w-4.5 h-4.5 mt-0.5 text-orange-500 border-stone-300 focus:ring-orange-500 cursor-pointer"
-                                />
-                                <div className="flex-1">
-                                    <span className="font-extrabold text-sm text-stone-800">{isKo ? '실시간 직접 결제하기' : 'Pay Directly'}</span>
-                                    <p className="text-xs text-stone-500 mt-1 leading-normal">
-                                        {isKo 
-                                            ? '크레딧 충전 과정 없이 카드나 간편결제로 바로 결제하여 도안을 구매합니다.'
-                                            : 'Pay directly using credit card or KakaoPay without charging credits.'}
-                                    </p>
-
-                                    {/* Direct payment methods selection (visible only when direct is active) */}
-                                    {paymentOption === 'direct' && (
-                                        <div className="grid grid-cols-2 gap-2 mt-3.5 animate-in slide-in-from-top-1 duration-150">
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedMethod('card')}
-                                                className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all ${
-                                                    selectedMethod === 'card'
-                                                        ? 'border-stone-800 bg-stone-900 text-white'
-                                                        : 'border-stone-200 bg-white text-stone-600 hover:border-stone-300'
-                                                }`}
-                                            >
-                                                <CreditCard size={14} />
-                                                {isKo ? '신용카드' : 'Credit Card'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedMethod('kakaopay')}
-                                                className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all ${
-                                                    selectedMethod === 'kakaopay'
-                                                        ? 'border-yellow-400 bg-yellow-400 text-stone-900'
-                                                        : 'border-stone-200 bg-white text-stone-600 hover:border-stone-300'
-                                                }`}
-                                            >
-                                                <span className="text-sm leading-none">💛</span>
-                                                {isKo ? '카카오페이' : 'KakaoPay'}
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </label>
+                    {/* Credit Status Summary */}
+                    <div className="bg-stone-50 rounded-2xl p-5 mb-6 border border-stone-150 space-y-3">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-stone-500">{isKo ? '내 보유 크레딧' : 'Your Credits'}</span>
+                            <span className="font-bold text-stone-800">{currentCredits.toLocaleString()} Credits</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm border-t border-stone-200/60 pt-3">
+                            <span className="text-stone-500">{isKo ? '차감 예정 크레딧' : 'Required Credits'}</span>
+                            <span className="font-extrabold text-orange-600">-{priceCredits.toLocaleString()} Credits</span>
+                        </div>
                     </div>
 
+                    {!canPayWithCredits && (
+                        <div className="mb-6 p-4 bg-rose-50 rounded-2xl border border-rose-100 flex flex-col items-center text-center gap-2">
+                            <p className="text-xs font-semibold text-rose-600">
+                                ⚠️ {isKo ? '보유하신 크레딧이 부족합니다.' : 'Insufficient credit balance.'}
+                            </p>
+                            <p className="text-[11px] text-stone-500">
+                                {isKo ? '안전한 거래를 위해 먼저 크레딧을 충전해 주세요.' : 'Please charge credits to proceed with the download.'}
+                            </p>
+                        </div>
+                    )}
+
                     {/* CTA Button */}
-                    <button
-                        onClick={handleCheckout}
-                        disabled={isProcessing}
-                        className={`w-full py-4 rounded-2xl text-white font-extrabold transition-all text-base flex items-center justify-center gap-2 shadow-md ${
-                            isProcessing
-                                ? 'bg-stone-300 cursor-not-allowed'
-                                : 'bg-stone-950 hover:bg-stone-850 active:scale-[0.98]'
-                        }`}
-                    >
-                        {isProcessing ? (
-                            <>
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                                {isKo ? '결제 진행 중...' : 'Processing...'}
-                            </>
-                        ) : (
-                            <>
-                                <ShieldCheck size={18} />
-                                {paymentOption === 'credit' 
-                                    ? (isKo ? `${priceCredits.toLocaleString()} 크레딧 결제하기` : `Pay ${priceCredits.toLocaleString()} Credits`)
-                                    : (isKo ? `₩ ${priceKrw.toLocaleString()} 안전 결제하기` : `Pay ₩ ${priceKrw.toLocaleString()}`)
-                                }
-                            </>
-                        )}
-                    </button>
+                    {canPayWithCredits ? (
+                        <button
+                            onClick={handleCheckout}
+                            disabled={isProcessing}
+                            className={`w-full py-4 rounded-2xl text-white font-extrabold transition-all text-base flex items-center justify-center gap-2 shadow-md ${
+                                isProcessing
+                                    ? 'bg-stone-300 cursor-not-allowed'
+                                    : 'bg-stone-950 hover:bg-stone-850 active:scale-[0.98]'
+                            }`}
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                                    {isKo ? '결제 진행 중...' : 'Processing...'}
+                                </>
+                            ) : (
+                                <>
+                                    <ShieldCheck size={18} />
+                                    {isKo ? `${priceCredits.toLocaleString()} 크레딧 결제하기` : `Pay ${priceCredits.toLocaleString()} Credits`}
+                                </>
+                            )}
+                        </button>
+                    ) : (
+                        <a
+                            href={`/${locale}/payments`}
+                            className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold transition-all text-base flex items-center justify-center gap-2 shadow-md text-center"
+                        >
+                            <span>💳</span>
+                            {isKo ? '크레딧 충전하러 가기' : 'Go to Charge Credits'}
+                        </a>
+                    )}
 
                     <p className="text-center text-[10px] text-stone-400 mt-4">
-                        🔒 PortOne 보안 토큰 결제 및 암호화 거래 시스템이 적용됩니다.
+                        🔒 안전하고 빠른 크레딧 거래 시스템이 적용됩니다.
                     </p>
                 </div>
             </div>
