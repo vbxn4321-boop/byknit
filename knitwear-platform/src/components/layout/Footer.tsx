@@ -76,7 +76,6 @@ export function Footer() {
                             <h4 className="font-bold text-brown-800 text-sm mb-2">{tFooter('businessInfo.companyName')}</h4>
                             <p>{tFooter('businessInfo.representative')} | {tFooter('businessInfo.businessLicense')} | {tFooter('businessInfo.telecommunicationsLicense')}</p>
                             <p>{tFooter('businessInfo.address')}</p>
-                            <p>{tFooter('businessInfo.servicePeriod')}</p>
                             <p>{tFooter('businessInfo.cpo')}</p>
                             <p>{tFooter('businessInfo.contact')} | {tFooter('businessInfo.hosting')}</p>
                             <div className="pt-1">
@@ -93,6 +92,10 @@ export function Footer() {
 
                         <p className="pt-4 border-t border-tan-200/50 max-w-4xl text-stone-400">
                             {tFooter('businessInfo.disclaimer')}
+                        </p>
+
+                        <p className="pt-2 text-stone-500 font-medium max-w-4xl">
+                            {tFooter('businessInfo.servicePeriod')}
                         </p>
                     </div>
 
