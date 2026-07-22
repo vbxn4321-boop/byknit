@@ -11,19 +11,6 @@ export default function BlogPage() {
 
     const posts = [
         {
-            id: 'gauge-size-adjustment-guide',
-            slug: 'gauge-size-adjustment-guide',
-            category: 'tip',
-            title: locale === 'ko'
-                ? '게이지가 도안과 다를 때! S/M/L 도안 내 몸 핏에 딱 맞추는 콧수·단수 보정법'
-                : 'What If Your Gauge Is Different? How to Adjust Stitches & Rows for S/M/L Patterns',
-            excerpt: locale === 'ko'
-                ? '원하는 옷 도안을 찾았는데 내 게이지와 다를 때 당황하지 마세요! 내 1cm당 콧수와 타겟 사이즈를 활용해 망치지 않고 맞춤 핏으로 콧수와 단수를 보정하는 3단계 실전 가이드를 소개합니다.'
-                : 'Found a pattern you love but your gauge is different? Do not worry! Here is a 3-step practical guide to recalculate stitches and rows to fit your exact body size.',
-            date: '2026. 07. 22',
-            imageUrl: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=800&auto=format&fit=crop'
-        },
-        {
             id: 'taiyaki-keyring-pouch',
             slug: 'taiyaki-keyring-pouch',
             category: 'tutorial',
