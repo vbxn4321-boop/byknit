@@ -357,7 +357,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
     const titleStr = typeof pattern.title === 'string' ? pattern.title : (locale === 'ko' ? (pattern.title?.ko || pattern.title?.en) : (pattern.title?.en || pattern.title?.ko));
     const rawDescStr = typeof pattern.description === 'string' ? pattern.description : (locale === 'ko' ? (pattern.description?.ko || pattern.description?.en) : (pattern.description?.en || pattern.description?.ko));
-    const cleanDescription = (str: string) => {
+    const cleanDescription = (str?: string) => {
         if (!str) return '';
         return str
             .replace(/<\/p>/gi, '\n')
