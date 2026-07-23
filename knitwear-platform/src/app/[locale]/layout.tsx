@@ -100,8 +100,8 @@ export default async function LocaleLayout({
         <html lang={locale} suppressHydrationWarning>
             <head>
                 {/* Favicon & Apple Touch Icon (Cache Busted) */}
-                <link rel="icon" href="/icon?v=2" type="image/png" sizes="32x32" />
-                <link rel="apple-touch-icon" href="/apple-icon?v=2" sizes="180x180" />
+                <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+                <link rel="apple-touch-icon" href="/apple-icon?v=3" sizes="180x180" />
 
                 {/* Naver Search Advisor Verification */}
                 <meta name="naver-site-verification" content="df5f7db3144b5b1714440e6b00c5d46336608816" />
