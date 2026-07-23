@@ -17,9 +17,12 @@ export default async function middleware(request: NextRequest) {
         pathname === '/robots.txt' || 
         pathname === '/sitemap.xml' || 
         pathname === '/favicon.ico' ||
+        pathname === '/favicon.svg' ||
         pathname.startsWith('/icon') ||
         pathname.startsWith('/apple-icon') ||
-        pathname.startsWith('/naver')
+        pathname.startsWith('/naver') ||
+        pathname.endsWith('.svg') ||
+        pathname.endsWith('.png')
     ) {
         return NextResponse.next();
     }
