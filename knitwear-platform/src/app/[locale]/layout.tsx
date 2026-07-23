@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         title: t('title'),
         description: t('description'),
         keywords: [
-            "knitting", "patterns", "crochet", "yarn", "DIY", "crafts", "byknit",
+            "바이니트", "바이니트 도안", "byknit", "byKnit", "knitting", "patterns", "crochet", "yarn", "DIY", "crafts",
             "knitting chart maker", "crochet pattern generator", "photo to knitting pattern", "colorwork chart editor", "free knitting patterns",
             "뜨개질", "도안", "코바늘", "대바늘", "뜨개질 도안", "코바늘 도안", "대바늘 도안", "도안 변환기", "뜨개 도안 에디터", "사진 뜨개질", "무료 도안", "배색 차트", "뜨개질 차트", "손뜨개"
         ],
@@ -36,13 +36,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             title: t('title'),
             description: t('description'),
             url: 'https://by-knit.com',
-            siteName: 'byKnit',
+            siteName: '바이니트 (byKnit)',
             images: [
                 {
                     url: 'https://by-knit.com/og-image.png',
                     width: 1200,
                     height: 630,
-                    alt: 'byKnit Open Graph Image',
+                    alt: '바이니트 byKnit Open Graph Image',
                 },
             ],
             locale: locale,
@@ -85,11 +85,26 @@ export default async function LocaleLayout({
         ? process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID_KR
         : process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID_EN;
 
+    // JSON-LD Structured Data for Search Engine Brand Recognition
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'name': '바이니트',
+        'alternateName': ['byKnit', 'byknit', '바이니트 도안'],
+        'url': 'https://by-knit.com',
+        'description': '바이니트(byKnit) - 사진을 뜨개질 차트로 변환하는 스마트 뜨개 도안 플랫폼'
+    };
+
     return (
         <html lang={locale} suppressHydrationWarning>
             <head>
                 {/* Naver Search Advisor Verification */}
                 <meta name="naver-site-verification" content="df5f7db3144b5b1714440e6b00c5d46336608816" />
+                {/* JSON-LD Brand Data for Google & Naver */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
                 {/* PortOne SDK for KakaoPay */}
                 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
                 {/* Google Consent Mode v2 Initialization */}
