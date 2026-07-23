@@ -12,10 +12,13 @@ const handleI18n = createMiddleware({
 export default async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // 💡 Naver site verification, robots.txt, sitemap.xml should bypass I18n locale redirection
+    // 💡 Naver site verification, robots.txt, sitemap.xml, favicon, icons should bypass I18n locale redirection
     if (
         pathname === '/robots.txt' || 
         pathname === '/sitemap.xml' || 
+        pathname === '/favicon.ico' ||
+        pathname.startsWith('/icon') ||
+        pathname.startsWith('/apple-icon') ||
         pathname.startsWith('/naver')
     ) {
         return NextResponse.next();
@@ -34,10 +37,9 @@ export const config = {
          * Match all request paths except:
          * - _next/static (static files)
          * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
+         * - favicon.ico, icon, apple-icon
          * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-         * Feel free to modify this pattern to include more paths.
          */
-        '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
