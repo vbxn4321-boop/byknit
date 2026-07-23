@@ -11,6 +11,7 @@ import { createClient } from '@/utils/supabase/server';
 import { GoogleAdSenseScript } from '@/components/ads/GoogleAdSense';
 import { CookieBanner } from '@/components/privacy/CookieBanner';
 import { CreditPopupManager } from '@/components/layout/CreditPopupManager';
+import { Analytics } from '@vercel/analytics/react';
 
 const nunito = Nunito({
     variable: "--font-nunito",
@@ -139,6 +140,7 @@ export default async function LocaleLayout({
                         <Footer />
                         <CookieBanner />
                         <CreditPopupManager isAuth={!!user} />
+                        <Analytics />
                     </div>
                 </NextIntlClientProvider>
             </body>
