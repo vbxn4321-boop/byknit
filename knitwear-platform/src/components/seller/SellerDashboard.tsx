@@ -29,13 +29,13 @@ export function SellerDashboard({ setActiveTab, locale }: SellerDashboardProps) 
     ];
 
     const salesHistory = [
-        { day: '월 (Mon)', amount: 245000, height: 'h-24' },
-        { day: '화 (Tue)', amount: 398000, height: 'h-40' },
-        { day: '수 (Wed)', amount: 189000, height: 'h-16' },
-        { day: '목 (Thu)', amount: 560000, height: 'h-52' },
-        { day: '금 (Fri)', amount: 480000, height: 'h-44' },
-        { day: '토 (Sat)', amount: 620000, height: 'h-56' },
-        { day: '일 (Sun)', amount: 750000, height: 'h-64' },
+        { date: '07/18', day: locale === 'ko' ? '월' : 'Mon', amount: 245000 },
+        { date: '07/19', day: locale === 'ko' ? '화' : 'Tue', amount: 398000 },
+        { date: '07/20', day: locale === 'ko' ? '수' : 'Wed', amount: 587000 },
+        { date: '07/21', day: locale === 'ko' ? '목' : 'Thu', amount: 1147000 },
+        { date: '07/22', day: locale === 'ko' ? '금' : 'Fri', amount: 1627000 },
+        { date: '07/23', day: locale === 'ko' ? '토' : 'Sat', amount: 2247000 },
+        { date: '07/24', day: locale === 'ko' ? '일' : 'Sun', amount: 3242000 },
     ];
 
     const recentInquiries = [
@@ -101,24 +101,86 @@ export function SellerDashboard({ setActiveTab, locale }: SellerDashboardProps) 
                         <span className="text-stone-400 text-xs font-bold ml-2">vs {locale === 'ko' ? '지난주 동일 대비' : 'vs last week'}</span>
                     </div>
 
-                    {/* Simple Custom Bar Chart */}
+                    {/* Premium SVG Line Chart */}
                     <div className="pt-6">
-                        <div className="flex items-end justify-between gap-4 h-64 border-b border-stone-100 pb-2">
-                            {salesHistory.map((item, index) => (
-                                <div key={index} className="flex-1 flex flex-col items-center gap-3 group cursor-pointer">
-                                    <div className="w-full relative">
-                                        {/* Hover Amount Tooltip */}
-                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-stone-800 text-white text-[10px] font-bold px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity mb-2 pointer-events-none whitespace-nowrap">
-                                            ₩{(item.amount / 1000).toFixed(0)}k
-                                        </div>
-                                        {/* Bar */}
-                                        <div className={`w-full ${item.height} bg-stone-100 group-hover:bg-[#8FBC8F] rounded-t-xl transition-all duration-300 shadow-soft`} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-stone-400 group-hover:text-stone-700 transition-colors">
-                                        {item.day.split(' ')[0]}
-                                    </span>
-                                </div>
-                            ))}
+                        <div className="w-full bg-stone-50/50 p-4 rounded-3xl border border-stone-100">
+                            {(() => {
+                                const points = salesHistory.map((item, i) => {
+                                    const x = 50 + (i * 500) / 6;
+                                    const y = 205 - (item.amount / 3500000) * 160;
+                                    return { x, y, ...item };
+                                });
+
+                                const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const areaData = `${pathData} L ${points[points.length - 1].x} 205 L ${points[0].x} 205 Z`;
+
+                                return (
+                                    <svg className="w-full h-auto" viewBox="0 0 600 250">
+                                        <defs>
+                                            <linearGradient id="chartAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#8FBC8F" stopOpacity="0.4" />
+                                                <stop offset="100%" stopColor="#8FBC8F" stopOpacity="0.0" />
+                                            </linearGradient>
+                                        </defs>
+
+                                        {/* Y-axis Grid Lines */}
+                                        <line x1="50" y1="45" x2="550" y2="45" stroke="#EAE9E6" strokeDasharray="4 4" />
+                                        <line x1="50" y1="125" x2="550" y2="125" stroke="#EAE9E6" strokeDasharray="4 4" />
+                                        <line x1="50" y1="205" x2="550" y2="205" stroke="#EAE9E6" strokeWidth="1" />
+
+                                        {/* Area under the line */}
+                                        <path d={areaData} fill="url(#chartAreaGrad)" />
+
+                                        {/* Main Chart Line */}
+                                        <path 
+                                            d={pathData} 
+                                            fill="none" 
+                                            stroke="#556B2F" 
+                                            strokeWidth="3" 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                        />
+
+                                        {/* Data points & Labels */}
+                                        {points.map((p, idx) => {
+                                            const label = locale === 'ko' 
+                                                ? `₩${(p.amount / 10000).toFixed(1)}만` 
+                                                : `₩${(p.amount / 1000).toFixed(0)}k`;
+
+                                            return (
+                                                <g key={idx}>
+                                                    {/* Data label floating above circle */}
+                                                    <text 
+                                                        x={p.x} 
+                                                        y={p.y - 12} 
+                                                        textAnchor="middle" 
+                                                        stroke="#ffffff" 
+                                                        strokeWidth="4" 
+                                                        paintOrder="stroke" 
+                                                        className="text-[10px] font-black fill-[#556B2F]"
+                                                    >
+                                                        {label}
+                                                    </text>
+
+                                                    {/* Outer white ring & inner circle */}
+                                                    <circle cx={p.x} cy={p.y} r={6} fill="#ffffff" className="shadow-soft" />
+                                                    <circle cx={p.x} cy={p.y} r={4} fill="#556B2F" />
+
+                                                    {/* X-axis date labels at the bottom */}
+                                                    <text 
+                                                        x={p.x} 
+                                                        y={225} 
+                                                        textAnchor="middle" 
+                                                        className="text-[10px] font-bold fill-stone-400"
+                                                    >
+                                                        {p.date}({p.day})
+                                                    </text>
+                                                </g>
+                                            );
+                                        })}
+                                    </svg>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
