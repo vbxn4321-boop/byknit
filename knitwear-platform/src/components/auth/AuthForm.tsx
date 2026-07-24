@@ -105,11 +105,11 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
 
     const handleGoogleLogin = async () => {
         const supabase = createClient();
-        const redirectBase = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+        const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || '');
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${redirectBase}/${locale}/auth/callback`,
+                redirectTo: `${origin}/${locale}/auth/callback`,
             },
         });
     };
