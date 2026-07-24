@@ -1,6 +1,6 @@
-
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 
 export async function GET(
     request: Request,
@@ -13,7 +13,34 @@ export async function GET(
     const { locale } = await params
 
     if (code) {
-        const supabase = await createClient()
+        const cookieStore = await cookies()
+        
+        // Construct fallback response early so we can write cookies to it
+        const redirectUrl = new URL(`/${locale}`, request.url)
+        const response = NextResponse.redirect(redirectUrl)
+
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    getAll() {
+                        return cookieStore.getAll()
+                    },
+                    setAll(cookiesToSet) {
+                        try {
+                            cookiesToSet.forEach(({ name, value, options }) => {
+                                cookieStore.set(name, value, options)
+                                response.cookies.set(name, value, options)
+                            })
+                        } catch (e) {
+                            // ignore set error
+                        }
+                    },
+                },
+            }
+        )
+
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
@@ -42,13 +69,13 @@ export async function GET(
                 ? `/${locale}/onboarding` 
                 : `/${locale}${cleanNext === '/' ? '' : cleanNext}`
 
-            if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${redirectPath}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${redirectPath}`)
-            } else {
-                return NextResponse.redirect(`${origin}${redirectPath}`)
+            let targetUrl = `${origin}${redirectPath}`
+            if (!isLocalEnv && forwardedHost) {
+                targetUrl = `https://${forwardedHost}${redirectPath}`
             }
+
+            response.headers.set('Location', targetUrl)
+            return response
         }
     }
 
