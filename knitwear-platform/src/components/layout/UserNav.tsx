@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
 import { signout } from '@/app/actions/auth';
-import { LogOut, User as UserIcon, LayoutDashboard, CreditCard, Palette, PenTool, ShoppingBag, Coins, Sparkles } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, CreditCard, Palette, PenTool, ShoppingBag, Coins, Sparkles, Store } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
@@ -167,6 +167,13 @@ export function UserNav({ user }: { user: User | null }) {
                         >
                             <ShoppingBag size={18} />
                             <span>{tNav('myMarketplace')}</span>
+                        </button>
+                        <button
+                            onClick={() => { setIsOpen(false); router.push(`/${locale}/seller`); }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-stone-600 hover:bg-rose-50 hover:text-rose-600 rounded-2xl transition-all"
+                        >
+                            <Store size={18} className="text-stone-500" />
+                            <span>{locale === 'ko' ? '판매자 콘솔 (실물)' : 'Seller Console'}</span>
                         </button>
                         <button
                             onClick={() => {
