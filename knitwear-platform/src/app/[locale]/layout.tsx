@@ -8,7 +8,6 @@ import { locales, type Locale } from '@/i18n/request';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { createClient } from '@/utils/supabase/server';
-import { GoogleAdSenseScript } from '@/components/ads/GoogleAdSense';
 import { CookieBanner } from '@/components/privacy/CookieBanner';
 import { CreditPopupManager } from '@/components/layout/CreditPopupManager';
 import { Analytics } from '@vercel/analytics/next';
@@ -86,6 +85,8 @@ export default async function LocaleLayout({
     const adClientKey = locale === 'ko'
         ? process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID_KR
         : process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID_EN;
+    // 환경변수가 비어 있어도 AdSense 스크립트가 빠지지 않도록 기본 게시자 ID 사용
+    const resolvedAdClientKey = adClientKey || 'ca-pub-4367705210889906';
 
     // JSON-LD Structured Data for Search Engine Brand Recognition
     const jsonLd = {
@@ -111,6 +112,12 @@ export default async function LocaleLayout({
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
+                {/* Google AdSense (사이트 소유권 확인을 위해 서버 렌더된 head에 직접 삽입) */}
+                <script
+                    async
+                    src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${resolvedAdClientKey}`}
+                    crossOrigin="anonymous"
+                />
                 {/* PortOne SDK for KakaoPay */}
                 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
                 {/* Google Consent Mode v2 Initialization */}
@@ -134,8 +141,6 @@ export default async function LocaleLayout({
                 className={`${nunito.variable} font-sans antialiased bg-cream-50 text-brown-700 min-h-screen`}
                 suppressHydrationWarning={true}
             >
-                {/* Dynamically load the correct AdSense script */}
-                <GoogleAdSenseScript pId={adClientKey || ''} />
                 <NextIntlClientProvider messages={messages}>
                     <div className="flex flex-col min-h-screen">
                         <Header locale={locale as Locale} user={user} />
@@ -146,7 +151,7 @@ export default async function LocaleLayout({
                         <CookieBanner />
                         <CreditPopupManager isAuth={!!user} />
                         <Analytics />
-                        <ActivityTracker />
+                        <ActivityTracker serverUserId={user?.id ?? null} />
                     </div>
                 </NextIntlClientProvider>
             </body>

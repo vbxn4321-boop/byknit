@@ -16,6 +16,7 @@ export default async function middleware(request: NextRequest) {
     if (
         pathname === '/robots.txt' || 
         pathname === '/sitemap.xml' || 
+        pathname === '/ads.txt' ||
         pathname === '/favicon.ico' ||
         pathname === '/favicon.svg' ||
         pathname.startsWith('/icon') ||
@@ -43,6 +44,6 @@ export const config = {
          * - favicon.ico, icon, apple-icon
          * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
          */
-        '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|ads.txt|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
