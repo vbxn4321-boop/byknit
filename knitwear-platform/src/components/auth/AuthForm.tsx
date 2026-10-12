@@ -135,7 +135,9 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
                         if (locale === 'ko') {
                             if (currentError.includes('Email not confirmed')) return '이메일 인증이 완료되지 않았습니다. 메일을 확인해주세요.';
                             if (currentError.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
-                            if (currentError.includes('User already registered')) return '이미 가입된 사용자입니다.';
+                            if (currentError.includes('already been registered') || currentError.includes('User already registered') || currentError.includes('already registered')) {
+                                return '이미 가입된 이메일입니다. 기존 계정으로 로그인하시거나 구글 간편 로그인을 이용해주세요.';
+                            }
                         }
                         return currentError;
                     })()}
@@ -221,6 +223,7 @@ export function AuthForm({ type, action, message, error }: AuthFormProps) {
             </div>
 
             <form action={handleFormAction} className="space-y-8">
+                <input type="hidden" name="locale" value={locale} />
                 <div>
                     <label className="block text-sm font-bold text-stone-700 mb-2">Email</label>
                     <input

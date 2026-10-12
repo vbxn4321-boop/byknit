@@ -10,8 +10,10 @@ export async function login(formData: FormData) {
 
     // manual data extraction as we might call this from a handler
     const data = Object.fromEntries(formData)
-    const email = data.email as string
-    const password = (data.password as string).normalize('NFC')
+    const rawEmail = (data.email as string) || ''
+    const email = rawEmail.trim().toLowerCase()
+    const password = ((data.password as string) || '').normalize('NFC')
+    const locale = (data.locale as string) || 'ko'
 
     const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -19,20 +21,21 @@ export async function login(formData: FormData) {
     })
 
     if (error) {
-        redirect('/login?error=' + encodeURIComponent(error.message))
+        redirect(`/${locale}/login?error=` + encodeURIComponent(error.message))
     }
 
-    revalidatePath('/', 'layout')
-    redirect('/')
+    revalidatePath(`/${locale}`, 'layout')
+    redirect(`/${locale}`)
 }
 
 export async function sendSignupOtp(formData: FormData) {
     const data = Object.fromEntries(formData);
-    const email = data.email as string;
+    const rawEmail = (data.email as string) || '';
+    const email = rawEmail.trim().toLowerCase();
     
-    const username = data.username as string;
-    const passwordConfirm = data.passwordConfirm as string;
-    const password = data.password as string;
+    const username = (data.username as string)?.trim();
+    const passwordConfirm = (data.passwordConfirm as string)?.normalize('NFC');
+    const password = (data.password as string)?.normalize('NFC');
 
     // Validate Username (Korean, English, Numbers allowed)
     const usernameRegex = /^[A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ._-]+$/;
@@ -55,11 +58,21 @@ export async function sendSignupOtp(formData: FormData) {
     const { createAdminClient } = await import('@/utils/supabase/server');
     const adminClient = await createAdminClient();
 
-    // Check if user already exists
-    const { data: existingUser } = await adminClient.auth.admin.listUsers();
-    const userExists = existingUser.users.find(u => u.email === email);
+    // Check if user already exists (both profiles table and auth.users)
+    const { data: existingProfile } = await adminClient
+        .from('profiles')
+        .select('id')
+        .ilike('email', email)
+        .maybeSingle();
+
+    if (existingProfile) {
+        return { error: '이미 가입된 이메일입니다. 로그인하거나 구글 간편 로그인을 이용해주세요.' };
+    }
+
+    const { data: existingUser } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    const userExists = existingUser?.users?.find(u => u.email?.toLowerCase() === email);
     if (userExists) {
-        return { error: '이미 가입된 이메일입니다.' };
+        return { error: '이미 가입된 이메일입니다. 로그인하거나 구글 간편 로그인을 이용해주세요.' };
     }
 
     // Generate 6-digit OTP
@@ -133,10 +146,11 @@ export async function sendSignupOtp(formData: FormData) {
 
 export async function verifySignupOtp(formData: FormData) {
     const data = Object.fromEntries(formData);
-    const email = data.email as string;
+    const rawEmail = (data.email as string) || '';
+    const email = rawEmail.trim().toLowerCase();
     const otpCode = data.otp_code as string;
-    const password = (data.password as string).normalize('NFC');
-    const username = data.username as string;
+    const password = ((data.password as string) || '').normalize('NFC');
+    const username = (data.username as string)?.trim();
     const privacyAgreed = data.privacy_policy_agreed === 'on';
     const adAgreement = data.ad_agreement === 'on';
     const marketingConsent = data.marketing_consent === 'on';
@@ -180,6 +194,9 @@ export async function verifySignupOtp(formData: FormData) {
     });
 
     if (createError) {
+        if (createError.message.includes('already been registered') || createError.message.includes('already registered')) {
+            return { error: '이미 가입된 이메일입니다. 로그인하시거나 구글 간편 로그인을 이용해주세요.' };
+        }
         return { error: '회원 생성 중 오류가 발생했습니다: ' + createError.message };
     }
 
