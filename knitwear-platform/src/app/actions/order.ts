@@ -30,6 +30,16 @@ export async function createOrder(data: {
         return { error: '유료 도안은 결제를 통해 구매해야 합니다.' };
     }
 
+    // 이미 받은 무료 도안이면 중복 주문을 만들지 않는다 (재다운로드 시 기록이 늘어나는 것 방지)
+    const { data: existing } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('pattern_id', data.patternId)
+        .eq('status', 'paid')
+        .limit(1);
+    if (existing && existing.length > 0) return { success: true, existing: true };
+
     // 2. Insert Order
     const { data: order, error } = await supabase.from('orders').insert({
         user_id: user.id,

@@ -4,6 +4,7 @@ import { Pattern } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Heart } from 'lucide-react';
+import { getPriceKrw, isFreePattern } from '@/lib/pricing';
 
 interface ProductRecommendationRowProps {
     title: string;
@@ -56,7 +57,7 @@ export function ProductRecommendationRow({ title, products, locale }: ProductRec
                             by {product.designer_id ? 'Designer' : 'Unknown'}
                         </p>
                         <p className="font-bold text-sm text-brown-900 mt-1">
-                            {product.is_free ? (locale === 'ko' ? '무료' : 'Free') : `₩${Number(product.price_krw ?? Math.round((product.price_usd || 0) * 1450)).toLocaleString()}`}
+                            {isFreePattern(product) ? (locale === 'ko' ? '무료' : 'Free') : `₩${getPriceKrw(product).toLocaleString()}`}
                         </p>
                     </Link>
                 ))}

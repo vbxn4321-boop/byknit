@@ -13,6 +13,7 @@ import { getDesignerProfile } from '@/app/actions/social';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { DUMMY_PATTERNS } from '@/data/dummyData';
+import { getPriceKrw, isFreePattern } from '@/lib/pricing';
 
 interface MarketplaceClientProps {
     locale: string;
@@ -112,9 +113,6 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                 if (filters.difficulty) {
                     query = query.eq('difficulty', filters.difficulty);
                 }
-                if (filters.freeOnly) {
-                    query = query.eq('price_usd', 0);
-                }
 
                 const { data: dbData, error: dbError } = await query;
                 if (dbError) throw dbError;
@@ -138,6 +136,11 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                         download_count: p.download_count || 0
                     };
                 });
+
+                // 무료 필터는 DB의 is_free/price_usd 대신 공통 가격 기준으로 판정한다
+                if (filters.freeOnly) {
+                    processed = processed.filter((p: any) => isFreePattern(p));
+                }
 
                 const activeYarnWeights = filters.yarnWeight;
                 if (activeYarnWeights && activeYarnWeights.length > 0) {
@@ -660,13 +663,13 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
 
                 {/* Price Tag - Floating Bottom Right */}
                 <div className="absolute bottom-3 right-3 z-10">
-                    {pattern.is_free || Number(pattern.price_krw ?? pattern.price_usd) === 0 ? (
+                    {isFreePattern(pattern) ? (
                         <span className="glass-premium px-3 py-1 rounded-full shadow-sm text-sage-600 font-bold text-xs backdrop-blur-md border border-white/50">
                             {t('free')}
                         </span>
                     ) : (
                         <span className="glass-premium px-3 py-1 rounded-full shadow-sm text-brown-800 font-bold text-xs backdrop-blur-md border border-white/50">
-                            ₩{Number(pattern.price_krw ?? Math.round(pattern.price_usd * 1450)).toLocaleString()}
+                            ₩{getPriceKrw(pattern).toLocaleString()}
                         </span>
                     )}
                 </div>

@@ -48,7 +48,7 @@ export default async function ProfilePage({
         .from('pattern_likes')
         .select(`
             id,
-            patterns:pattern_id (id, title, thumbnail_url, price_usd, difficulty)
+            patterns:pattern_id (id, title, thumbnail_url, price_usd, price_krw, difficulty)
         `)
         .eq('user_id', user.id);
 

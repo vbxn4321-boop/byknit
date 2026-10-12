@@ -107,6 +107,7 @@ export async function createPdfPattern(data: {
             title: translatedMetadata.title,
             description: translatedMetadata.description,
             price_krw: data.priceKrw,
+            is_free: data.priceKrw === 0,
             images: [data.imageUrl, ...(data.additionalImages || [])].filter(Boolean),
             category: data.category,
             difficulty: data.difficulty,

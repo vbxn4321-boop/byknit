@@ -14,6 +14,7 @@ import { DeleteAccountSection } from './DeleteAccountSection';
 import { OrderList } from './OrderList';
 import { CreditHistory } from './CreditHistory';
 import { Link } from '@/i18n/navigation';
+import { getPriceKrw, isFreePattern } from '@/lib/pricing';
 
 interface Props {
     profile: any;
@@ -227,7 +228,7 @@ export function MyPageClient({
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-stone-800 text-xs truncate">{getPatternTitle(pattern.title)}</p>
                                                     <p className="text-[10px] text-stone-400 mt-0.5">
-                                                        {pattern.difficulty} · {(pattern.price_krw ?? pattern.price_usd) === 0 ? '무료' : `₩${Number(pattern.price_krw ?? Math.round(pattern.price_usd * 1450)).toLocaleString()}`}
+                                                        {pattern.difficulty} · {isFreePattern(pattern) ? '무료' : `₩${getPriceKrw(pattern).toLocaleString()}`}
                                                     </p>
                                                 </div>
                                                 <Link

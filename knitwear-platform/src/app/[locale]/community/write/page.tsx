@@ -11,6 +11,7 @@ import {
 import { createPost, getMyPatterns } from '@/app/actions/community';
 import { createClient } from '@/utils/supabase/client';
 import { PollCreator } from '@/components/community/PollCreator';
+import { getPriceKrw, isFreePattern } from '@/lib/pricing';
 
 interface PatternItem {
     id: string;
@@ -19,6 +20,7 @@ interface PatternItem {
     images: string[] | null;
     difficulty: string;
     price_usd: number;
+    price_krw?: number | null;
 }
 
 export default function CommunityWritePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -339,7 +341,7 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
                                                     {getPatternTitle(pattern.title)}
                                                 </p>
                                                 <p className="text-xs text-stone-400 mt-0.5">
-                                                    {pattern.difficulty} · {pattern.price_usd === 0 ? '무료' : `${pattern.price_usd} ${locale === 'ko' ? '크레딧' : 'Credits'}`}
+                                                    {pattern.difficulty} · {isFreePattern(pattern) ? '무료' : `₩${getPriceKrw(pattern).toLocaleString()}`}
                                                 </p>
                                             </div>
                                             <Check className="w-5 h-5 text-stone-200" />

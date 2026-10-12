@@ -196,6 +196,7 @@ export async function publishPattern(projectId: string, metadata: {
             title: translated.title,
             description: translated.description,
             price_krw: metadata.priceKrw,
+            is_free: metadata.priceKrw === 0,
             category: metadata.category,
             difficulty: metadata.difficulty,
             thumbnail_url: metadata.imageUrl || project.original_image_url,

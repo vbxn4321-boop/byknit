@@ -368,7 +368,7 @@ export async function getMyPatterns() {
 
     const { data, error } = await supabase
         .from('patterns')
-        .select('id, title, thumbnail_url, images, difficulty, price_usd')
+        .select('id, title, thumbnail_url, images, difficulty, price_usd, price_krw')
         .eq('designer_id', user.id)
         .order('created_at', { ascending: false });
 

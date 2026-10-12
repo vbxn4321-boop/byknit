@@ -26,6 +26,10 @@ import { ProductImageGallery } from './detail/ProductImageGallery';
 import { ProductInfoTable } from './detail/ProductInfoTable';
 import { ProductRecommendationRow } from './detail/ProductRecommendationRow';
 import { DownloadOptionModal } from './detail/DownloadOptionModal';
+import { GoogleAdUnit } from '@/components/ads/GoogleAdSense';
+
+// AdSense 광고 단위 'download-wait' (무료 도안 다운로드 대기 화면 전용)
+const DOWNLOAD_AD_SLOT_ID = '3744895117';
 import { CheckoutModal } from './detail/CheckoutModal';
 import { useCartStore } from '@/stores/useCartStore';
 
@@ -240,20 +244,9 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
     useEffect(() => {
         if (isWatchingAd && adProgress >= 100) {
             const completeAd = async () => {
-                try {
-                    // Record "purchase" of free item
-                    await createOrder({
-                        patternId,
-                        amount: 0,
-                        paymentKey: `free_${Date.now()}`
-                    });
-
-                    setIsWatchingAd(false);
-                    setIsAdCompleted(true); // Don't auto-download, just show buttons
-                } catch (err) {
-                    console.error('Error recording download:', err);
-                    setIsWatchingAd(false);
-                }
+                // 다운로드 기록은 실제 다운로드 시점(handleActualDownload)에 남긴다
+                setIsWatchingAd(false);
+                setIsAdCompleted(true); // Don't auto-download, just show buttons
             };
             completeAd();
         }
@@ -306,6 +299,14 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         }
 
         setShowDownloadModal(false);
+
+        // 무료 도안은 다운로드 기록(주문 내역)을 남긴다. 실패해도 다운로드는 막지 않고 로그만 남긴다.
+        if (pattern.is_free) {
+            const recorded = await createOrder({ patternId, amount: 0, paymentKey: `free_${Date.now()}` });
+            if (recorded && 'error' in recorded && recorded.error) {
+                console.error('Error recording download:', recorded.error);
+            }
+        }
 
         // Optimistic update
         setPattern(prev => prev ? {
@@ -606,6 +607,13 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                 )}
 
                                 {pattern.is_free && !isAdCompleted ? (
+                                    <>
+                                    <div className="mb-3">
+                                        <p className="text-[10px] font-bold text-stone-400 tracking-wider uppercase mb-1">
+                                            {locale === 'ko' ? '광고' : 'Advertisement'}
+                                        </p>
+                                        <GoogleAdUnit slotId={DOWNLOAD_AD_SLOT_ID} />
+                                    </div>
                                     <button
                                         disabled={isWatchingAd}
                                         onClick={() => {
@@ -626,10 +634,11 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                         ) : (
                                             <>
                                                 <Play size={18} className="fill-white" />
-                                                {locale === 'ko' ? '광고 보고 무료 다운로드' : 'Watch Ad & Download Free'}
+                                                {locale === 'ko' ? '무료 다운로드 시작' : 'Start Free Download'}
                                             </>
                                         )}
                                     </button>
+                                    </>
                                 ) : (
                                     <div className="flex flex-col gap-2">
                                         <button
