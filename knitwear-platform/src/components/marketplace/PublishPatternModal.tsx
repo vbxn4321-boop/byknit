@@ -98,6 +98,13 @@ const YARN_WEIGHTS = [
 
 const YARD_TO_METER = 0.9144;
 
+// Supabase Storage 경로는 ASCII만 허용한다. 한글 등 원본 파일명은 쓰지 않고 확장자만 유지한다.
+function storageFileName(prefix: string, file: File): string {
+    const ext = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5);
+    const rand = Math.random().toString(36).slice(2, 8);
+    return `${prefix}_${Date.now()}_${rand}${ext ? `.${ext}` : ''}`;
+}
+
 export function PublishPatternModal({ isOpen, onClose, locale, initialFile, initialData }: { isOpen: boolean; onClose: () => void; locale: string; initialFile?: File | null; initialData?: any }) {
     const router = useRouter();
     const tPublish = useTranslations('Publish');
@@ -257,7 +264,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         try {
             setLoading(true);
             const supabase = createClient();
-            const filename = `preview_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+            const filename = storageFileName('preview', file);
             const { data, error } = await supabase.storage
                 .from('patterns')
                 .upload(filename, file);
@@ -350,7 +357,7 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             let pdfUrl = '';
             if (file) {
                 const supabase = createClient();
-                const pdfFilename = `pdf_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                const pdfFilename = storageFileName('pdf', file);
                 const { error: uploadError } = await supabase.storage
                     .from('patterns')
                     .upload(pdfFilename, file);
