@@ -84,7 +84,7 @@ export async function getSellerAnalytics(sellerId: string) {
     // Get seller's pattern IDs
     const { data: patterns } = await supabase
         .from('patterns')
-        .select('id')
+        .select('id, view_count')
         .eq('designer_id', sellerId);
 
     const patternIds = patterns?.map(p => p.id) || [];
@@ -101,11 +101,8 @@ export async function getSellerAnalytics(sellerId: string) {
         };
     }
 
-    // Get views count (all time)
-    const { count: viewsCount } = await supabase
-        .from('pattern_views')
-        .select('*', { count: 'exact', head: true })
-        .in('pattern_id', patternIds);
+    // 총 조회수는 카드/상세 페이지와 같은 기준(patterns.view_count 카운터)의 합계를 쓴다
+    const viewsCount = (patterns || []).reduce((sum, p: any) => sum + (p.view_count || 0), 0);
 
     // Get likes count (all time)
     const { count: likesCount } = await supabase

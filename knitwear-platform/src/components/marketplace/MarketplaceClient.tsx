@@ -83,7 +83,23 @@ export function MarketplaceClient({ locale }: MarketplaceClientProps) {
                 console.error('Error code:', error.code);
                 throw error;
             } else {
-                setPatterns(data && data.length > 0 ? data : DUMMY_PATTERNS);
+                if (data && data.length > 0) {
+                    // RPC는 조회수를 pattern_views 행 수로 내려주고 다운로드 수는 주지 않는다.
+                    // 상세 페이지와 같은 기준(patterns.view_count / download_count)으로 덮어쓴다.
+                    const { data: counters } = await supabase
+                        .from('patterns')
+                        .select('id, view_count, download_count')
+                        .in('id', data.map((p: any) => p.id));
+                    const counterMap = new Map((counters || []).map((c: any) => [c.id, c]));
+                    setPatterns(data.map((p: any) => {
+                        const c: any = counterMap.get(p.id);
+                        return c
+                            ? { ...p, view_count: c.view_count || 0, download_count: c.download_count || 0 }
+                            : p;
+                    }));
+                } else {
+                    setPatterns(DUMMY_PATTERNS);
+                }
             }
         } catch (err) {
             console.error('Failed to fetch patterns via RPC, falling back to direct table query:', err);
