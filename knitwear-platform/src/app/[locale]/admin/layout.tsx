@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Package, Store, Lock, AlertTriangle } from 'lucide-react';
+import { Shield, Package, Store, Lock, AlertTriangle, BarChart3 } from 'lucide-react';
 
 export default function AdminLayout({
     children,
@@ -16,6 +16,7 @@ export default function AdminLayout({
     const pathname = usePathname();
     const isSellers = pathname.includes('/admin/sellers');
     const isKyc = pathname.includes('/admin/kyc');
+    const isAnalytics = pathname.includes('/admin/analytics');
 
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [authUser, setAuthUser] = useState<any>(null);
@@ -149,6 +150,17 @@ export default function AdminLayout({
                         <Shield size={18} />
                         <span>바이니트 입점 심사</span>
                     </Link>
+                    <Link 
+                        href={`/${locale}/admin/analytics`}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                            isAnalytics 
+                                ? 'bg-rose-50 text-rose-700' 
+                                : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                        }`}
+                    >
+                        <BarChart3 size={18} />
+                        <span>방문자/회원 활동</span>
+                    </Link>
                 </nav>
                 <div className="p-4 border-t border-stone-200">
                     <div className="bg-stone-50 rounded-xl p-4 text-xs font-bold text-stone-500 text-center">
@@ -171,6 +183,12 @@ export default function AdminLayout({
                         className={`flex-1 py-2 text-center text-xs font-bold rounded-lg ${isKyc ? 'bg-rose-50 text-rose-600' : 'bg-stone-100 text-stone-500'}`}
                     >
                         입점 심사
+                    </Link>
+                    <Link 
+                        href={`/${locale}/admin/analytics`}
+                        className={`flex-1 py-2 text-center text-xs font-bold rounded-lg ${isAnalytics ? 'bg-rose-50 text-rose-600' : 'bg-stone-100 text-stone-500'}`}
+                    >
+                        방문/활동
                     </Link>
                 </div>
             </div>

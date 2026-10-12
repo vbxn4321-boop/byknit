@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://ggtykciehwqiwtjrebmw.supabase.co';
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdndHlrY2llaHdxaXd0anJlYm13Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODczODkxNSwiZXhwIjoyMDk0MzE0OTE1fQ.8yeBxo0TQYvwSoa9WgTsjRVSgK9vb2JvIVtZHJIC1-A';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 async function main() {
     console.log('Querying Supabase profiles...');
