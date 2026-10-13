@@ -93,7 +93,7 @@ export default function AdminAnalyticsPage() {
                         <Stat icon={<Eye size={14} />} label="오늘 방문자" value={data.summary.todayVisitors} sub={`페이지뷰 ${data.summary.todayPageviews}`} />
                         <Stat icon={<Users size={14} />} label={`최근 ${days}일 방문자`} value={data.summary.periodVisitors} sub={`페이지뷰 ${data.summary.periodPageviews} · 로그인 회원 ${data.summary.loggedInVisitors}명`} />
                         <Stat icon={<UserPlus size={14} />} label="전체 회원" value={data.memberStats.total} sub={`오늘 +${data.memberStats.newToday} · 7일 +${data.memberStats.new7d}`} />
-                        <Stat icon={<Activity size={14} />} label="7일 내 접속 회원" value={data.memberStats.active7d} />
+                        <Stat icon={<Activity size={14} />} label="7일 내 접속 회원 (방문 기록 기준)" value={data.memberStats.active7d} />
                     </div>
                     {data.summary.truncated && <p className="text-xs text-amber-600 font-bold">로그가 20,000건을 넘어 최근 20,000건만 집계되었습니다.</p>}
 
@@ -124,7 +124,7 @@ export default function AdminAnalyticsPage() {
                         <h3 className="text-sm font-black text-stone-900 mb-3">최근 가입 회원</h3>
                         <table className="w-full text-xs min-w-[640px]">
                             <thead><tr className="text-left text-stone-400 border-b border-stone-100">
-                                <th className="py-2">이메일</th><th>닉네임</th><th>가입 방식</th><th>가입일</th><th>마지막 로그인</th><th className="text-right">활동수({days}일)</th>
+                                <th className="py-2">이메일</th><th>닉네임</th><th>가입 방식</th><th>가입일</th><th>최근 접속</th><th className="text-right">활동수({days}일)</th>
                             </tr></thead>
                             <tbody>
                                 {data.recentMembers.map(m => (

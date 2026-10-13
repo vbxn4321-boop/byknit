@@ -130,11 +130,23 @@ export async function getAdminAnalytics(filters: ActivityFilters = {}) {
     };
 
     const sevenDaysAgo = Date.now() - 7 * 86400000;
+
+    // 접속 회원은 로그인 시각(last_sign_in_at)이 아니라 실제 방문 로그 기준으로 센다.
+    // 로그인 상태가 유지된 채 재방문하면 last_sign_in_at이 갱신되지 않아 과소 집계되기 때문이다.
+    const { data: memberLogs } = await admin
+        .from('site_activity_logs')
+        .select('user_id, created_at')
+        .not('user_id', 'is', null)
+        .gte('created_at', new Date(sevenDaysAgo).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20000);
+    const lastSeen = new Map<string, string>();
+    for (const l of memberLogs || []) if (l.user_id && !lastSeen.has(l.user_id)) lastSeen.set(l.user_id, l.created_at);
     const memberStats = {
         total: users.length,
         newToday: users.filter(u => kstDay(u.created_at) === todayKey).length,
         new7d: users.filter(u => new Date(u.created_at).getTime() >= sevenDaysAgo).length,
-        active7d: users.filter(u => u.last_sign_in_at && new Date(u.last_sign_in_at).getTime() >= sevenDaysAgo).length,
+        active7d: lastSeen.size,
     };
 
     const recentMembers = [...users]
@@ -146,7 +158,7 @@ export async function getAdminAnalytics(filters: ActivityFilters = {}) {
             name: (profileMap.get(u.id) as any)?.display_name || (profileMap.get(u.id) as any)?.username || '',
             provider: (u.app_metadata?.provider as string) || 'email',
             createdAt: u.created_at,
-            lastSignInAt: u.last_sign_in_at ?? null,
+            lastSignInAt: [u.last_sign_in_at, lastSeen.get(u.id)].filter(Boolean).sort().pop() ?? null,
             activityCount: rows.filter(r => r.user_id === u.id).length,
         }));
 
