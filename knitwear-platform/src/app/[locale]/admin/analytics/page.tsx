@@ -73,10 +73,10 @@ export default function AdminAnalyticsPage() {
                     <p className="text-xs text-stone-400 font-medium mt-1">자체 수집 로그 기준입니다 (관리자 페이지 방문 및 봇은 제외, 한국 시간).</p>
                 </div>
                 <div className="flex gap-1">
-                    {[7, 14, 30, 90].map(d => (
+                    {[1, 7, 14, 30, 90].map(d => (
                         <button key={d} onClick={() => setDays(d)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold ${days === d ? 'bg-stone-900 text-white' : 'bg-white border border-stone-200 text-stone-500'}`}>
-                            {d}일
+                            {d === 1 ? '오늘' : `${d}일`}
                         </button>
                     ))}
                 </div>
@@ -91,7 +91,7 @@ export default function AdminAnalyticsPage() {
                 <div className={pending ? 'opacity-60 transition-opacity space-y-6' : 'space-y-6'}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <Stat icon={<Eye size={14} />} label="오늘 방문자" value={data.summary.todayVisitors} sub={`페이지뷰 ${data.summary.todayPageviews}`} />
-                        <Stat icon={<Users size={14} />} label={`최근 ${days}일 방문자`} value={data.summary.periodVisitors} sub={`페이지뷰 ${data.summary.periodPageviews} · 로그인 회원 ${data.summary.loggedInVisitors}명`} />
+                        <Stat icon={<Users size={14} />} label={days === 1 ? '오늘 방문자 (기간 선택)' : `최근 ${days}일 방문자`} value={data.summary.periodVisitors} sub={`페이지뷰 ${data.summary.periodPageviews} · 로그인 회원 ${data.summary.loggedInVisitors}명`} />
                         <Stat icon={<UserPlus size={14} />} label="전체 회원" value={data.memberStats.total} sub={`오늘 +${data.memberStats.newToday} · 7일 +${data.memberStats.new7d}`} />
                         <Stat icon={<Activity size={14} />} label="7일 내 접속 회원 (방문 기록 기준)" value={data.memberStats.active7d} />
                     </div>

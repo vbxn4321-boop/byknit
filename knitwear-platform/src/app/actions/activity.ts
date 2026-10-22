@@ -70,7 +70,10 @@ export async function getAdminAnalytics(filters: ActivityFilters = {}) {
     const admin = await createAdminClient();
 
     const days = Math.min(Math.max(filters.days ?? 14, 1), 90);
-    const since = new Date(Date.now() - days * 86400000).toISOString();
+    // 기간은 한국 시간 자정 기준으로 맞춘다 (days=1 이면 '오늘 0시부터 지금까지')
+    const DAY_MS = 86400000;
+    const kstMidnightToday = Math.floor((Date.now() + KST_OFFSET_MS) / DAY_MS) * DAY_MS - KST_OFFSET_MS;
+    const since = new Date(kstMidnightToday - (days - 1) * DAY_MS).toISOString();
 
     // 기간 내 로그 (최대 20,000건 집계)
     const { data: logs, error: logsError } = await admin
