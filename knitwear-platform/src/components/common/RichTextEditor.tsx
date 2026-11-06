@@ -86,10 +86,18 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');
                 const table = text ? parseTableJson(text) : null;
-                if (!table) return false;
-                event.preventDefault();
-                editorRef.current?.chain().focus().insertContent(tableToHtml(table)).run();
-                return true;
+                if (table) {
+                    event.preventDefault();
+                    editorRef.current?.chain().focus().insertContent(tableToHtml(table)).run();
+                    return true;
+                }
+                // HTML 소스 코드(<p>, <strong>, <br> ...)를 텍스트로 붙여넣은 경우 서식으로 적용
+                if (text && /^\s*(<!doctype[^>]*>\s*)?<(html|body|p|h[1-6]|div|ul|ol|table|strong|b|em|i|u|br|span|blockquote)[\s>\/]/i.test(text) && /<\/[a-z][a-z0-9]*>|<br\s*\/?>/i.test(text)) {
+                    event.preventDefault();
+                    editorRef.current?.chain().focus().insertContent(text.trim()).run();
+                    return true;
+                }
+                return false;
             },
             attributes: {
                 // Remove fixed padding/height from prose to let container handle it
