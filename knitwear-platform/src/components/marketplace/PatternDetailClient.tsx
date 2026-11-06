@@ -367,7 +367,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
     const cleanDescription = (str?: string) => {
         if (!str) return '';
         return str
-            .replace(/<\/p>/gi, '\n')
+            .replace(/<\/(?:p|h[1-6]|li|blockquote|div|tr)>/gi, '\n')
             .replace(/<br\s*\/?>/gi, '\n')
             .replace(/<[^>]+>/g, '')
             .replace(/\n\s*\n\s*\n/g, '\n\n')

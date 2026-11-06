@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { Pattern, Profile } from '@/types';
 import { splitHtmlIntoBlocks, ParsedTable } from '@/utils/tableJson';
+import { htmlToRichLines, wrapRuns } from '@/utils/richText';
 
 interface PDFGeneratorOptions {
     pattern: Pattern;
@@ -636,22 +637,9 @@ export class PatternPDFGenerator {
         const pageHeight = doc.internal.pageSize.getHeight();
         const bottomMargin = 20; // Footer margin
         
-        let cleanText = htmlText
-            .replace(/<p[^>]*>/gi, '')
-            .replace(/<\/p>/gi, '\n')
-            .replace(/<br\s*\/?>/gi, '\n')
-            .replace(/<li>/gi, '• ')
-            .replace(/<\/li>/gi, '\n')
-            .replace(/<[^>]+>/g, '') // Strip any remaining HTML tags
-            .replace(/&nbsp;/gi, ' ')
-            .replace(/&lt;/gi, '<')
-            .replace(/&gt;/gi, '>')
-            .replace(/&amp;/gi, '&');
-            
-        // Filter out empty lines to control spacing programmatically
-        const paragraphs = cleanText.split('\n').map(p => p.trim()).filter(Boolean);
+        const richLines = htmlToRichLines(htmlText);
         let currentY = startY;
-        const lineHeight = fontSize * 1.6; // Line height in mm
+        const lineHeight = fontSize * 0.55; // Line height in mm (글자 높이는 약 fontSize * 0.29mm)
         
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -660,8 +648,13 @@ export class PatternPDFGenerator {
         const scale = 4;
         
         // Conversion factor from mm to canvas pixels
-        const canvasMaxWidth = maxWidth * scale * 3.5;
-        
+        const pxPerMm = scale * 3.5;
+        const indentPerLevel = 4; // mm
+        const measure = (text: string, bold: boolean) => {
+            ctx.font = `${bold ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+            return ctx.measureText(text).width;
+        };
+
         const isBigHeader = (text: string) => {
             const trimmed = text.trim().replace(/^###\s*/, '');
             return trimmed.startsWith('시작 부분') || 
@@ -677,47 +670,33 @@ export class PatternPDFGenerator {
                    trimmed.startsWith('번역 결과');
         };
         
-        for (let idx = 0; idx < paragraphs.length; idx++) {
-            const para = paragraphs[idx];
-            const isBig = isBigHeader(para);
-            const isSub = isSubHeader(para);
-            const isHeader = isBig || isSub;
-            
-            // Spacing before big headers ONLY (except the first one)
+        for (let idx = 0; idx < richLines.length; idx++) {
+            const richLine = richLines[idx];
+            const plainText = richLine.runs.map(r => r.text).join('');
+            const isBig = richLine.heading || (!richLine.listItem && isBigHeader(plainText));
+            const isHeader = isBig || (!richLine.listItem && isSubHeader(plainText));
+
             if (isBig && idx > 0) {
                 currentY += lineHeight * 1.2; // 2-3 lines gap before new big sections
+            } else if (richLine.gapBefore) {
+                currentY += lineHeight * 0.5; // Paragraph gap
             }
-            
-            const fontStr = `${isHeader ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
-            ctx.font = fontStr;
-            
-            // Wrap text
-            const lines: string[] = [];
-            let currentLine = '';
-            
-            for (let i = 0; i < para.length; i++) {
-                const char = para[i];
-                const testLine = currentLine + char;
-                const metrics = ctx.measureText(testLine);
-                
-                if (metrics.width > canvasMaxWidth && currentLine !== '') {
-                    lines.push(currentLine);
-                    currentLine = char;
-                } else {
-                    currentLine = testLine;
-                }
-            }
-            if (currentLine !== '') {
-                lines.push(currentLine);
-            }
-            
-            for (const line of lines) {
+
+            const lineX = startX + richLine.indent * indentPerLevel;
+            const runs = richLine.runs.map(r => ({ text: r.text, bold: isHeader || r.bold }));
+            const wrapped = wrapRuns(runs, (maxWidth - richLine.indent * indentPerLevel) * pxPerMm, measure);
+
+            for (const segments of wrapped) {
                 if (currentY + lineHeight > pageHeight - bottomMargin) {
                     doc.addPage();
                     currentY = 25; // Start below watermark
                 }
-                
-                await this.renderTextAsImage(line, startX, currentY, fontSize, color, isHeader, 'left');
+
+                let segmentX = lineX;
+                for (const segment of segments) {
+                    await this.renderTextAsImage(segment.text, segmentX, currentY, fontSize, color, segment.bold, 'left');
+                    segmentX += measure(segment.text, segment.bold) / pxPerMm;
+                }
                 currentY += lineHeight;
             }
         }

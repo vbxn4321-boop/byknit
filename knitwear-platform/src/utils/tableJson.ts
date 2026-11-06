@@ -70,7 +70,7 @@ export function tableToHtml({ headers, rows }: ParsedTable): string {
     return `<table><tbody>${th}${body}</tbody></table>`;
 }
 
-const decode = (s: string) =>
+export const decodeEntities = (s: string) =>
     s.replace(/&nbsp;/gi, ' ').replace(/&quot;/gi, '"').replace(/&#39;/gi, "'")
         .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
 
@@ -81,7 +81,7 @@ const decode = (s: string) =>
 export function convertJsonParagraphsToTables(html: string): string {
     if (!html) return html;
     return html.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (match, inner) => {
-        const text = decode(inner.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''));
+        const text = decodeEntities(inner.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''));
         const table = parseTableJson(text);
         return table ? tableToHtml(table) : match;
     });
@@ -121,7 +121,7 @@ function htmlTableToParsed(tableHtml: string): ParsedTable | null {
         while ((td = tdRe.exec(tr[1])) !== null) {
             if (td[1].toLowerCase() === 'th') isHeader = true;
             cells.push(
-                decode(td[2].replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).trim()
+                decodeEntities(td[2].replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).trim()
             );
         }
         if (!cells.length) continue;

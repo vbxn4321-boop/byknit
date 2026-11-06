@@ -9,6 +9,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Youtube from '@tiptap/extension-youtube';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import { parseTableJson, tableToHtml, convertJsonParagraphsToTables } from '@/utils/tableJson';
+import { hasTextMarkup, isRichClipboardHtml, pastedTextToHtml } from '@/utils/richText';
 import {
     Bold,
     Italic,
@@ -85,23 +86,23 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
         editorProps: {
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');
-                const table = text ? parseTableJson(text) : null;
-                if (table) {
-                    event.preventDefault();
-                    editorRef.current?.chain().focus().insertContent(tableToHtml(table)).run();
-                    return true;
-                }
-                // HTML 소스 코드(<p>, <strong>, <br> ...)를 텍스트로 붙여넣은 경우 서식으로 적용
-                if (text && /^\s*(<!doctype[^>]*>\s*)?<(html|body|p|h[1-6]|div|ul|ol|table|strong|b|em|i|u|br|span|blockquote)[\s>\/]/i.test(text) && /<\/[a-z][a-z0-9]*>|<br\s*\/?>/i.test(text)) {
-                    event.preventDefault();
-                    editorRef.current?.chain().focus().insertContent(text.trim()).run();
-                    return true;
-                }
-                return false;
+                if (!text) return false;
+                const html = event.clipboardData?.getData('text/html');
+                const table = parseTableJson(text);
+                // 서식이 살아 있는 HTML 이 같이 왔거나, 텍스트에 서식 표시가 없으면 기본 붙여넣기에 맡긴다
+                const converted = table
+                    ? tableToHtml(table)
+                    : html && (isRichClipboardHtml(html) || !hasTextMarkup(text))
+                        ? null
+                        : pastedTextToHtml(text);
+                if (!converted) return false;
+                event.preventDefault();
+                editorRef.current?.chain().focus().insertContent(converted).run();
+                return true;
             },
             attributes: {
-                // Remove fixed padding/height from prose to let container handle it
-                class: 'prose prose-sm max-w-none focus:outline-none px-6 py-4 text-stone-800 [&_strong]:font-bold [&_a]:text-rose-500 [&_a]:underline [&_table]:border-collapse [&_table]:w-full [&_th]:border [&_th]:border-stone-300 [&_th]:bg-stone-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_td]:border [&_td]:border-stone-300 [&_td]:px-2 [&_td]:py-1 [&_td_p]:m-0 [&_th_p]:m-0',
+                // Tailwind preflight 가 문단 간격/목록/제목 스타일을 지우므로 직접 지정한다 (typography 플러그인 미사용)
+                class: 'prose prose-sm max-w-none focus:outline-none px-6 py-4 text-stone-800 [&_p]:my-2 [&_strong]:font-bold [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mt-4 [&_h1]:mb-2 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mt-4 [&_h2]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:mt-3 [&_h3]:mb-1 [&_h4]:font-bold [&_h4]:mt-3 [&_h4]:mb-1 [&_h5]:font-bold [&_h6]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-2 [&_li_p]:my-0.5 [&_blockquote]:border-l-4 [&_blockquote]:border-stone-200 [&_blockquote]:pl-3 [&_hr]:my-4 [&_hr]:border-stone-200 [&_a]:text-rose-500 [&_a]:underline [&_table]:border-collapse [&_table]:w-full [&_table]:my-2 [&_th]:border [&_th]:border-stone-300 [&_th]:bg-stone-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_td]:border [&_td]:border-stone-300 [&_td]:px-2 [&_td]:py-1 [&_td_p]:m-0 [&_th_p]:m-0',
             },
         },
     });
