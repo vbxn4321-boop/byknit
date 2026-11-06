@@ -7,6 +7,8 @@ import Underline from '@tiptap/extension-underline';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Youtube from '@tiptap/extension-youtube';
+import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
+import { parseTableJson, tableToHtml, convertJsonParagraphsToTables } from '@/utils/tableJson';
 import {
     Bold,
     Italic,
@@ -40,6 +42,8 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
     const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
     const colorMenuRef = useRef<HTMLDivElement>(null);
 
+    const editorRef = useRef<any>(null);
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -52,6 +56,10 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
             }),
             TextStyle,
             Color,
+            Table.configure({ resizable: false }),
+            TableRow,
+            TableHeader,
+            TableCell,
             Youtube.configure({
                 width: 480,
                 height: 270,
@@ -65,14 +73,33 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());
         },
+        onBlur: ({ editor }) => {
+            // 직접 타이핑한 JSON 표도 포커스를 벗어나면 표로 변환
+            const html = editor.getHTML();
+            const converted = convertJsonParagraphsToTables(html);
+            if (converted !== html) {
+                editor.commands.setContent(converted);
+                onChange(editor.getHTML());
+            }
+        },
         editorProps: {
+            handlePaste: (view, event) => {
+                const text = event.clipboardData?.getData('text/plain');
+                const table = text ? parseTableJson(text) : null;
+                if (!table) return false;
+                event.preventDefault();
+                editorRef.current?.chain().focus().insertContent(tableToHtml(table)).run();
+                return true;
+            },
             attributes: {
                 // Remove fixed padding/height from prose to let container handle it
-                class: 'prose prose-sm max-w-none focus:outline-none px-6 py-4 text-stone-800 [&_strong]:font-bold [&_a]:text-rose-500 [&_a]:underline',
+                class: 'prose prose-sm max-w-none focus:outline-none px-6 py-4 text-stone-800 [&_strong]:font-bold [&_a]:text-rose-500 [&_a]:underline [&_table]:border-collapse [&_table]:w-full [&_th]:border [&_th]:border-stone-300 [&_th]:bg-stone-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_td]:border [&_td]:border-stone-300 [&_td]:px-2 [&_td]:py-1 [&_td_p]:m-0 [&_th_p]:m-0',
             },
         },
     });
     
+    editorRef.current = editor;
+
     // Sync external content changes (e.g. from draft restore) with editor
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {

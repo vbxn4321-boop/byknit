@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { Pattern, Profile } from '@/types';
+import { splitHtmlIntoBlocks, ParsedTable } from '@/utils/tableJson';
 
 interface PDFGeneratorOptions {
     pattern: Pattern;
@@ -525,6 +526,112 @@ export class PatternPDFGenerator {
     }
 
     private async drawMultilineText(htmlText: string, startX: number, startY: number, fontSize: number, color: string, maxWidth: number): Promise<number> {
+        // 표(<table> 또는 JSON 표)는 별도로 그리고, 나머지는 기존 텍스트 렌더링 사용
+        const blocks = splitHtmlIntoBlocks(htmlText);
+        let y = startY;
+        for (const block of blocks) {
+            if (block.type === 'table') {
+                y = await this.drawTable(block.table, startX, y, maxWidth);
+            } else if (block.html.replace(/<[^>]+>|&nbsp;|\s/gi, '')) {
+                y = await this.drawTextBlock(block.html, startX, y, fontSize, color, maxWidth);
+            }
+        }
+        return y;
+    }
+
+    private async drawTable(table: ParsedTable, startX: number, startY: number, maxWidth: number): Promise<number> {
+        const { doc } = this;
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const bottomMargin = 20;
+        const topMargin = 25;
+        const fontSize = 9;
+        const scale = 4;
+        const pxPerMm = scale * 3.5;
+        const pad = 1.5;
+        const lineH = fontSize * 0.43 * 1.3; // mm
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return startY;
+
+        const colCount = Math.max(table.headers.length, ...table.rows.map(r => r.length), 1);
+        const header = table.headers.length ? table.headers : null;
+        const allRows: string[][] = header ? [header, ...table.rows] : table.rows;
+
+        const setFont = (bold: boolean) => {
+            ctx.font = `${bold ? 'bold' : 'normal'} ${fontSize * scale}px "Pretendard", "Noto Sans KR", Arial, sans-serif`;
+        };
+
+        // 열 너비: 내용 길이에 비례 (최소 비율 보장)
+        setFont(false);
+        const natural: number[] = Array(colCount).fill(0);
+        for (const r of allRows) {
+            for (let c = 0; c < colCount; c++) {
+                const longest = Math.max(...String(r[c] ?? '').split('\n').map(l => ctx.measureText(l).width / pxPerMm));
+                natural[c] = Math.max(natural[c], longest + pad * 2);
+            }
+        }
+        const minCol = Math.min(14, maxWidth / colCount);
+        const clamped = natural.map(n => Math.max(minCol, n));
+        const total = clamped.reduce((a, b) => a + b, 0);
+        const colW = clamped.map(w => (w / total) * maxWidth);
+
+        const wrap = (text: string, width: number, bold: boolean): string[] => {
+            setFont(bold);
+            const limit = (width - pad * 2) * pxPerMm;
+            const out: string[] = [];
+            for (const para of String(text ?? '').split('\n')) {
+                let line = '';
+                for (const ch of para) {
+                    if (line && ctx.measureText(line + ch).width > limit) {
+                        out.push(line);
+                        line = ch;
+                    } else {
+                        line += ch;
+                    }
+                }
+                out.push(line);
+            }
+            return out;
+        };
+
+        let y = startY + 2;
+        doc.setLineWidth(0.2);
+        doc.setDrawColor(190, 180, 170);
+
+        for (let ri = 0; ri < allRows.length; ri++) {
+            const isHeader = !!header && ri === 0;
+            const row = allRows[ri];
+            const cellLines = colW.map((w, c) => wrap(row[c] ?? '', w, isHeader));
+            const rowH = Math.max(...cellLines.map(l => l.length)) * lineH + pad * 2;
+
+            if (y + rowH > pageHeight - bottomMargin) {
+                doc.addPage();
+                y = topMargin;
+            }
+
+            let x = startX;
+            for (let c = 0; c < colCount; c++) {
+                if (isHeader) {
+                    doc.setFillColor(242, 238, 230);
+                    doc.rect(x, y, colW[c], rowH, 'FD');
+                } else {
+                    doc.rect(x, y, colW[c], rowH, 'S');
+                }
+                let ty = y + pad;
+                for (const line of cellLines[c]) {
+                    if (line) await this.renderTextAsImage(line, x + pad - 1, ty, fontSize, '#543e35', isHeader, 'left');
+                    ty += lineH;
+                }
+                x += colW[c];
+            }
+            y += rowH;
+        }
+
+        return y + 6;
+    }
+
+    private async drawTextBlock(htmlText: string, startX: number, startY: number, fontSize: number, color: string, maxWidth: number): Promise<number> {
         const { doc } = this;
         const pageHeight = doc.internal.pageSize.getHeight();
         const bottomMargin = 20; // Footer margin
