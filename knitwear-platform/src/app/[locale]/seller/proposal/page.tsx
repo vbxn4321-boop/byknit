@@ -20,7 +20,8 @@ import {
     FileCheck
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 export interface StoreProposal {
     id: string;
@@ -46,6 +47,7 @@ export interface StoreProposal {
 
 export default function SellerProposalPage() {
     const params = useParams();
+    const router = useRouter();
     const locale = (params?.locale as string) || 'ko';
 
     // Form States
@@ -68,8 +70,9 @@ export default function SellerProposalPage() {
     const [mailOrderFile, setMailOrderFile] = useState<File | null>(null);
 
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validation
@@ -104,40 +107,48 @@ export default function SellerProposalPage() {
             return;
         }
 
-        // Build proposal record
-        const newProposal: StoreProposal = {
-            id: 'PROP-' + Date.now(),
-            brandName,
-            repName,
-            email,
-            phone,
-            sellerType,
-            businessNum: sellerType === 'individual' ? '비사업자(개인)' : businessNum,
-            bankName,
-            accountNumber,
-            accountHolder,
-            category,
-            intro,
-            portfolioUrl,
-            bizCertFileName: bizCertFile ? bizCertFile.name : (sellerType === 'individual' ? '해당없음(개인)' : '사업자등록증_사본.pdf'),
-            bankBookFileName: bankBookFile ? bankBookFile.name : '정산통장_사본.png',
-            mailOrderFileName: mailOrderFile ? mailOrderFile.name : undefined,
-            status: 'pending',
-            createdAt: new Date().toISOString().split('T')[0]
-        };
-
-        // Save to localStorage
-        if (typeof window !== 'undefined') {
-            const existing = localStorage.getItem('byknit_store_proposals');
-            let proposalsList: StoreProposal[] = [];
-            if (existing) {
-                try { proposalsList = JSON.parse(existing); } catch (err) {}
+        setIsSubmitting(true);
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert(locale === 'ko' ? '입점 신청은 로그인 후 가능합니다.' : 'Please log in to submit a seller application.');
+                router.push(`/${locale}/login`);
+                return;
             }
-            proposalsList.unshift(newProposal);
-            localStorage.setItem('byknit_store_proposals', JSON.stringify(proposalsList));
-        }
 
-        setIsSubmitted(true);
+            const { error } = await supabase.from('seller_applications').insert({
+                user_id: user.id,
+                brand_name: brandName.trim(),
+                rep_name: repName.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                seller_type: sellerType,
+                business_num: sellerType === 'individual' ? null : businessNum.trim(),
+                bank_name: bankName,
+                account_number: accountNumber.trim(),
+                account_holder: accountHolder.trim(),
+                category,
+                intro: intro.trim() || null,
+                portfolio_url: portfolioUrl.trim() || null,
+                biz_cert_file_name: bizCertFile ? bizCertFile.name : null,
+                bank_book_file_name: bankBookFile.name,
+                mail_order_file_name: mailOrderFile.name,
+            });
+
+            if (error) {
+                if (error.code === '23505') {
+                    alert(locale === 'ko' ? '이미 심사 대기 중인 입점 신청이 있습니다.' : 'You already have a pending application.');
+                } else {
+                    alert((locale === 'ko' ? '신청 접수에 실패했습니다: ' : 'Submission failed: ') + error.message);
+                }
+                return;
+            }
+
+            setIsSubmitted(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -543,7 +554,8 @@ export default function SellerProposalPage() {
                         <div className="pt-4">
                             <button
                                 type="submit"
-                                className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-base font-bold transition-all shadow-soft flex items-center justify-center gap-2"
+                                disabled={isSubmitting}
+                                className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-2xl text-base font-bold transition-all shadow-soft flex items-center justify-center gap-2"
                             >
                                 <Check size={18} />
                                 <span>입점 제안서 및 증빙 서류 제출하기</span>

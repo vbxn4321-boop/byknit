@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { addCredits } from "./credits";
+import { assertCanSellPaid } from "@/utils/sellerGuard";
 
 // 서버 측 다운로드 권한 검증 - 클라이언트 상태(canDownload 등)를 신뢰하지 않고
 // DB 기준으로 무료 도안/구매 완료/본인 소유 여부를 직접 확인한다.
@@ -88,6 +89,8 @@ export async function createPdfPattern(data: {
             throw new Error('Unauthorized: Only administrators can publish physical products or official items.');
         }
     }
+
+    await assertCanSellPaid(adminClient, user.id, isAdmin, data.priceKrw);
 
     // Translate metadata if needed
     const { translatePatternMetadata } = await import("./translate");
@@ -221,6 +224,11 @@ export async function updatePattern(data: {
 
     // Track price changes for the sale badge
     const priceChanged = existing.price_krw !== data.priceKrw;
+
+    // 이미 유료인 도안의 가격 변경 / 무료 도안의 유료 전환은 승인된 판매자만 가능
+    if (priceChanged) {
+        await assertCanSellPaid(adminClient, user.id, isAdmin, data.priceKrw);
+    }
     const updatePayload: any = {
         title: updatedTitle,
         description: updatedDescription,

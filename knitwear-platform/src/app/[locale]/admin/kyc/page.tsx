@@ -79,86 +79,80 @@ export default function AdminKycPage() {
         checkAdminAuth();
     }, []);
 
-    // Load data from localStorage on mount (only after authorized)
-    useEffect(() => {
-        if (!isAuthorized) return;
-        if (typeof window !== 'undefined') {
-            // 1. Load Proposals Data
-            const savedProposals = localStorage.getItem('byknit_store_proposals');
-            if (savedProposals) {
-                try { setProposals(JSON.parse(savedProposals)); } catch (e) {}
-            } else {
-                // Initial Default Dummy Proposals for Demo
-                const initialProposals: StoreProposal[] = [
-                    {
-                        id: 'PROP-2026072901',
-                        brandName: '포근한 니팅 아틀리에',
-                        repName: '차도운',
-                        email: 'chadowoon@knitcraft.kr',
-                        phone: '010-3489-0234',
-                        sellerType: 'biz_general',
-                        businessNum: '128-86-90231',
-                        bankName: '신한은행',
-                        accountNumber: '110-348-902348',
-                        accountHolder: '차도운',
-                        category: 'yarn',
-                        intro: '손뜨개 실 전문 수입 및 자체 수제 염색 실 제작 공방입니다. 바이니트에 코튼/울 실 20여 종을 입점 제안합니다.',
-                        portfolioUrl: 'https://instagram.com/knit_craft_studio',
-                        bizCertFileName: '사업자등록증_포근한니팅.pdf',
-                        bankBookFileName: '신한은행_정산통장_사본.png',
-                        status: 'pending',
-                        createdAt: '2026-07-29'
-                    },
-                    {
-                        id: 'PROP-2026072802',
-                        brandName: '클래식 대바늘 공작소',
-                        repName: '김니트',
-                        email: 'kimknit@woodneedles.com',
-                        phone: '010-9876-5432',
-                        sellerType: 'corporate',
-                        businessNum: '220-81-45678',
-                        bankName: 'KB국민은행',
-                        accountNumber: '400401-04-123456',
-                        accountHolder: '(주)클래식대바늘공작소',
-                        category: 'needle',
-                        intro: '독일식 조립식 대바늘 및 우드 부자재 전문 제조 법인 사업자입니다.',
-                        portfolioUrl: 'https://woodneedles.com',
-                        bizCertFileName: '법인_사업자등록증_사본.pdf',
-                        bankBookFileName: '법인계좌_통장사본.pdf',
-                        status: 'approved',
-                        createdAt: '2026-07-28'
-                    }
-                ];
-                setProposals(initialProposals);
-                localStorage.setItem('byknit_store_proposals', JSON.stringify(initialProposals));
-            }
+    const loadProposals = async () => {
+        const { createClient } = await import('@/utils/supabase/client');
+        const supabase = createClient();
+        const { data, error } = await supabase
+            .from('seller_applications')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-            setIsLoading(false);
+        if (error) {
+            alert('입점 신청 목록을 불러오지 못했습니다: ' + error.message);
+        } else {
+            setProposals((data || []).map((row: any): StoreProposal => ({
+                id: row.id,
+                brandName: row.brand_name,
+                repName: row.rep_name,
+                email: row.email,
+                phone: row.phone,
+                sellerType: row.seller_type,
+                businessNum: row.seller_type === 'individual' ? '비사업자(개인)' : (row.business_num || ''),
+                bankName: row.bank_name,
+                accountNumber: row.account_number,
+                accountHolder: row.account_holder,
+                category: row.category || '',
+                intro: row.intro || '',
+                portfolioUrl: row.portfolio_url || '',
+                bizCertFileName: row.biz_cert_file_name || undefined,
+                bankBookFileName: row.bank_book_file_name || undefined,
+                mailOrderFileName: row.mail_order_file_name || undefined,
+                status: row.status,
+                rejectReason: row.reject_reason || undefined,
+                createdAt: String(row.created_at).split('T')[0]
+            })));
         }
-    }, [isAuthorized]);
-
-    // Proposal status changes
-    const handleApproveProposal = (id: string) => {
-        const updated = proposals.map(p => p.id === id ? { ...p, status: 'approved' as const } : p);
-        setProposals(updated);
-        localStorage.setItem('byknit_store_proposals', JSON.stringify(updated));
-        alert('해당 파트너의 입점 제안이 승인 처리되었습니다. 신청자 이메일로 가입 초대 메시지가 발송됩니다.');
-        setSelectedProposal(null);
+        setIsLoading(false);
     };
 
-    const handleRejectProposal = (id: string) => {
+    useEffect(() => {
+        if (!isAuthorized) return;
+        loadProposals();
+    }, [isAuthorized]);
+
+    // Proposal status changes (RPC가 신청서 상태와 profiles.seller_status를 함께 갱신)
+    const handleApproveProposal = async (id: string) => {
+        const { createClient } = await import('@/utils/supabase/client');
+        const { error } = await createClient().rpc('approve_seller_application', { app_id: id });
+        if (error) {
+            alert('승인 처리에 실패했습니다: ' + error.message);
+            return;
+        }
+        alert('해당 파트너의 입점 신청이 승인되었습니다. 이제 유료 도안을 판매할 수 있고 통합 판매자 관리에 표시됩니다.');
+        setSelectedProposal(null);
+        await loadProposals();
+    };
+
+    const handleRejectProposal = async (id: string) => {
         if (!rejectReasonInput.trim()) {
             alert('반려 사유를 반드시 기입해 주세요.');
             return;
         }
 
-        const updated = proposals.map(p => p.id === id ? { ...p, status: 'rejected' as const, rejectReason: rejectReasonInput.trim() } : p);
-        setProposals(updated);
-        localStorage.setItem('byknit_store_proposals', JSON.stringify(updated));
+        const { createClient } = await import('@/utils/supabase/client');
+        const { error } = await createClient().rpc('reject_seller_application', {
+            app_id: id,
+            reason: rejectReasonInput.trim()
+        });
+        if (error) {
+            alert('반려 처리에 실패했습니다: ' + error.message);
+            return;
+        }
         alert('입점 제안이 반려 처리되었습니다. 반려 사유가 기록되었습니다.');
         setRejectMode(false);
         setRejectReasonInput('');
         setSelectedProposal(null);
+        await loadProposals();
     };
 
 

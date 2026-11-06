@@ -11,8 +11,8 @@ export default async function AdminSellersPage({
     const { locale } = await params;
     const supabase = await createClient();
 
-    // [임시 복구] 대표님 시연을 위해 실제 seller 권한 대신 마켓플레이스 도안 등록자 목록을 임시로 불러옵니다.
-    const { data: profiles, error } = await supabase
+    // 입점 승인(seller_status = 'approved')된 판매자만 표시
+    const { data: profiles } = await supabase
         .from('profiles')
         .select(`
             id,
@@ -20,18 +20,18 @@ export default async function AdminSellersPage({
             avatar_url,
             created_at
         `)
+        .eq('seller_status', 'approved')
         .order('created_at', { ascending: false });
 
-    // 도안 등록 개수를 조회하여 더미 데이터로 활용
-    const { data: patterns } = await supabase.from('patterns').select('designer_id');
-    
-    const sellers = (profiles || []).map(p => {
-        const productCount = (patterns || []).filter(pat => pat.designer_id === p.id).length;
-        return {
-            ...p,
-            productCount
-        };
-    }).filter(p => p.productCount > 0); // 상품이 1개라도 있는 사람만 표시
+    const sellerIds = (profiles || []).map(p => p.id);
+    const { data: patterns } = sellerIds.length > 0
+        ? await supabase.from('patterns').select('designer_id').in('designer_id', sellerIds)
+        : { data: [] as { designer_id: string }[] };
+
+    const sellers = (profiles || []).map(p => ({
+        ...p,
+        productCount: (patterns || []).filter(pat => pat.designer_id === p.id).length
+    }));
 
     return (
         <div className="p-6 md:p-10 font-sans text-stone-700 max-w-7xl mx-auto space-y-8">

@@ -1,6 +1,7 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
+import { assertCanSellPaid } from '@/utils/sellerGuard';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { translatePatternMetadata } from './translate';
@@ -165,6 +166,19 @@ export async function publishPattern(projectId: string, metadata: {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return { error: 'Unauthorized' };
+
+    // 유료 가격 설정은 승인된 판매자(또는 관리자)만 가능
+    const adminClient = await createAdminClient();
+    const { data: callerProfile } = await adminClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+    try {
+        await assertCanSellPaid(adminClient, user.id, callerProfile?.role === 'admin', metadata.priceKrw);
+    } catch (e: any) {
+        return { error: e.message };
+    }
 
     // 1. Get Project Data
     const { data: project, error: fetchError } = await supabase
