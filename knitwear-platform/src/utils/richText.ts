@@ -35,8 +35,19 @@ const FENCE_RE = /^\s*```\s*([\w-]*)\s*$/;
 const HEADING_RE = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/;
 const HR_RE = /^\s*([-*_])(?:\s*\1){2,}\s*$/;
 const TABLE_DELIMITER_RE = /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/;
+const RULE_RE = /^\s*[━─═▬]{3,}\s*$/;
+const LABEL_RE = /^\s*(?:【[^】]+】|[▶▷►①-⑳]\s*\S.*)\s*$/;
 const HTML_BLOCK_RE = /<\/?(?:html|body|p|div|h[1-6]|ul|ol|li|table|tr|td|th|blockquote)\b[^>]*>/i;
 const HTML_INLINE_RE = /<\/?(?:strong|b|em|i|u|s)>|<br\s*\/?>/i;
+
+/** "① 코잡기" 같은 짧은 제목 줄. "① 수면 중에는 벗겨주세요." 같은 문장은 제외한다. */
+const isLabelLine = (line: string) => {
+    const trimmed = line.trim();
+    return trimmed.length <= 30 && LABEL_RE.test(trimmed) && !/[.!?。:]$/.test(trimmed);
+};
+
+const paragraphLineToHtml = (line: string) =>
+    isLabelLine(line) ? `<strong>${inlineToHtml(line)}</strong>` : inlineToHtml(line);
 
 const isOrderedMarker = (marker: string) => /\d/.test(marker);
 const indentOf = (line: string) => line.match(/^\s*/)![0].length;
@@ -118,7 +129,7 @@ function markdownToHtml(text: string): string {
     let paragraph: string[] = [];
 
     const flush = () => {
-        if (paragraph.length) out.push(`<p>${paragraph.map(inlineToHtml).join('<br>')}</p>`);
+        if (paragraph.length) out.push(`<p>${paragraph.map(paragraphLineToHtml).join('<br>')}</p>`);
         paragraph = [];
     };
 
@@ -159,6 +170,20 @@ function markdownToHtml(text: string): string {
             flush();
             out.push(`<h${heading[1].length}>${inlineToHtml(heading[2])}</h${heading[1].length}>`);
             i++;
+            continue;
+        }
+
+        if (RULE_RE.test(line)) {
+            flush();
+            // 구분선 두 줄로 감싼 한 줄은 구분선 + 제목으로 정리한다
+            const title = lines[i + 1];
+            if (!isBlank(title) && !RULE_RE.test(title) && RULE_RE.test(lines[i + 2] ?? '')) {
+                out.push(`<hr><h3>${inlineToHtml(title.trim())}</h3>`);
+                i += 3;
+            } else {
+                out.push('<hr>');
+                i++;
+            }
             continue;
         }
 
@@ -210,6 +235,7 @@ export function hasTextMarkup(text: string): boolean {
         HTML_BLOCK_RE.test(text) ||
         HTML_INLINE_RE.test(text) ||
         /\*\*\S/.test(text) ||
+        text.split('\n').some(line => RULE_RE.test(line) || isLabelLine(line)) ||
         /^\s*```/m.test(text) ||
         /^\s{0,3}#{1,6}\s/m.test(text) ||
         /^\s*(?:[-*+]|\d+[.)])\s/m.test(text) ||
@@ -223,6 +249,38 @@ export function hasTextMarkup(text: string): boolean {
  */
 export function isRichClipboardHtml(html: string): boolean {
     return html.includes('data-pm-slice') || /<(?:strong|b|h[1-6]|table|ul|ol|li|em|blockquote)[\s>]/i.test(html);
+}
+
+/**
+ * 에디터 기본 붙여넣기로 넘어가는 클립보드 HTML 에도 구분선/제목 줄 처리를 적용한다.
+ * 이미 서식이 있는 문단은 건드리지 않는다.
+ */
+export function decorateClipboardHtml(html: string): string {
+    if (html.includes('data-pm-slice')) return html;
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    doc.body.querySelectorAll('p').forEach(p => {
+        if (p.closest('table, li, blockquote')) return;
+        if (Array.from(p.children).some(child => child.tagName !== 'BR')) return;
+        const text = Array.from(p.childNodes)
+            .map(node => (node.nodeName === 'BR' ? '\n' : node.textContent ?? ''))
+            .join('');
+        if (text.split('\n').some(line => RULE_RE.test(line) || isLabelLine(line))) {
+            p.outerHTML = markdownToHtml(text);
+        }
+    });
+
+    doc.body.querySelectorAll('hr').forEach(hr => {
+        const title = hr.nextElementSibling;
+        const closing = title?.nextElementSibling;
+        if (!hr.isConnected || !title || title.tagName !== 'P' || title.querySelector('br') || closing?.tagName !== 'HR') return;
+        const heading = doc.createElement('h3');
+        heading.innerHTML = title.innerHTML;
+        title.replaceWith(heading);
+        closing.remove();
+    });
+
+    return doc.body.innerHTML;
 }
 
 /** 붙여넣은 텍스트를 HTML 로 변환. 서식도 줄바꿈도 없는 한 줄이면 null(기본 붙여넣기). */
@@ -252,6 +310,8 @@ export interface RichLine {
     indent: number;
     /** 앞 문단과의 사이에 간격을 둘지 */
     gapBefore: boolean;
+    /** 구분선 (runs 는 비어 있음) */
+    rule: boolean;
 }
 
 const BLOCK_TAGS = new Set(['p', 'div', 'blockquote', 'pre', 'table', 'tr', 'td', 'th']);
@@ -277,6 +337,7 @@ export function htmlToRichLines(html: string): RichLine[] {
                 listItem: lists.length > 0,
                 indent: Math.max(0, lists.length - 1),
                 gapBefore: pendingGap && lines.length > 0,
+                rule: false,
             });
             pendingGap = false;
         }
@@ -311,7 +372,8 @@ export function htmlToRichLines(html: string): RichLine[] {
             endLine();
         } else if (tag === 'hr') {
             endLine();
-            pendingGap = true;
+            lines.push({ runs: [], heading: false, listItem: false, indent: 0, gapBefore: false, rule: true });
+            pendingGap = false;
         } else if (/^h[1-6]$/.test(tag)) {
             endLine();
             heading = !closing;

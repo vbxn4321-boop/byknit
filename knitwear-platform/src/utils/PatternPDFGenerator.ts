@@ -664,7 +664,7 @@ export class PatternPDFGenerator {
         
         const isSubHeader = (text: string) => {
             const trimmed = text.trim();
-            return /^(?:\d+[\s\.\)]|🔘|✨|⚡|🚀|✦|★|☆|■)/u.test(trimmed) || 
+            return /^(?:\d+(?:[\s\)]|\.(?!\d))|🔘|✨|⚡|🚀|✦|★|☆|■)/u.test(trimmed) || 
                    trimmed.startsWith('단추 달기') ||
                    trimmed.startsWith('도안 설명') ||
                    trimmed.startsWith('번역 결과');
@@ -672,11 +672,24 @@ export class PatternPDFGenerator {
         
         for (let idx = 0; idx < richLines.length; idx++) {
             const richLine = richLines[idx];
+            if (richLine.rule) {
+                if (idx > 0) currentY += lineHeight * 0.5;
+                if (currentY + lineHeight > pageHeight - bottomMargin) {
+                    doc.addPage();
+                    currentY = 25; // Start below watermark
+                }
+                doc.setDrawColor(190, 180, 170);
+                doc.setLineWidth(0.2);
+                doc.line(startX, currentY, startX + maxWidth, currentY);
+                currentY += lineHeight * 0.5;
+                continue;
+            }
+
             const plainText = richLine.runs.map(r => r.text).join('');
             const isBig = richLine.heading || (!richLine.listItem && isBigHeader(plainText));
             const isHeader = isBig || (!richLine.listItem && isSubHeader(plainText));
 
-            if (isBig && idx > 0) {
+            if (isBig && idx > 0 && !richLines[idx - 1].rule) {
                 currentY += lineHeight * 1.2; // 2-3 lines gap before new big sections
             } else if (richLine.gapBefore) {
                 currentY += lineHeight * 0.5; // Paragraph gap

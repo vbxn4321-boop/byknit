@@ -9,7 +9,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Youtube from '@tiptap/extension-youtube';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import { parseTableJson, tableToHtml, convertJsonParagraphsToTables } from '@/utils/tableJson';
-import { hasTextMarkup, isRichClipboardHtml, pastedTextToHtml } from '@/utils/richText';
+import { decorateClipboardHtml, hasTextMarkup, isRichClipboardHtml, pastedTextToHtml } from '@/utils/richText';
 import {
     Bold,
     Italic,
@@ -84,6 +84,7 @@ const RichTextEditor = ({ content, onChange, placeholder, minHeight, hideLink, h
             }
         },
         editorProps: {
+            transformPastedHTML: decorateClipboardHtml,
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');
                 if (!text) return false;
