@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Package, Store, Lock, AlertTriangle, BarChart3 } from 'lucide-react';
+import { Shield, Package, Store, Lock, AlertTriangle, BarChart3, ShoppingCart } from 'lucide-react';
 
 export default function AdminLayout({
     children,
@@ -17,6 +17,7 @@ export default function AdminLayout({
     const isSellers = pathname.includes('/admin/sellers');
     const isKyc = pathname.includes('/admin/kyc');
     const isAnalytics = pathname.includes('/admin/analytics');
+    const isShop = pathname.includes('/admin/shop');
 
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [authUser, setAuthUser] = useState<any>(null);
@@ -161,6 +162,17 @@ export default function AdminLayout({
                         <BarChart3 size={18} />
                         <span>방문자/회원 활동</span>
                     </Link>
+                    <Link
+                        href={`/${locale}/admin/shop`}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                            isShop
+                                ? 'bg-rose-50 text-rose-700'
+                                : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                        }`}
+                    >
+                        <ShoppingCart size={18} />
+                        <span>뜨개 샵 관리</span>
+                    </Link>
                 </nav>
                 <div className="p-4 border-t border-stone-200">
                     <div className="bg-stone-50 rounded-xl p-4 text-xs font-bold text-stone-500 text-center">
@@ -189,6 +201,12 @@ export default function AdminLayout({
                         className={`flex-1 py-2 text-center text-xs font-bold rounded-lg ${isAnalytics ? 'bg-rose-50 text-rose-600' : 'bg-stone-100 text-stone-500'}`}
                     >
                         방문/활동
+                    </Link>
+                    <Link
+                        href={`/${locale}/admin/shop`}
+                        className={`flex-1 py-2 text-center text-xs font-bold rounded-lg ${isShop ? 'bg-rose-50 text-rose-600' : 'bg-stone-100 text-stone-500'}`}
+                    >
+                        뜨개 샵
                     </Link>
                 </div>
             </div>

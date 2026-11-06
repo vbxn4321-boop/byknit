@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useRef, useEffect } from 'react';
-import { Menu, X, ShoppingBag, PenTool, Calculator, Heart, Image as ImageIcon, Users, Sparkles } from 'lucide-react';
+import { Menu, X, ShoppingBag, PenTool, Calculator, Heart, Image as ImageIcon, Users, Sparkles, Store } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import type { Locale } from '@/i18n/request';
 
@@ -41,6 +41,7 @@ export function Header({ locale, user }: HeaderProps) {
 
     const navItems = [
         { href: '/marketplace', label: t('marketplace'), icon: ShoppingBag },
+        { href: '/shop', label: t('shop'), icon: Store },
         { href: '/editor', label: t('editor'), icon: PenTool, requiresLogin: true },
         { href: '/community', label: t('community'), icon: Users },
         { href: '/ai', label: t('chartConverter'), icon: ImageIcon, requiresLogin: true },
@@ -69,12 +70,12 @@ export function Header({ locale, user }: HeaderProps) {
                     </a>
 
                     {/* Navigation - Natural Flow (Equal Gap) */}
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav className="hidden xl:flex items-center gap-0.5">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-brown-600 font-medium hover:text-rose-500 hover:bg-rose-50/50 transition-all whitespace-nowrap relative group"
+                                className="flex items-center gap-1.5 px-2.5 py-2.5 rounded-full text-brown-600 font-medium hover:text-rose-500 hover:bg-rose-50/50 transition-all whitespace-nowrap relative group"
                             >
                                 <item.icon className="w-4 h-4" />
                                 <span>{item.label}</span>
@@ -88,7 +89,7 @@ export function Header({ locale, user }: HeaderProps) {
                     </nav>
 
                     {/* Actions */}
-                    <div className="hidden md:flex items-center gap-3">
+                    <div className="hidden xl:flex items-center gap-3 shrink-0 whitespace-nowrap">
                         <CartIcon />
                         <NotificationBell user={user} />
                         <LanguageSwitcher locale={locale} />
@@ -97,7 +98,7 @@ export function Header({ locale, user }: HeaderProps) {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden p-2 rounded-xl text-brown-600 hover:text-brown-700 hover:bg-cream-100"
+                        className="xl:hidden p-2 rounded-xl text-brown-600 hover:text-brown-700 hover:bg-cream-100"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                     >
                         {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -109,7 +110,7 @@ export function Header({ locale, user }: HeaderProps) {
 
             {/* Mobile Menu */}
             {isMenuOpen && (
-                <div className="md:hidden border-t border-tan-200 bg-white animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="xl:hidden border-t border-tan-200 bg-white animate-in slide-in-from-top-2 fade-in duration-200">
                     <nav className="px-4 py-4 space-y-2">
                         <div className="flex justify-center py-2 mb-2 pb-4 border-b border-tan-200">
                             <UserNav user={user} />

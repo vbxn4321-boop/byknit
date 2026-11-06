@@ -74,6 +74,7 @@
   "nav": {
     "home": "Home",
     "marketplace": "Marketplace",
+    "shop": "Shop",
     "editor": "Pattern Editor",
     "chartConverter": "Chart Converter",
     "smartCalculator": "Smart Calculator",

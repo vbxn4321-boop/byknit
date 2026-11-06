@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/server';
+import { settleShopCancellation, settleShopPayment, shopOrderIdFromCustomData } from '@/utils/shopPayment';
 
 export async function POST(request: NextRequest) {
     try {
@@ -104,6 +105,15 @@ export async function POST(request: NextRequest) {
             const patternId = customDataObj.pattern_id;
             const creditAmount = customDataObj.credits || 0;
             const amountVal = paymentData.amount?.total || paymentData.amount?.paid || 0;
+
+            // 뜨개 샵 실물 주문: 주문 확정과 재고 차감은 shopPayment 에서 처리한다
+            if (shopOrderIdFromCustomData(customDataObj)) {
+                const result = await settleShopPayment(paymentId);
+                if (result.retryable) {
+                    return NextResponse.json({ error: result.message }, { status: 500 });
+                }
+                return NextResponse.json({ status: result.ok ? 'success' : 'ignored', code: result.code });
+            }
 
             if (patternId) {
                 console.log(`[Webhook] Direct pattern purchase. User: ${userId}, Pattern: ${patternId}, Amount: ${amountVal}`);
@@ -308,6 +318,15 @@ export async function POST(request: NextRequest) {
                 }
             } catch (e: any) {
                 console.error('[Webhook] Failed to parse customData:', e.message);
+            }
+
+            // 뜨개 샵 실물 주문: 주문 상태 변경과 재고 복구는 shopPayment 에서 처리한다
+            if (shopOrderIdFromCustomData(customDataObj)) {
+                const result = await settleShopCancellation(paymentId);
+                if (result.retryable) {
+                    return NextResponse.json({ error: result.message }, { status: 500 });
+                }
+                return NextResponse.json({ status: result.ok ? 'success' : 'ignored', code: result.code });
             }
 
             if (!customDataObj || !customDataObj.user_id) {
