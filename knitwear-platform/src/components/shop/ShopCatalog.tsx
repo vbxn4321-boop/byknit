@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { Store } from 'lucide-react';
@@ -8,7 +8,7 @@ import { SHOP_CATEGORIES, shopCategoryLabel } from '@/constants/shop';
 import type { ShopProduct } from '@/types/shop';
 import { ShopNav } from './ShopNav';
 
-export function ShopCatalog({ products, locale }: { products: ShopProduct[]; locale: string }) {
+export function ShopCatalog({ products, locale, children }: { products: ShopProduct[]; locale: string; children?: ReactNode }) {
     const isKo = locale === 'ko';
     const [category, setCategory] = useState('all');
 
@@ -48,10 +48,12 @@ export function ShopCatalog({ products, locale }: { products: ShopProduct[]; loc
             )}
 
             {visible.length === 0 ? (
-                <div className="py-24 text-center text-brown-500">
-                    <Store className="w-10 h-10 mx-auto mb-3 text-tan-300" />
-                    <p>{isKo ? '상품을 준비하고 있어요.' : 'Products are coming soon.'}</p>
-                </div>
+                !children && (
+                    <div className="py-24 text-center text-brown-500">
+                        <Store className="w-10 h-10 mx-auto mb-3 text-tan-300" />
+                        <p>{isKo ? '상품을 준비하고 있어요.' : 'Products are coming soon.'}</p>
+                    </div>
+                )
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {visible.map(product => (
@@ -79,6 +81,8 @@ export function ShopCatalog({ products, locale }: { products: ShopProduct[]; loc
                     ))}
                 </div>
             )}
+
+            {children}
         </div>
     );
 }

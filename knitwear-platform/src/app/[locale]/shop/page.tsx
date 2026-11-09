@@ -1,5 +1,7 @@
 import { getShopProducts } from '@/app/actions/shop';
+import { CoupangProductList } from '@/components/shop/CoupangProductList';
 import { ShopCatalog } from '@/components/shop/ShopCatalog';
+import { getCoupangCatalog } from '@/lib/coupang';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,5 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function ShopPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const products = await getShopProducts();
-    return <ShopCatalog products={products} locale={locale} />;
+    const coupang = locale === 'ko' ? getCoupangCatalog() : null;
+    return (
+        <ShopCatalog products={products} locale={locale}>
+            {coupang && coupang.categories.length > 0 && <CoupangProductList {...coupang} />}
+        </ShopCatalog>
+    );
 }
