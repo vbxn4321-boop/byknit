@@ -26,10 +26,7 @@ import { ProductImageGallery } from './detail/ProductImageGallery';
 import { ProductInfoTable } from './detail/ProductInfoTable';
 import { ProductRecommendationRow } from './detail/ProductRecommendationRow';
 import { DownloadOptionModal } from './detail/DownloadOptionModal';
-import { GoogleAdUnit } from '@/components/ads/GoogleAdSense';
-
-// AdSense 광고 단위 'download-wait' (무료 도안 다운로드 대기 화면 전용)
-const DOWNLOAD_AD_SLOT_ID = '3744895117';
+import { CoupangBanner } from '@/components/ads/CoupangBanner';
 import { CheckoutModal } from './detail/CheckoutModal';
 import { useCartStore } from '@/stores/useCartStore';
 
@@ -608,12 +605,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
                                 {pattern.is_free && !isAdCompleted ? (
                                     <>
-                                    <div className="mb-3">
-                                        <p className="text-[10px] font-bold text-stone-400 tracking-wider uppercase mb-1">
-                                            {locale === 'ko' ? '광고' : 'Advertisement'}
-                                        </p>
-                                        <GoogleAdUnit slotId={DOWNLOAD_AD_SLOT_ID} />
-                                    </div>
+                                    <CoupangBanner locale={locale} className="mb-3" />
                                     <button
                                         disabled={isWatchingAd}
                                         onClick={() => {
