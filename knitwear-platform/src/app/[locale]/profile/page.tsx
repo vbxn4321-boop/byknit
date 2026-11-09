@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { getTranslations } from 'next-intl/server';
 import { MyPageClient } from '@/components/profile/MyPageClient';
 import Link from 'next/link';
@@ -27,7 +27,8 @@ export default async function ProfilePage({
         );
     }
 
-    const { data: profile } = await supabase
+    const adminClient = await createAdminClient();
+    const { data: profile } = await adminClient
         .from('profiles')
         .select('*')
         .eq('id', user.id)

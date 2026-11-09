@@ -5,6 +5,8 @@ import { assertCanSellPaid } from '@/utils/sellerGuard';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { translatePatternMetadata } from './translate';
+import { savePatternPrivate } from '@/utils/patternPrivate';
+import { grantCredits } from '@/utils/creditsServer';
 
 export async function saveGridProject(data: any) {
     try {
@@ -226,8 +228,6 @@ export async function publishPattern(projectId: string, metadata: {
             gauge: gaugeString,
             // Added 'hashtags' column to patterns table
             hashtags: metadata.hashtags || [],
-            // Grid data for PDF generation
-            grid_data: project.grid_data,
             palette: project.palette,
             grid_width: project.width,
             grid_height: project.height,
@@ -246,10 +246,17 @@ export async function publishPattern(projectId: string, metadata: {
         return { error: insertError.message };
     }
 
+    // 차트 데이터는 결제 후에만 전달되므로 비공개 테이블에 저장한다
+    try {
+        await savePatternPrivate(pattern.id, { grid_data: project.grid_data });
+    } catch (privateError: any) {
+        await supabase.from('patterns').delete().eq('id', pattern.id);
+        return { error: privateError.message };
+    }
+
     // Award credits for uploading a pattern
     try {
-        const { addCredits } = await import('./credits');
-        await addCredits(user.id, 100, 'Pattern Upload Reward');
+        await grantCredits(user.id, 100, 'Pattern Upload Reward');
     } catch (creditError) {
         console.error('Failed to award credits:', creditError);
     }

@@ -6,7 +6,7 @@ export async function getPosts(locale: string = 'ko') {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
@@ -31,7 +31,7 @@ export async function getPopularPosts(limit: number = 5) {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:pattern_id (id, title, thumbnail_url, images, price_usd)
@@ -61,7 +61,7 @@ export async function getPost(postId: string) {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
@@ -83,7 +83,7 @@ export async function getComments(postId: string) {
         .from('post_comments')
         .select(`
             *,
-            profiles:user_id (id, display_name, email)
+            profiles:user_id (id, display_name)
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true });

@@ -358,16 +358,14 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
             if (file) {
                 const supabase = createClient();
                 const pdfFilename = storageFileName('pdf', file);
+                // 유료 파일은 비공개 버킷에 올리고 결제 후 서명 URL로만 전달한다
                 const { error: uploadError } = await supabase.storage
-                    .from('patterns')
+                    .from('pattern-files')
                     .upload(pdfFilename, file);
 
                 if (uploadError) throw uploadError;
 
-                const { data: { publicUrl } } = supabase.storage
-                    .from('patterns')
-                    .getPublicUrl(pdfFilename);
-                pdfUrl = publicUrl;
+                pdfUrl = pdfFilename;
             }
 
             // Map structured sizeParts and yarnParts to legacy needles, sizes, and measurements for backend/translation compatibility

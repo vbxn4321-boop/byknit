@@ -21,7 +21,7 @@ export default function AdminSellerDetailLayout({
     useEffect(() => {
         const fetchData = async () => {
             const supabase = createClient();
-            const { data } = await supabase.from('profiles').select('*').eq('id', sellerId).single();
+            const { data } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', sellerId).single();
             setProfile(data);
             // Mock stats for the profile header to match Image 1
             setStats({ revenue: 0, views: 0, likes: 1, followers: 0 });

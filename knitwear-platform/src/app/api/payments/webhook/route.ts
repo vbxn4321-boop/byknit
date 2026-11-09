@@ -1,432 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/utils/supabase/server';
+import { fetchPortonePayment } from '@/utils/portone';
+import { recordPatternPurchase, refundPatternPurchase } from '@/utils/patternPurchase';
 import { settleShopCancellation, settleShopPayment, shopOrderIdFromCustomData } from '@/utils/shopPayment';
+
+interface SettleResult {
+    ok: boolean;
+    code: string;
+    message?: string;
+    retryable?: boolean;
+}
+
+function toResponse(result: SettleResult) {
+    if (result.retryable) {
+        return NextResponse.json({ error: result.message }, { status: 500 });
+    }
+    return NextResponse.json({ status: result.ok ? 'success' : 'ignored', code: result.code });
+}
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Webhook 바디 파싱
         const body = await request.json();
-        console.log('[Webhook] Received PortOne webhook:', JSON.stringify(body, null, 2));
-
-        // 포트원 V1 SDK 결제 시 imp_uid, merchant_uid, status 필드가 전달됩니다.
-        const paymentId = body.imp_uid || body.paymentId || body.data?.paymentId;
-        const status = body.status || body.data?.status;
-
-        if (!paymentId) {
-            console.error('[Webhook] Missing paymentId / imp_uid in webhook body');
-            return NextResponse.json({ error: 'Missing paymentId' }, { status: 400 });
+        const paymentId = body.imp_uid;
+        if (typeof paymentId !== 'string' || !paymentId) {
+            return NextResponse.json({ error: 'Missing imp_uid' }, { status: 400 });
         }
 
-        // paid 상태 혹은 Transaction.Paid 이벤트 유형일 때 결제 완료 처리
-        const isPaidStatus = 
-            status === 'paid' || 
-            status === 'PAID' || 
-            body.type === 'Transaction.Paid' ||
-            body.type === 'paid';
-
-        // cancelled 상태 혹은 Transaction.Cancelled 이벤트 유형일 때 환불 처리
-        const isCancelledStatus =
-            status === 'cancelled' ||
-            status === 'CANCELLED' ||
-            body.type === 'Transaction.Cancelled' ||
-            body.type === 'cancelled';
-
-        if (!isPaidStatus && !isCancelledStatus) {
-            console.log(`[Webhook] Ignored webhook status: ${status || body.type} for paymentId: ${paymentId}`);
-            return NextResponse.json({ status: 'ignored', message: 'Not a paid or cancelled event' });
+        // 웹훅 본문은 위조될 수 있으므로 결제 상태는 포트원에서 직접 조회한 값만 믿는다
+        const payment = await fetchPortonePayment(paymentId);
+        if (!payment) {
+            return NextResponse.json({ error: 'Failed to verify payment with PortOne' }, { status: 500 });
         }
 
-        const supabase = await createAdminClient();
+        const isShopOrder = !!shopOrderIdFromCustomData(payment.customData);
+        const isPatternOrder = typeof payment.customData?.pattern_id === 'string';
 
-        // -------------------------------------------------------------
-        // [CASE 1] 결제 완료 (paid) 처리
-        // -------------------------------------------------------------
-        if (isPaidStatus) {
-            // 결제 중복 처리 방지 확인
-            const { data: existingOrder } = await supabase
-                .from('orders')
-                .select('id, status')
-                .eq('transaction_id', paymentId)
-                .maybeSingle();
-
-            if (existingOrder && existingOrder.status === 'paid') {
-                console.log(`[Webhook] Payment ${paymentId} already processed (order found)`);
-                return NextResponse.json({ status: 'ignored', message: 'Payment already processed' });
-            }
-
-            // 포트원 V2 REST API를 통해 결제 상세정보 조회 (2차 검증)
-            const PORTONE_API_SECRET = process.env.PORTONE_API_SECRET;
-            if (!PORTONE_API_SECRET) {
-                console.error('[Webhook] PORTONE_API_SECRET is not configured in environment variables');
-                return NextResponse.json({ error: 'Webhook configuration error' }, { status: 500 });
-            }
-
-            console.log(`[Webhook] Verifying payment details with PortOne API for paymentId: ${paymentId}`);
-            const response = await fetch(`https://api.portone.io/payments/${paymentId}`, {
-                headers: {
-                    'Authorization': `PortOne ${PORTONE_API_SECRET}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                console.error(`[Webhook] PortOne API payment details fetch failed: Status ${response.status}, Body: ${errText}`);
-                return NextResponse.json({ error: 'Failed to verify payment with PortOne' }, { status: 400 });
-            }
-
-            const paymentData = await response.json();
-            console.log('[Webhook] PortOne payment data fetched:', JSON.stringify(paymentData, null, 2));
-
-            // 결제 상태가 PAID(결제완료)인지 검증
-            if (paymentData.status !== 'PAID') {
-                console.error(`[Webhook] PortOne payment status is not PAID. Status: ${paymentData.status}`);
-                return NextResponse.json({ error: 'Payment is not completed' }, { status: 400 });
-            }
-
-            // customData에서 충전 대상 유저 ID와 지급 크레딧 수량 추출
-            let customDataObj: any = null;
-            try {
-                if (paymentData.customData) {
-                    customDataObj = typeof paymentData.customData === 'string'
-                        ? JSON.parse(paymentData.customData)
-                        : paymentData.customData;
-                }
-            } catch (e: any) {
-                console.error('[Webhook] Failed to parse customData:', e.message, paymentData.customData);
-            }
-
-            if (!customDataObj || !customDataObj.user_id) {
-                console.error('[Webhook] Missing user_id in custom_data of payment:', JSON.stringify(paymentData.customData));
-                return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
-            }
-
-            const userId = customDataObj.user_id;
-            const patternId = customDataObj.pattern_id;
-            const creditAmount = customDataObj.credits || 0;
-            const amountVal = paymentData.amount?.total || paymentData.amount?.paid || 0;
-
-            // 뜨개 샵 실물 주문: 주문 확정과 재고 차감은 shopPayment 에서 처리한다
-            if (shopOrderIdFromCustomData(customDataObj)) {
-                const result = await settleShopPayment(paymentId);
-                if (result.retryable) {
-                    return NextResponse.json({ error: result.message }, { status: 500 });
-                }
-                return NextResponse.json({ status: result.ok ? 'success' : 'ignored', code: result.code });
-            }
-
-            if (patternId) {
-                console.log(`[Webhook] Direct pattern purchase. User: ${userId}, Pattern: ${patternId}, Amount: ${amountVal}`);
-                
-                // Fetch pattern details to get seller_id and pricing
-                const { data: pattern, error: patternErr } = await supabase
-                    .from('patterns')
-                    .select('designer_id, title, price_usd, price_krw')
-                    .eq('id', patternId)
-                    .single();
-
-                if (patternErr || !pattern) {
-                    console.error('[Webhook] Pattern not found for direct purchase:', patternErr?.message);
-                    return NextResponse.json({ error: 'Pattern not found' }, { status: 400 });
-                }
-
-                const sellerId = pattern.designer_id;
-                const priceUsd = pattern.price_usd || 0;
-                const expectedAmount = pattern.price_krw || Math.round(priceUsd * 1450);
-
-                if (amountVal !== expectedAmount) {
-                    console.error(`[Webhook] Direct purchase amount mismatch. Expected: ${expectedAmount}, Got: ${amountVal}`);
-                    return NextResponse.json({ error: 'Payment amount mismatch' }, { status: 400 });
-                }
-
-                // 주문(orders) 테이블에 이력 로깅
-                const { data: insertedOrder, error: orderError } = await supabase.from('orders').insert({
-                    user_id: userId,
-                    pattern_id: patternId,
-                    seller_id: sellerId,
-                    amount: amountVal,
-                    amount_usd: priceUsd,
-                    currency: 'KRW',
-                    status: 'paid',
-                    payment_provider: 'portone',
-                    transaction_id: paymentId
-                }).select().single();
-
-                if (orderError) {
-                    console.error('[Webhook] Direct purchase orders logging failed:', orderError.message);
-                    return NextResponse.json({ error: 'Failed to log direct order' }, { status: 500 });
-                }
-
-                // Settle proceeds to the designer in KRW (skip self-purchase)
-                if (sellerId && sellerId !== userId) {
-                    try {
-                        const { creditSellerSettlement } = await import('@/app/actions/settlement');
-                        const patternTitle = (pattern.title as any)?.ko || (pattern.title as any)?.en || 'Pattern';
-                        await creditSellerSettlement(sellerId, amountVal, insertedOrder.id, `도안 판매 정산: ${patternTitle}`);
-                    } catch (settlementErr: any) {
-                        console.error('[Webhook] Failed to settle seller proceeds:', settlementErr.message);
-                    }
-                }
-
-                // Notify seller
-                try {
-                    const patternTitle = (pattern.title as any)?.en || 'your pattern';
-                    await supabase.from('notifications').insert({
-                        user_id: sellerId,
-                        sender_id: userId,
-                        type: 'purchase',
-                        reference_id: paymentId,
-                        message: JSON.stringify({
-                            key: 'purchase',
-                            params: {
-                                title: patternTitle,
-                                price: priceUsd
-                            }
-                        }),
-                        read: false
-                    });
-                } catch (notiError: any) {
-                    console.warn('[Webhook] Warning: Failed to send direct purchase notification:', notiError.message);
-                }
-
-                console.log(`[Webhook] Success! Direct pattern purchase recorded for user ${userId}, pattern ${patternId}`);
-                return NextResponse.json({ status: 'success', message: 'Direct pattern purchase processed successfully' });
-            }
-
-            // Otherwise, credit charge flow
-            if (!creditAmount) {
-                console.error('[Webhook] Missing credits in custom_data of credit charging payment');
-                return NextResponse.json({ error: 'Missing credits in custom_data' }, { status: 400 });
-            }
-
-            console.log(`[Webhook] Proceeding to charge. User: ${userId}, Credits: ${creditAmount}, Amount: ${amountVal}`);
-
-            // 어드민 클라이언트로 DB 반영 (RLS 우회)
-            const { data: profile, error: profileGetError } = await supabase
-                .from('profiles')
-                .select('credits')
-                .eq('id', userId)
-                .single();
-
-            if (profileGetError) {
-                console.error('[Webhook] Error fetching user profile:', profileGetError.message);
-                return NextResponse.json({ error: 'User profile not found' }, { status: 400 });
-            }
-
-            const currentCredits = profile?.credits ?? 0;
-            const newCredits = currentCredits + creditAmount;
-
-            // 프로필 크레딧 업데이트 직접 수행
-            const { error: profileUpdateError } = await supabase
-                .from('profiles')
-                .update({ credits: newCredits })
-                .eq('id', userId);
-
-            if (profileUpdateError) {
-                console.error('[Webhook] Direct profile credit update failed:', profileUpdateError.message);
-                return NextResponse.json({ error: 'Failed to update user credits' }, { status: 500 });
-            }
-
-            // 크레딧 트랜잭션 추가 (충전 이력 로깅용)
-            const desc = `포트원 충전 (주문번호: ${paymentId})`;
-            const { error: txError } = await supabase
-                .from('credit_transactions')
-                .insert({
-                    user_id: userId,
-                    amount: creditAmount,
-                    type: 'earning',
-                    description: desc
-                });
-
-            if (txError) {
-                console.warn('[Webhook] Warning: Failed to insert credit transaction log:', txError.message);
-            }
-
-            // 주문(orders) 테이블에 이력 로깅
-            const { error: orderError } = await supabase.from('orders').insert({
-                user_id: userId,
-                pattern_id: null as any,
-                amount: amountVal,
-                status: 'paid',
-                payment_provider: 'portone',
-                transaction_id: paymentId
-            });
-
-            if (orderError) {
-                console.warn('[Webhook] Orders logging failed (skipping since credits are already charged):', orderError.message);
-            } else {
-                console.log('[Webhook] Order logged successfully in orders table');
-            }
-
-            console.log(`[Webhook] Success! Charged ${creditAmount} credits to user ${userId} for payment ${paymentId}`);
-            return NextResponse.json({ status: 'success', message: 'Payment processed and credits charged' });
+        if (payment.status === 'PAID') {
+            if (isShopOrder) return toResponse(await settleShopPayment(paymentId));
+            if (isPatternOrder) return toResponse(await recordPatternPurchase(payment));
         }
 
-        // -------------------------------------------------------------
-        // [CASE 2] 결제 취소/환불 (cancelled) 처리
-        // -------------------------------------------------------------
-        if (isCancelledStatus) {
-            // 이미 환불 완료 처리 되었는지 확인
-            const { data: existingOrder } = await supabase
-                .from('orders')
-                .select('id, status')
-                .eq('transaction_id', paymentId)
-                .maybeSingle();
-
-            if (existingOrder && existingOrder.status === 'refunded') {
-                console.log(`[Webhook] Payment ${paymentId} already marked as refunded`);
-                return NextResponse.json({ status: 'ignored', message: 'Payment already refunded' });
-            }
-
-            // 포트원 V2 REST API를 통해 결제 상세정보 조회 (2차 검증)
-            const PORTONE_API_SECRET = process.env.PORTONE_API_SECRET;
-            if (!PORTONE_API_SECRET) {
-                console.error('[Webhook] PORTONE_API_SECRET is not configured in environment variables');
-                return NextResponse.json({ error: 'Webhook configuration error' }, { status: 500 });
-            }
-
-            console.log(`[Webhook] Verifying cancelled payment details with PortOne API for paymentId: ${paymentId}`);
-            const response = await fetch(`https://api.portone.io/payments/${paymentId}`, {
-                headers: {
-                    'Authorization': `PortOne ${PORTONE_API_SECRET}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                console.error(`[Webhook] PortOne API payment details fetch failed: Status ${response.status}, Body: ${errText}`);
-                return NextResponse.json({ error: 'Failed to verify payment with PortOne' }, { status: 400 });
-            }
-
-            const paymentData = await response.json();
-            console.log('[Webhook] PortOne payment data fetched (cancelled):', JSON.stringify(paymentData, null, 2));
-
-            // 결제 상태가 CANCELLED(결제취소)인지 검증
-            if (paymentData.status !== 'CANCELLED') {
-                console.error(`[Webhook] PortOne payment status is not CANCELLED. Status: ${paymentData.status}`);
-                return NextResponse.json({ error: 'Payment is not cancelled' }, { status: 400 });
-            }
-
-            // customData에서 환불 대상 유저 ID와 회수할 크레딧 수량 추출
-            let customDataObj: any = null;
-            try {
-                if (paymentData.customData) {
-                    customDataObj = typeof paymentData.customData === 'string'
-                        ? JSON.parse(paymentData.customData)
-                        : paymentData.customData;
-                }
-            } catch (e: any) {
-                console.error('[Webhook] Failed to parse customData:', e.message);
-            }
-
-            // 뜨개 샵 실물 주문: 주문 상태 변경과 재고 복구는 shopPayment 에서 처리한다
-            if (shopOrderIdFromCustomData(customDataObj)) {
-                const result = await settleShopCancellation(paymentId);
-                if (result.retryable) {
-                    return NextResponse.json({ error: result.message }, { status: 500 });
-                }
-                return NextResponse.json({ status: result.ok ? 'success' : 'ignored', code: result.code });
-            }
-
-            if (!customDataObj || !customDataObj.user_id) {
-                console.error('[Webhook] Missing user_id in custom_data of payment:', JSON.stringify(paymentData.customData));
-                return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
-            }
-
-            const userId = customDataObj.user_id;
-            const patternId = customDataObj.pattern_id;
-            const creditAmount = customDataObj.credits || 0;
-            const amountVal = paymentData.amount?.total || paymentData.amount?.paid || 0;
-
-            if (patternId) {
-                console.log(`[Webhook] Direct pattern purchase refund. User: ${userId}, Pattern: ${patternId}`);
-                
-                // 주문(orders) 테이블 상태를 refunded로 업데이트
-                const { error: orderError } = await supabase
-                    .from('orders')
-                    .update({ status: 'refunded' })
-                    .eq('transaction_id', paymentId);
-
-                if (orderError) {
-                    console.error('[Webhook] Direct purchase refund status update failed:', orderError.message);
-                    return NextResponse.json({ error: 'Failed to update order status to refunded' }, { status: 500 });
-                }
-
-                console.log(`[Webhook] Success! Refunded direct pattern purchase for user ${userId}, pattern ${patternId}`);
-                return NextResponse.json({ status: 'success', message: 'Direct purchase refund processed' });
-            }
-
-            // Otherwise, credit refund flow
-            if (!creditAmount) {
-                console.error('[Webhook] Missing credits in custom_data of credit refund payment');
-                return NextResponse.json({ error: 'Missing credits in custom_data' }, { status: 400 });
-            }
-
-            console.log(`[Webhook] Proceeding to deduct credits for refund. User: ${userId}, Credits: ${creditAmount}, Amount: ${amountVal}`);
-
-            // 어드민 클라이언트로 DB 반영 (RLS 우회)
-            const { data: profile, error: profileGetError } = await supabase
-                .from('profiles')
-                .select('credits')
-                .eq('id', userId)
-                .single();
-
-            if (profileGetError) {
-                console.error('[Webhook] Error fetching user profile:', profileGetError.message);
-                return NextResponse.json({ error: 'User profile not found' }, { status: 400 });
-            }
-
-            const currentCredits = profile?.credits ?? 0;
-            // 회수할 크레딧 차감 (크레딧 보유량보다 많은 크레딧을 차감해야 할 경우 음수 대신 0으로 캡)
-            const newCredits = Math.max(0, currentCredits - creditAmount);
-
-            // 프로필 크레딧 업데이트 직접 수행
-            const { error: profileUpdateError } = await supabase
-                .from('profiles')
-                .update({ credits: newCredits })
-                .eq('id', userId);
-
-            if (profileUpdateError) {
-                console.error('[Webhook] Direct profile credit update failed during refund:', profileUpdateError.message);
-                return NextResponse.json({ error: 'Failed to update user credits' }, { status: 500 });
-            }
-
-            // 크레딧 트랜잭션 추가 (환불 회수 이력 로깅용)
-            const desc = `포트원 환불 회수 (주문번호: ${paymentId})`;
-            const { error: txError } = await supabase
-                .from('credit_transactions')
-                .insert({
-                    user_id: userId,
-                    amount: -creditAmount,
-                    type: 'refund',
-                    description: desc
-                });
-
-            if (txError) {
-                console.warn('[Webhook] Warning: Failed to insert refund transaction log:', txError.message);
-            }
-
-            // 주문(orders) 테이블 상태를 refunded로 업데이트
-            const { error: orderError } = await supabase
-                .from('orders')
-                .update({ status: 'refunded' })
-                .eq('transaction_id', paymentId);
-
-            if (orderError) {
-                console.warn('[Webhook] Failed to update order status to refunded:', orderError.message);
-            } else {
-                console.log('[Webhook] Order status set to refunded successfully');
-            }
-
-            console.log(`[Webhook] Success! Refunded and deducted ${creditAmount} credits from user ${userId} for payment ${paymentId}`);
-            return NextResponse.json({ status: 'success', message: 'Refund processed and credits deducted' });
+        if (payment.status === 'CANCELLED') {
+            if (isShopOrder) return toResponse(await settleShopCancellation(paymentId));
+            if (isPatternOrder) return toResponse(await refundPatternPurchase(paymentId));
         }
 
-        return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
-
-    } catch (err: any) {
-        console.error('[Webhook] Server Error in Webhook Handler:', err);
-        return NextResponse.json({ error: 'Internal Server Error', details: err.message }, { status: 500 });
+        return NextResponse.json({ status: 'ignored' });
+    } catch (err) {
+        console.error('[Webhook] Server error:', err);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

@@ -39,11 +39,12 @@ export const config = {
     matcher: [
         /*
          * Match all request paths except:
+         * - api/payments (PortOne webhooks must not be redirected to a locale path)
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico, icon, apple-icon
          * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
          */
-        '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|ads.txt|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api/payments|_next/static|_next/image|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|ads.txt|naver|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };

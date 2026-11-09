@@ -21,7 +21,7 @@ interface Comment {
     parent_id: string | null;
     content: string;
     created_at: string;
-    profiles: { id: string; display_name: string; email: string };
+    profiles: { id: string; display_name: string };
 }
 
 interface Post {
@@ -32,7 +32,7 @@ interface Post {
     created_at: string;
     locale: string;
     category: string;
-    profiles: { id: string; display_name: string; email: string };
+    profiles: { id: string; display_name: string };
     likes: { count: number }[];
     comments: { count: number }[];
     views: number;

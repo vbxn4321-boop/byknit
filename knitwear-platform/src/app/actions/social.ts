@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { createNotification } from './notification';
 
@@ -245,13 +245,17 @@ export async function getFollowStatus(followingId: string) {
 
 export async function getDesignerProfile(designerId: string) {
     const supabase = await createClient();
-    const { data: profile, error } = await supabase
+    const adminClient = await createAdminClient();
+    const { data: fullProfile, error } = await adminClient
         .from('profiles')
         .select('*')
         .eq('id', designerId)
         .single();
 
     if (error) return { error: error.message };
+
+    // 공개 프로필에는 연락처를 포함하지 않는다
+    const { email: _email, phone: _phone, ...profile } = fullProfile;
 
     // Get follower count
     const { count, error: countError } = await supabase

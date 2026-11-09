@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { grantCredits, spendCredits } from '@/utils/creditsServer';
 
 export async function getUserCredits(userId: string) {
     const supabase = await createClient();
@@ -16,28 +17,20 @@ export async function getUserCredits(userId: string) {
         return 0;
     }
 
-    // Auto-grant 1000 welcome credits if user has 0 credits and no transactions yet
+    // Auto-grant 1000 welcome credits if the signed-in user has 0 credits and no transactions yet
     const currentCredits = data.credits ?? 0;
     if (currentCredits === 0) {
         try {
+            const { data: { user } } = await supabase.auth.getUser();
             const { data: txs, error: txError } = await supabase
                 .from('credit_transactions')
                 .select('id')
                 .eq('user_id', userId)
                 .limit(1);
 
-            if (!txError && (!txs || txs.length === 0)) {
-                console.log(`[Credits] Auto-granting 1000 welcome credits to new user: ${userId}`);
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ credits: 1000 })
-                    .eq('id', userId);
-
-                if (!updateError) {
-                    return 1000;
-                } else {
-                    console.error('[Credits] Failed to update welcome credits:', updateError.message);
-                }
+            if (user?.id === userId && !txError && (!txs || txs.length === 0)) {
+                await grantCredits(userId, 1000, 'signUpBonus');
+                return 1000;
             }
         } catch (e: any) {
             console.error('[Credits] Welcome credit check failed:', e.message);
@@ -81,73 +74,11 @@ export async function getCreditHistory(userId: string) {
     return data;
 }
 
-export async function addCredits(userId: string, amount: number, description: string) {
-    const supabase = await createClient();
-    
-    // 1. Get current balance
-    const currentCredits = await getUserCredits(userId);
-
-    const { error } = await supabase
-        .from('credit_transactions')
-        .insert({
-            user_id: userId,
-            amount: amount,
-            type: 'earning',
-            description: description
-        });
-
-    if (error) {
-        console.warn('Error inserting transaction into credit_transactions, falling back to direct profiles update:', error.message);
-        
-        // Fallback: update profile credits directly
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ credits: currentCredits + amount })
-            .eq('id', userId);
-
-        if (profileError) {
-            console.error('Fallback direct profile update failed:', profileError.message);
-            throw new Error('Failed to add credits');
-        }
-    }
-
-    revalidatePath('/', 'layout');
-}
-
 export async function deductCredits(userId: string, amount: number, description: string) {
     const supabase = await createClient();
-    
-    // 1. Check current balance
-    const currentCredits = await getUserCredits(userId);
-    if (currentCredits < amount) {
-        throw new Error('Insufficient credits');
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== userId) throw new Error('Unauthorized');
 
-    // 2. Insert transaction (Trigger will update profile credits)
-    const { error } = await supabase
-        .from('credit_transactions')
-        .insert({
-            user_id: userId,
-            amount: -amount,
-            type: 'spending',
-            description: description
-        });
-
-    if (error) {
-        console.warn('Error inserting transaction into credit_transactions, falling back to direct profiles update:', error.message);
-        
-        // Fallback: update profile credits directly
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ credits: currentCredits - amount })
-            .eq('id', userId);
-
-        if (profileError) {
-            console.error('Fallback direct profile update failed:', profileError.message);
-            throw new Error('Failed to deduct credits');
-        }
-    }
-
+    await spendCredits(userId, amount, description);
     revalidatePath('/', 'layout');
 }
-

@@ -3,7 +3,7 @@
 
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { addCredits } from './credits';
+import { grantCredits } from '@/utils/creditsServer';
 import { sendNotification } from './notifications';
 
 // ============================================
@@ -26,7 +26,7 @@ export async function getPosts(locale: string = 'ko') {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
@@ -55,7 +55,7 @@ export async function getPopularPosts(limit: number = 5) {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:pattern_id (id, title, thumbnail_url, images, price_usd)
@@ -193,7 +193,7 @@ export async function createPost(formData: FormData) {
     // 도안을 첨부한 게시글이면 +50 크레딧 보상 (서버 사이드에서만 처리)
     if (patternId) {
         try {
-            await addCredits(user.id, 100, 'Pattern Upload Bonus');
+            await grantCredits(user.id, 100, 'Pattern Upload Bonus');
         } catch (creditError) {
             console.error('Failed to award pattern share credits:', creditError);
             // 크레딧 지급 실패해도 게시글은 정상 등록
@@ -264,7 +264,7 @@ export async function toggleLike(postId: string) {
                         .select('id').eq('user_id', post.user_id).like('description', `%Popular Post%${postId}%`).maybeSingle();
                     
                     if (!existingReward) {
-                        await addCredits(post.user_id, 50, `Popular Post Reward (${postId})`);
+                        await grantCredits(post.user_id, 50, `Popular Post Reward (${postId})`);
                     }
                 }
             }
@@ -389,7 +389,7 @@ export async function getPost(postId: string) {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)
@@ -414,7 +414,7 @@ export async function getComments(postId: string) {
         .from('post_comments')
         .select(`
             *,
-            profiles:user_id (id, display_name, email)
+            profiles:user_id (id, display_name)
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
@@ -657,7 +657,7 @@ export async function searchPosts(query: string, locale: string) {
         .from('posts')
         .select(`
             *,
-            profiles:user_id (id, display_name, email),
+            profiles:user_id (id, display_name),
             likes:post_likes(count),
             comments:post_comments(count),
             pattern:patterns (id, title, thumbnail_url, images, price_usd, difficulty)

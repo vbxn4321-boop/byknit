@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { createNotification } from './notification';
 import { revalidatePath } from 'next/cache';
 
@@ -41,7 +41,8 @@ export async function createOrder(data: {
     if (existing && existing.length > 0) return { success: true, existing: true };
 
     // 2. Insert Order
-    const { data: order, error } = await supabase.from('orders').insert({
+    const adminClient = await createAdminClient();
+    const { data: order, error } = await adminClient.from('orders').insert({
         user_id: user.id,
         pattern_id: data.patternId,
         seller_id: pattern.designer_id, // Important for analytics

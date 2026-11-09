@@ -2,7 +2,8 @@
 
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { addCredits } from "./credits";
+import { grantCredits } from "@/utils/creditsServer";
+import { createPdfDownloadUrl, loadPatternPrivate, savePatternPrivate } from "@/utils/patternPrivate";
 import { assertCanSellPaid } from "@/utils/sellerGuard";
 
 // 서버 측 다운로드 권한 검증 - 클라이언트 상태(canDownload 등)를 신뢰하지 않고
@@ -26,17 +27,26 @@ export async function canDownloadPattern(patternId: string): Promise<{ allowed: 
     const priceKrw = pattern.price_krw || Math.round((pattern.price_usd || 0) * 1450);
     if (priceKrw <= 0) return { allowed: true };
 
-    const { data: order } = await supabase
+    // 구매 후 가격이 올라도 기존 구매자는 받을 수 있어야 하므로 실제 결제 주문이 있는지만 본다
+    const { data: orders } = await supabase
         .from('orders')
-        .select('id, amount')
+        .select('amount')
         .eq('user_id', user.id)
         .eq('pattern_id', patternId)
-        .eq('status', 'paid')
-        .maybeSingle();
+        .eq('status', 'paid');
 
-    if (order && (order.amount || 0) >= priceKrw) return { allowed: true };
+    if (orders?.some(order => (order.amount || 0) > 0)) return { allowed: true };
 
     return { allowed: false, reason: 'Purchase required' };
+}
+
+// 다운로드 권한을 확인한 뒤에만 PDF 주소와 차트 데이터를 전달한다
+export async function getPatternDeliverable(patternId: string): Promise<{ error: string } | { pdfUrl: string | null; gridData: any }> {
+    const permission = await canDownloadPattern(patternId);
+    if (!permission.allowed) return { error: permission.reason || 'Purchase required' };
+
+    const { pdf_url, grid_data } = await loadPatternPrivate(patternId);
+    return { pdfUrl: await createPdfDownloadUrl(pdf_url), gridData: grid_data };
 }
 
 export async function createPdfPattern(data: {
@@ -92,6 +102,11 @@ export async function createPdfPattern(data: {
 
     await assertCanSellPaid(adminClient, user.id, isAdmin, data.priceKrw);
 
+    const isPhysicalItem = isAdmin && data.itemType === 'physical';
+    if (!isPhysicalItem && (!/^[\w./-]+$/.test(data.pdfUrl) || data.pdfUrl.includes('..'))) {
+        throw new Error('Invalid PDF file');
+    }
+
     // Translate metadata if needed
     const { translatePatternMetadata } = await import("./translate");
     const translatedMetadata = await translatePatternMetadata({
@@ -123,7 +138,6 @@ export async function createPdfPattern(data: {
             purchase_url: isAdmin ? (data.purchaseUrl || null) : null,
             content: {
                 type: isPhysical ? 'external' : 'pdf',
-                pdf_url: isPhysical ? null : data.pdfUrl,
                 original_filename: isPhysical ? null : (data.title + '.pdf'),
                 metadata: {
                     craft_type: data.craftType,
@@ -147,10 +161,20 @@ export async function createPdfPattern(data: {
         throw new Error(error.message);
     }
 
+    // PDF 위치는 결제 후에만 전달되므로 비공개 테이블에 저장한다
+    if (!isPhysical) {
+        try {
+            await savePatternPrivate(pattern.id, { pdf_url: data.pdfUrl });
+        } catch (privateError) {
+            await adminClient.from('patterns').delete().eq('id', pattern.id);
+            throw privateError;
+        }
+    }
+
     // Award credits for uploading a pattern (only for creator digital patterns)
     if (!isPhysical) {
         try {
-            await addCredits(user.id, 100, 'Pattern Upload Reward');
+            await grantCredits(user.id, 100, 'Pattern Upload Reward');
         } catch (creditError) {
             console.error('Failed to award credits:', creditError);
         }

@@ -18,7 +18,7 @@ import {
     toggleLike, getLikeStatus, deleteReview
 } from '@/app/actions/social';
 import { createOrder } from '@/app/actions/order';
-import { incrementViewCount, incrementDownloadCount, canDownloadPattern } from '@/app/actions/pattern';
+import { incrementViewCount, incrementDownloadCount, canDownloadPattern, getPatternDeliverable } from '@/app/actions/pattern';
 import { PatternPDFGenerator } from '@/utils/PatternPDFGenerator';
 
 // New Sub-Components
@@ -45,6 +45,21 @@ import { ProductReviews } from './detail/ProductReviews';
 import { ProductInquiries } from './detail/ProductInquiries';
 
 // ... (previous imports remain, ensure imports are there)
+
+async function saveFile(url: string, filename: string) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+        const objectUrl = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(objectUrl);
+    } catch {
+        window.location.assign(url);
+    }
+}
 
 export function PatternDetailClient({ patternId, locale, user, isModal }: PatternDetailClientProps) {
     // ... (existing state and useEffects remain unchanged) ...
@@ -155,22 +170,14 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
 
                 // 3. Fetch Social Status (User dependent)
                 if (activeUser) {
-                    const [likeRes, followRes, orderRes] = await Promise.all([
+                    const [likeRes, followRes, permission] = await Promise.all([
                         getLikeStatus(patternId),
                         getFollowStatus(data.designer_id),
-                        supabase.from('orders').select('*').eq('user_id', activeUser.id).eq('pattern_id', patternId).eq('status', 'paid').maybeSingle()
+                        canDownloadPattern(patternId)
                     ]);
                     setIsLiked(likeRes.isLiked);
                     setIsFollowing(followRes.isFollowing);
-                    const priceKrw = data.price_krw || Math.round((data.price_usd || 0) * 1450);
-                    const isPaidPattern = priceKrw > 0;
-                    const hasValidPaidOrder = orderRes.data && (!isPaidPattern || (orderRes.data.amount || 0) >= priceKrw);
-
-                    if (!isPaidPattern || hasValidPaidOrder) {
-                        setCanDownload(true);
-                    } else {
-                        setCanDownload(false);
-                    }
+                    setCanDownload(permission.allowed);
                 }
 
                 // 3. Fetch Public Data (Reviews)
@@ -287,8 +294,8 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
         if (!pattern) return;
 
         // Server-side re-verification: never trust client-only canDownload state for paid patterns
-        const permission = await canDownloadPattern(patternId);
-        if (!permission.allowed) {
+        const deliverable = await getPatternDeliverable(patternId);
+        if ('error' in deliverable) {
             alert(locale === 'ko' ? '구매가 필요한 도안입니다.' : 'This pattern requires purchase.');
             setCanDownload(false);
             setShowDownloadOptions(false);
@@ -311,24 +318,20 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
             download_count: (prev.download_count || 0) + 1
         } : null);
 
-        const pdfGenerator = new PatternPDFGenerator({
-            pattern: pattern!,
-            user: authUser,
-            targetLocale: lang, // Use selected language
-            designerProfile: profile
-        });
-        await pdfGenerator.generate();
-        await incrementDownloadCount(patternId);
-
-        // 🔔 Reward the designer (+10) for download
-        if (pattern.designer_id && pattern.designer_id !== authUser?.id) {
-            try {
-                const { addCredits } = await import('@/app/actions/credits');
-                await addCredits(pattern.designer_id, 10, `Marketplace Download Reward (${patternId})`);
-            } catch (e) {
-                console.error('Failed to reward pattern download:', e);
-            }
+        if (deliverable.pdfUrl) {
+            // 판매자가 올린 PDF가 있으면 원본 파일을 그대로 전달한다
+            const title = pattern.title?.[lang] || pattern.title?.ko || pattern.title?.en || 'pattern';
+            await saveFile(deliverable.pdfUrl, `${title.replace(/[\\/:*?"<>|]/g, '_')}.pdf`);
+        } else {
+            const pdfGenerator = new PatternPDFGenerator({
+                pattern: { ...pattern!, grid_data: deliverable.gridData ?? undefined },
+                user: authUser,
+                targetLocale: lang, // Use selected language
+                designerProfile: profile
+            });
+            await pdfGenerator.generate();
         }
+        await incrementDownloadCount(patternId);
     };
 
     if (isLoading || !pattern) {

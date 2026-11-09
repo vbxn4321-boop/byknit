@@ -1,7 +1,10 @@
 'use server';
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 import { deductCredits } from "./credits";
+import { grantCredits } from "@/utils/creditsServer";
+import { loadPatternPrivate, savePatternPrivate } from "@/utils/patternPrivate";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -161,10 +164,6 @@ Be precise. If the image is not related to knitting or crochet, output an error 
                         preview_content: {
                             ko: aiResult.preview_ko,
                             en: aiResult.preview_en
-                        },
-                        full_content: {
-                            ko: aiResult.full_ko,
-                            en: aiResult.full_en
                         }
                     }
                 }
@@ -175,6 +174,14 @@ Be precise. If the image is not related to knitting or crochet, output an error 
         if (dbError) {
             console.error('Failed to save pattern draft in Supabase:', dbError);
             throw new Error(dbError.message);
+        }
+
+        // 전체 도안은 크레딧으로 잠금 해제한 뒤에만 전달한다
+        try {
+            await savePatternPrivate(newPattern.id, { full_content: { ko: aiResult.full_ko, en: aiResult.full_en } });
+        } catch (privateError) {
+            await supabase.from('patterns').delete().eq('id', newPattern.id);
+            throw privateError;
         }
 
         console.log(`[AI Analyze] Draft pattern saved successfully. ID: ${newPattern.id}`);
@@ -220,7 +227,7 @@ export async function unlockFabricPattern(patternId: string) {
             .eq('id', patternId)
             .single();
 
-        if (fetchError || !pattern) {
+        if (fetchError || !pattern || pattern.designer_id !== user.id || !pattern.content?.metadata?.is_ai_generated) {
             return { success: false, error: "Pattern draft not found" };
         }
 
@@ -235,10 +242,10 @@ export async function unlockFabricPattern(patternId: string) {
 
         if (existingOrder) {
             console.log(`[AI Unlock] Pattern already unlocked. Returning full content.`);
-            const metadata = pattern.content?.metadata;
+            const { full_content } = await loadPatternPrivate(patternId);
             return {
                 success: true,
-                fullContent: metadata?.full_content || null
+                fullContent: full_content
             };
         }
 
@@ -251,7 +258,8 @@ export async function unlockFabricPattern(patternId: string) {
         }
 
         // 4. Create paid order in the database to record ownership
-        const { error: orderError } = await supabase
+        const adminClient = await createAdminClient();
+        const { error: orderError } = await adminClient
             .from('orders')
             .insert({
                 user_id: user.id,
@@ -267,17 +275,16 @@ export async function unlockFabricPattern(patternId: string) {
         if (orderError) {
             console.error('[AI Unlock] Failed to create order in Supabase:', orderError.message);
             // Refund credits on failure
-            const { addCredits } = await import('./credits');
-            await addCredits(user.id, 50, `AI 도안 해제 실패 환불`);
+            await grantCredits(user.id, 50, `AI 도안 해제 실패 환불`);
             throw new Error("결제 내역 저장에 실패해 환불 처리되었습니다.");
         }
 
         console.log(`[AI Unlock] Unlock successful for user ${user.id}.`);
 
-        const metadata = pattern.content?.metadata;
+        const { full_content } = await loadPatternPrivate(patternId);
         return {
             success: true,
-            fullContent: metadata?.full_content || null
+            fullContent: full_content
         };
 
     } catch (e: any) {

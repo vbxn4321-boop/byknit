@@ -1,6 +1,9 @@
 // 서버 전용: 샵 결제 검증/확정/환불. 클라이언트 콜백(actions/shop)과 웹훅이 함께 사용한다.
 // 'use server' 파일이 아니므로 브라우저에서 직접 호출할 수 없다.
 import { createAdminClient } from '@/utils/supabase/server';
+import { cancelPortonePayment, fetchPortonePayment } from '@/utils/portone';
+
+export { cancelPortonePayment };
 
 export interface ShopSettleResult {
     ok: boolean;
@@ -13,60 +16,9 @@ export interface ShopSettleResult {
 const fail = (code: string, message: string, retryable = false): ShopSettleResult =>
     ({ ok: false, code, message, retryable });
 
-async function fetchPayment(paymentId: string): Promise<any | null> {
-    const secret = process.env.PORTONE_API_SECRET;
-    if (!secret) {
-        console.error('[Shop] PORTONE_API_SECRET is not configured');
-        return null;
-    }
-    const response = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}`, {
-        headers: { Authorization: `PortOne ${secret}`, 'Content-Type': 'application/json' },
-        cache: 'no-store',
-    });
-    if (!response.ok) {
-        console.error(`[Shop] PortOne lookup failed: ${response.status} ${await response.text()}`);
-        return null;
-    }
-    return response.json();
-}
-
-function parseCustomData(payment: any): any {
-    const raw = payment?.customData;
-    if (!raw) return null;
-    if (typeof raw !== 'string') return raw;
-    try {
-        return JSON.parse(raw);
-    } catch {
-        return null;
-    }
-}
-
-const paidAmountOf = (payment: any): number => payment?.amount?.total ?? payment?.amount?.paid ?? 0;
-
 /** 결제 데이터에 담긴 샵 주문 ID. 샵 결제가 아니면 null */
 export function shopOrderIdFromCustomData(customData: any): string | null {
     return typeof customData?.shop_order_id === 'string' ? customData.shop_order_id : null;
-}
-
-/** PortOne에 전액 취소를 요청한다. 이미 취소된 결제도 성공으로 본다. */
-export async function cancelPortonePayment(paymentId: string, reason: string): Promise<boolean> {
-    const secret = process.env.PORTONE_API_SECRET;
-    if (!secret) return false;
-
-    const payment = await fetchPayment(paymentId);
-    if (!payment) return false;
-    if (payment.status === 'CANCELLED') return true;
-
-    const response = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}/cancel`, {
-        method: 'POST',
-        headers: { Authorization: `PortOne ${secret}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, amount: paidAmountOf(payment) }),
-    });
-    if (!response.ok) {
-        console.error(`[Shop] PortOne cancel failed: ${response.status} ${await response.text()}`);
-        return false;
-    }
-    return true;
 }
 
 /**
@@ -74,11 +26,10 @@ export async function cancelPortonePayment(paymentId: string, reason: string): P
  * @param expectedOrderId 지정하면 결제가 이 주문을 위한 것인지까지 확인한다
  */
 export async function settleShopPayment(paymentId: string, expectedOrderId?: string): Promise<ShopSettleResult> {
-    const payment = await fetchPayment(paymentId);
+    const payment = await fetchPortonePayment(paymentId);
     if (!payment) return fail('lookup_failed', '결제 내역을 조회하지 못했습니다.', true);
 
-    const customData = parseCustomData(payment);
-    const orderId = shopOrderIdFromCustomData(customData);
+    const orderId = shopOrderIdFromCustomData(payment.customData);
 
     // 다른 용도의 결제(크레딧 충전 등)를 샵 주문 결제로 재사용하지 못하게 한다
     if (!orderId || (expectedOrderId && orderId !== expectedOrderId)) {
@@ -92,7 +43,7 @@ export async function settleShopPayment(paymentId: string, expectedOrderId?: str
     const { data: result, error } = await supabase.rpc('finalize_shop_order', {
         p_order_id: orderId,
         p_payment_id: paymentId,
-        p_paid_amount: paidAmountOf(payment),
+        p_paid_amount: payment.amount,
     });
 
     if (error) {
@@ -146,11 +97,11 @@ async function refundUnfulfillable(
 
 /** PortOne에서 취소된 결제를 주문에 반영한다 (웹훅, 포트원 콘솔에서 직접 취소한 경우 포함) */
 export async function settleShopCancellation(paymentId: string): Promise<ShopSettleResult> {
-    const payment = await fetchPayment(paymentId);
+    const payment = await fetchPortonePayment(paymentId);
     if (!payment) return fail('lookup_failed', '결제 내역을 조회하지 못했습니다.', true);
     if (payment.status !== 'CANCELLED') return fail('not_cancelled', '취소된 결제가 아닙니다.');
 
-    const orderId = shopOrderIdFromCustomData(parseCustomData(payment));
+    const orderId = shopOrderIdFromCustomData(payment.customData);
     if (!orderId) return fail('payment_not_for_order', '샵 결제가 아닙니다.');
 
     const supabase = await createAdminClient();
