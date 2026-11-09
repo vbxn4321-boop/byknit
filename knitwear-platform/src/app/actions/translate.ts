@@ -37,7 +37,7 @@ export async function translateText(
                     apiKey: currentKey,
                     baseURL: 'https://api.groq.com/openai/v1',
                 });
-                const model = 'llama-3.3-70b-versatile';
+                const model = 'qwen/qwen3.8-27b';
 
                 console.log(`[Translate] Attempting with Groq key index ${i} (${model})`);
 
