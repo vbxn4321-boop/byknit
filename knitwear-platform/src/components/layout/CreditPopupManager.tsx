@@ -1,4 +1,5 @@
 'use client';
+import { isMaintenanceActive } from '@/utils/maintenance';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
@@ -73,6 +74,9 @@ export function CreditPopupManager({ isAuth }: CreditPopupManagerProps) {
 
     useEffect(() => {
         if (loadingProfile) return;
+
+        // 점검 중에는 로그인을 권하는 팝업이 혼란을 주므로 띄우지 않는다
+        if (isMaintenanceActive()) return;
 
         const timer = setTimeout(() => {
             const hideUntil = localStorage.getItem('hideCreditPopupUntil_byknit');
