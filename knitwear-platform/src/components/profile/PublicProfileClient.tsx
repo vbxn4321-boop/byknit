@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,7 +55,7 @@ export function PublicProfileClient({ profile, patterns, viewer, initialIsFollow
                     <div className="w-24 h-24 md:w-36 md:h-36 rounded-full border-2 border-gray-100 p-1 flex-shrink-0">
                         <div className="w-full h-full rounded-full bg-gray-200 overflow-hidden relative">
                             {profile.avatar_url ? (
-                                <img src={profile.avatar_url} alt={profile.display_name || ''} className="w-full h-full object-cover" />
+                                <img src={optimizedImageUrl(profile.avatar_url, 128)} alt={profile.display_name || ''} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400 font-bold bg-gray-100 uppercase">
                                     {(profile.display_name || profile.username || 'U')[0]}
@@ -153,7 +154,7 @@ export function PublicProfileClient({ profile, patterns, viewer, initialIsFollow
                         >
                             {pattern.preview_images?.[0] || pattern.thumbnail_url ? (
                                 <img
-                                    src={pattern.preview_images?.[0] || pattern.thumbnail_url || ''}
+                                    src={optimizedImageUrl(pattern.preview_images?.[0] || pattern.thumbnail_url, 640) || ''}
                                     alt=""
                                     className="w-full h-full object-cover"
                                 />

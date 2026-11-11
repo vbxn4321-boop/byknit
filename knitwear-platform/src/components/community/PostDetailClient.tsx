@@ -1,4 +1,6 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
+import { compressImage } from '@/utils/compressImage';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -297,7 +299,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
             if (removeImage) {
                 formData.append('remove_image', 'true');
             } else if (editImageFile) {
-                formData.append('image', editImageFile);
+                formData.append('image', await compressImage(editImageFile));
             }
             
             await updatePost(post.id, formData);
@@ -700,7 +702,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                         <div className="p-4 bg-stone-50 rounded-2xl border border-stone-100 flex items-center gap-3">
                                             {getPatternImage(post.pattern) ? (
                                                 <img
-                                                    src={getPatternImage(post.pattern)!}
+                                                    src={optimizedImageUrl(getPatternImage(post.pattern), 640)}
                                                     alt="pattern"
                                                     className="w-12 h-12 rounded-xl object-cover border border-stone-100 flex-shrink-0"
                                                 />
@@ -731,7 +733,7 @@ export function PostDetailClient({ post, comments: initialComments, user, userRo
                                     {post.images && post.images.length > 0 && post.images.map((imgUrl, i) => (
                                         <div key={i} className="p-4 bg-stone-50 rounded-2xl border border-stone-100 flex items-center gap-3">
                                             <img
-                                                src={imgUrl}
+                                                src={optimizedImageUrl(imgUrl, 1080)}
                                                 alt="attached photo"
                                                 className="w-12 h-12 rounded-xl object-cover border border-stone-100 flex-shrink-0"
                                             />

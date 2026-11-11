@@ -1,5 +1,6 @@
 
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -55,7 +56,7 @@ export function SellerProductList({ initialProducts, locale }: SellerProductList
                     <div key={product.id} className="p-6 flex items-center gap-6 hover:bg-cream-50/20 transition-all group">
                         <div className="w-20 h-20 rounded-2xl overflow-hidden bg-tan-100 flex-shrink-0">
                             {product.thumbnail_url && (
-                                <img src={product.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                                <img src={optimizedImageUrl(product.thumbnail_url, 640)} alt="" className="w-full h-full object-cover" />
                             )}
                         </div>
                         <div className="flex-1 min-w-0">

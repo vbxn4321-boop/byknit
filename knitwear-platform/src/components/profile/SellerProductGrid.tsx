@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -99,7 +100,7 @@ export function SellerProductGrid({ products, locale }: SellerProductGridProps) 
                             >
                                 {product.thumbnail_url ? (
                                     <img
-                                        src={product.thumbnail_url}
+                                        src={optimizedImageUrl(product.thumbnail_url, 640)}
                                         alt=""
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                     />
@@ -296,7 +297,7 @@ function PatternDetailModal({
                     <div className="flex gap-4 mb-6">
                         <div className="w-32 h-32 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 shadow-sm border border-gray-100">
                             {product.thumbnail_url && (
-                                <img src={product.thumbnail_url} className="w-full h-full object-cover" />
+                                <img src={optimizedImageUrl(product.thumbnail_url, 640)} className="w-full h-full object-cover" />
                             )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -377,7 +378,7 @@ function PatternDetailModal({
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
                                             <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
-                                                {review.user?.avatar_url && <img src={review.user.avatar_url} className="w-full h-full object-cover" />}
+                                                {review.user?.avatar_url && <img src={optimizedImageUrl(review.user.avatar_url, 128)} className="w-full h-full object-cover" />}
                                             </div>
                                             <span className="font-bold text-gray-800">{review.user?.full_name || 'User'}</span>
                                         </div>

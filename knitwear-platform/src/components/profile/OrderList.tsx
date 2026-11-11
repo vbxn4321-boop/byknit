@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -44,7 +45,7 @@ export function OrderList({ initialOrders, locale, user }: OrderListProps) {
                     >
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-tan-200 flex-shrink-0">
                             {order.patterns?.thumbnail_url && (
-                                <img src={order.patterns.thumbnail_url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                <img src={optimizedImageUrl(order.patterns.thumbnail_url, 640)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                             )}
                         </div>
                         <div className="flex-1 min-w-0">

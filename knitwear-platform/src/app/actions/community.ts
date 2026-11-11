@@ -120,7 +120,7 @@ export async function createPost(formData: FormData) {
             const { error: uploadError } = await supabase.storage
                 .from('community-images')
                 .upload(filePath, imageFile, {
-                    cacheControl: '3600',
+                    cacheControl: '31536000',
                     upsert: true
                 });
 
@@ -736,7 +736,7 @@ export async function updatePost(postId: string, formData: FormData) {
             const { error: uploadError } = await supabase.storage
                 .from('community-images')
                 .upload(filePath, imageFile, {
-                    cacheControl: '3600',
+                    cacheControl: '31536000',
                     upsert: true
                 });
 

@@ -1,4 +1,5 @@
 'use client';
+import { compressImage, IMAGE_CACHE_SECONDS } from '@/utils/compressImage';
 
 import { useState, useRef } from 'react';
 import { Camera, Loader2, User } from 'lucide-react';
@@ -19,8 +20,9 @@ export function AvatarEditor({ currentAvatarUrl, displayName }: AvatarEditorProp
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
             setUploading(true);
-            const file = event.target.files?.[0];
-            if (!file) return;
+            const picked = event.target.files?.[0];
+            if (!picked) return;
+            const file = await compressImage(picked, 512);
 
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
@@ -32,7 +34,7 @@ export function AvatarEditor({ currentAvatarUrl, displayName }: AvatarEditorProp
 
             const { error: uploadError, data } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file);
+                .upload(filePath, file, { cacheControl: IMAGE_CACHE_SECONDS });
 
             if (uploadError) throw uploadError;
 

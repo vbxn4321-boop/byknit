@@ -1,4 +1,5 @@
 'use client';
+import { isMaintenanceActive, maintenancePaymentMessage } from '@/utils/maintenance';
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -101,6 +102,10 @@ export function ShopCheckout({ locale, user }: ShopCheckoutProps) {
 
     const handlePay = async () => {
         setError('');
+        if (isMaintenanceActive()) {
+            setError(maintenancePaymentMessage(isKo));
+            return;
+        }
         const IMP = (window as any).IMP;
         if (!IMP) {
             setError(isKo ? '결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.' : 'Loading payment module. Please try again in a moment.');

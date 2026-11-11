@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -98,7 +99,7 @@ export function CartDrawer({ locale }: CartDrawerProps) {
                                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-200 shrink-0 relative">
                                         {item.image ? (
                                             <img
-                                                src={item.image}
+                                                src={optimizedImageUrl(item.image, 128)}
                                                 alt={getTitleString(item.title)}
                                                 className="w-full h-full object-cover"
                                             />

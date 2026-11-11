@@ -1,4 +1,5 @@
 'use client';
+import { compressImage, IMAGE_CACHE_SECONDS } from '@/utils/compressImage';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -63,11 +64,12 @@ export function ShopProductsAdmin() {
 
         const supabase = createClient();
         const uploaded: string[] = [];
-        for (const file of Array.from(files).slice(0, MAX_IMAGES - form.images.length)) {
+        for (const original of Array.from(files).slice(0, MAX_IMAGES - form.images.length)) {
+            const file = await compressImage(original);
             // 스토리지 키에는 한글을 쓸 수 없어 원본 파일명 대신 무작위 이름을 쓴다
             const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
             const path = `${crypto.randomUUID()}.${extension}`;
-            const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file);
+            const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: IMAGE_CACHE_SECONDS });
             if (uploadError) {
                 setError(`이미지 업로드 실패 (${file.name}): ${uploadError.message}`);
                 break;

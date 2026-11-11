@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -463,7 +464,7 @@ export function PatternDetailClient({ patternId, locale, user, isModal }: Patter
                                 <Link href={`/${locale}/profile/${pattern.designer_id}`} className="flex items-center gap-2 group">
                                     <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs uppercase overflow-hidden">
                                         {profile?.avatar_url ? (
-                                            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                            <img src={optimizedImageUrl(profile.avatar_url, 128)} alt="" className="w-full h-full object-cover" />
                                         ) : (
                                             (profile?.display_name || profile?.username || 'D')?.[0]
                                         )}

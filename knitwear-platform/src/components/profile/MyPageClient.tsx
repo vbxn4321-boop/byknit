@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState, useTransition } from 'react';
 import { 
@@ -216,7 +217,7 @@ export function MyPageClient({
                                             <div key={item.id} className="p-4 bg-stone-50 border border-stone-200/60 rounded-2xl flex items-center gap-3">
                                                 {pattern.thumbnail_url ? (
                                                     <img
-                                                        src={pattern.thumbnail_url}
+                                                        src={optimizedImageUrl(pattern.thumbnail_url, 640)}
                                                         alt={getPatternTitle(pattern.title)}
                                                         className="w-12 h-12 rounded-xl object-cover border border-stone-100 flex-shrink-0"
                                                     />

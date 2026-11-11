@@ -1,5 +1,6 @@
 
 'use client';
+import { compressImage } from '@/utils/compressImage';
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
@@ -106,6 +107,10 @@ export default function CommunityWritePage({ params }: { params: Promise<{ local
         e.preventDefault();
         setIsSubmitting(true);
         const formData = new FormData(e.currentTarget);
+        const coverImage = formData.get('image');
+        if (coverImage instanceof File && coverImage.size > 0) {
+            formData.set('image', await compressImage(coverImage));
+        }
         formData.append('locale', locale);
 
         const categoryValue = selectedCategory === 'notice' 

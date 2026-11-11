@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -649,7 +650,7 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
             {/* Image Container */}
             <div className="aspect-square relative overflow-hidden bg-tan-100/30">
                 <img
-                    src={pattern.images?.[0] || 'https://picsum.photos/400/400'}
+                    src={optimizedImageUrl(pattern.images?.[0], 640) || 'https://picsum.photos/400/400'}
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
@@ -700,7 +701,7 @@ function PatternCard({ pattern, locale }: { pattern: any; locale: string }) {
                             <Crown className="w-5 h-5 fill-amber-100" />
                         </div>
                     ) : pattern.author_avatar ? (
-                        <img src={pattern.author_avatar} alt="" className="w-full h-full object-cover" />
+                        <img src={optimizedImageUrl(pattern.author_avatar, 128)} alt="" className="w-full h-full object-cover" />
                     ) : (
                         <UserIcon className="w-full h-full p-2 text-brown-400" />
                     )}

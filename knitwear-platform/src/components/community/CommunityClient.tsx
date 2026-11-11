@@ -1,5 +1,6 @@
 
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import { useState, useEffect } from 'react';
 import { 
@@ -462,7 +463,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                                 </div>
                                                 {post.pattern && getPatternImage(post.pattern) && (
                                                     <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-stone-100">
-                                                        <img src={getPatternImage(post.pattern)!} alt="" className="w-full h-full object-cover" />
+                                                        <img src={optimizedImageUrl(getPatternImage(post.pattern), 640)} alt="" className="w-full h-full object-cover" />
                                                     </div>
                                                 )}
                                             </div>
@@ -562,7 +563,7 @@ export function CommunityClient({ initialPosts, popularPosts, user, locale }: Co
                                             {post.pattern && getPatternImage(post.pattern) && (
                                                 <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-stone-100">
                                                     <img 
-                                                        src={getPatternImage(post.pattern)!} 
+                                                        src={optimizedImageUrl(getPatternImage(post.pattern), 640)} 
                                                         alt="" 
                                                         className="w-full h-full object-cover"
                                                     />

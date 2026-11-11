@@ -1,3 +1,4 @@
+import { MaintenanceNotice } from '@/components/layout/MaintenanceNotice';
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "../globals.css";
@@ -143,6 +144,7 @@ export default async function LocaleLayout({
             >
                 <NextIntlClientProvider messages={messages}>
                     <div className="flex flex-col min-h-screen">
+                        <MaintenanceNotice locale={locale} />
                         <Header locale={locale as Locale} user={user} />
                         <main className="flex-1">
                             {children}

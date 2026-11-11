@@ -1,4 +1,5 @@
 'use client';
+import { compressImage, IMAGE_CACHE_SECONDS } from '@/utils/compressImage';
 
 import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Check, Loader2, FileText, Image as ImageIcon, Plus, HelpCircle, Crown, Package, Sparkles } from 'lucide-react';
@@ -264,10 +265,11 @@ export function PublishPatternModal({ isOpen, onClose, locale, initialFile, init
         try {
             setLoading(true);
             const supabase = createClient();
-            const filename = storageFileName('preview', file);
+            const image = await compressImage(file);
+            const filename = storageFileName('preview', image);
             const { data, error } = await supabase.storage
                 .from('patterns')
-                .upload(filename, file);
+                .upload(filename, image, { cacheControl: IMAGE_CACHE_SECONDS });
 
             if (error) throw error;
 

@@ -1,4 +1,5 @@
 'use client';
+import { isMaintenanceActive, maintenancePaymentMessage } from '@/utils/maintenance';
 
 import { useState, useEffect } from 'react';
 import { X, Sparkles, ShieldCheck, Info } from 'lucide-react';
@@ -86,6 +87,10 @@ export function CheckoutModal({
     };
 
     const handlePaidCheckout = () => {
+        if (isMaintenanceActive()) {
+            alert(maintenancePaymentMessage(isKo));
+            return;
+        }
         // @ts-ignore
         const IMP = typeof window !== 'undefined' ? window.IMP : null;
         if (!IMP) {

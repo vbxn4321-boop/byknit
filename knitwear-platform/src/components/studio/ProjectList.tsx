@@ -1,4 +1,5 @@
 'use client';
+import { optimizedImageUrl } from '@/utils/imageUrl';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -57,7 +58,7 @@ export function ProjectList({ initialProjects, locale }: ProjectListProps) {
                     {/* Thumbnail/Preview */}
                     <div className="aspect-[4/3] bg-cream-100 flex items-center justify-center relative group">
                         {project.thumbnail_url ? (
-                            <img src={project.thumbnail_url} alt={project.title} className="w-full h-full object-cover" />
+                            <img src={optimizedImageUrl(project.thumbnail_url, 640)} alt={project.title} className="w-full h-full object-cover" />
                         ) : (
                             <Grid className="text-tan-300" size={48} />
                         )}
