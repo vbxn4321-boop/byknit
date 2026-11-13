@@ -37,6 +37,7 @@ export function ProductRecommendationRow({ title, products, locale }: ProductRec
                                     src={product.preview_images?.[0] || product.thumbnail_url || ''}
                                     alt={typeof product.title === 'string' ? product.title : (product.title?.en || '')}
                                     fill
+                                    sizes="144px"
                                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
                             ) : (

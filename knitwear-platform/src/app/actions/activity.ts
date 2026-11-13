@@ -122,14 +122,14 @@ export async function getAdminAnalytics(filters: ActivityFilters = {}) {
     const users = usersData?.users || [];
     const userIds = users.map(u => u.id);
     const { data: profiles } = userIds.length
-        ? await admin.from('profiles').select('id, display_name, username, role').in('id', userIds)
+        ? await admin.from('profiles').select('id, display_name, role').in('id', userIds)
         : { data: [] as any[] };
     const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
     const nameOf = (id: string | null) => {
         if (!id) return null;
         const u = users.find(x => x.id === id);
         const p: any = profileMap.get(id);
-        return { email: u?.email ?? null, name: p?.display_name || p?.username || null };
+        return { email: u?.email ?? null, name: p?.display_name || null };
     };
 
     const sevenDaysAgo = Date.now() - 7 * 86400000;
@@ -158,7 +158,7 @@ export async function getAdminAnalytics(filters: ActivityFilters = {}) {
         .map(u => ({
             id: u.id,
             email: u.email ?? '',
-            name: (profileMap.get(u.id) as any)?.display_name || (profileMap.get(u.id) as any)?.username || '',
+            name: (profileMap.get(u.id) as any)?.display_name || '',
             provider: (u.app_metadata?.provider as string) || 'email',
             createdAt: u.created_at,
             lastSignInAt: [u.last_sign_in_at, lastSeen.get(u.id)].filter(Boolean).sort().pop() ?? null,

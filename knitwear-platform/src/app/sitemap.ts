@@ -39,7 +39,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (supabase) {
             const { data: patterns } = await supabase
                 .from('patterns')
-                .select('id, updated_at')
+                // patterns 테이블에는 updated_at 컬럼이 없다. 없는 컬럼을 고르면 쿼리 전체가 실패해 도안이 사이트맵에서 빠진다.
+                .select('id, created_at')
+                .eq('status', 'published')
                 .limit(500);
 
             if (patterns) {
@@ -47,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                     for (const locale of locales) {
                         sitemapEntries.push({
                             url: `${baseUrl}/${locale}/marketplace/${pattern.id}`,
-                            lastModified: pattern.updated_at ? new Date(pattern.updated_at) : new Date(),
+                            lastModified: pattern.created_at ? new Date(pattern.created_at) : new Date(),
                             changeFrequency: 'weekly',
                             priority: 0.6,
                         });

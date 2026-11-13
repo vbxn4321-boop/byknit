@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { ogImageUrl, SITE_URL } from '@/utils/imageUrl';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const { locale, id } = await params;
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             ? (pattern.description?.ko || pattern.description?.en)
             : (pattern.description?.en || pattern.description?.ko)) || '바이니트에서 뜨개 도안을 확인해 보세요.';
 
-    const ogImage = pattern.thumbnail_url || 'https://byknit.com/og-image.png';
+    const ogImage = ogImageUrl(pattern.thumbnail_url);
 
     return {
         title: `${titleStr} - byKnit`,
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         openGraph: {
             title: `${titleStr} - byKnit`,
             description: descStr,
-            url: `https://byknit.com/${locale}/marketplace/${id}`,
+            url: `${SITE_URL}/${locale}/marketplace/${id}`,
             images: [
                 {
                     url: ogImage,

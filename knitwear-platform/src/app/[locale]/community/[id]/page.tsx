@@ -1,4 +1,5 @@
 import { getPost, getComments, incrementPostViews } from '@/utils/community-queries';
+import { DEFAULT_OG_IMAGE, SITE_URL } from '@/utils/imageUrl';
 import { createClient } from '@/utils/supabase/server';
 import { PostDetailClient } from '@/components/community/PostDetailClient';
 import { notFound } from 'next/navigation';
@@ -31,10 +32,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         openGraph: {
             title: `${titleStr} - byKnit`,
             description: descStr,
-            url: `https://byknit.com/${locale}/community/${id}`,
+            url: `${SITE_URL}/${locale}/community/${id}`,
             images: [
                 {
-                    url: 'https://byknit.com/og-image.png',
+                    url: DEFAULT_OG_IMAGE,
                     width: 1200,
                     height: 630,
                     alt: titleStr,
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             card: 'summary_large_image',
             title: `${titleStr} - byKnit`,
             description: descStr,
-            images: ['https://byknit.com/og-image.png'],
+            images: [DEFAULT_OG_IMAGE],
         },
     };
 }

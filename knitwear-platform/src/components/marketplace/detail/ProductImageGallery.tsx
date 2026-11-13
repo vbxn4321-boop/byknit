@@ -31,6 +31,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                     src={images[currentIndex]}
                     alt={`${title} - Image ${currentIndex + 1}`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                     priority={currentIndex === 0}
                 />
@@ -68,7 +69,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                         className={`relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${idx === currentIndex ? 'border-brown-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                             }`}
                     >
-                        <Image src={img} alt={`Thumbnail ${idx}`} fill className="object-cover" />
+                        <Image src={img} alt={`Thumbnail ${idx}`} fill sizes="64px" className="object-cover" />
                     </button>
                 ))}
             </div>

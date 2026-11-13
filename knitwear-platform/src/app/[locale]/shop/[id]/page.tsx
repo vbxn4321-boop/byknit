@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getShopProduct } from '@/app/actions/shop';
 import { ShopProductDetail } from '@/components/shop/ShopProductDetail';
+import { ogImageUrl } from '@/utils/imageUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: Props) {
     return {
         title: `${product.name} - byKnit`,
         description: product.summary || undefined,
-        openGraph: product.images[0] ? { images: [product.images[0]] } : undefined,
+        openGraph: product.images[0] ? { images: [ogImageUrl(product.images[0])] } : undefined,
     };
 }
 

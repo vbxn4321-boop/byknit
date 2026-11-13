@@ -412,10 +412,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         openGraph: {
             title: post.title,
             description: plainTextDesc,
-            url: `https://byknit.com/${resolvedParams.locale}/blog/${resolvedParams.slug}`,
+            url: `https://by-knit.com/${resolvedParams.locale}/blog/${resolvedParams.slug}`,
             images: [
                 {
-                    url: `https://byknit.com${post.imageUrl}`,
+                    url: `https://by-knit.com${post.imageUrl}`,
                     width: 1200,
                     height: 630,
                     alt: post.title,
@@ -427,7 +427,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
             card: 'summary_large_image',
             title: post.title,
             description: plainTextDesc,
-            images: [`https://byknit.com${post.imageUrl}`],
+            images: [`https://by-knit.com${post.imageUrl}`],
         },
     };
 }

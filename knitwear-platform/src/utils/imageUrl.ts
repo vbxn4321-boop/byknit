@@ -11,3 +11,16 @@ export function optimizedImageUrl(url: string | null | undefined, width: ImageWi
     if (!SUPABASE_PUBLIC_OBJECT.test(url)) return url;
     return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=75`;
 }
+
+export const SITE_URL = 'https://by-knit.com';
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+
+/**
+ * SNS 미리보기(og:image)용 절대 주소. 인스타그램·카카오·네이버 크롤러가 Supabase 원본(수 MB)을
+ * 직접 받아가지 않도록 최적화된 1080px 이미지를 가리킨다.
+ */
+export function ogImageUrl(url: string | null | undefined): string {
+    const optimized = optimizedImageUrl(url, 1080);
+    if (!optimized) return DEFAULT_OG_IMAGE;
+    return optimized.startsWith('/') ? `${SITE_URL}${optimized}` : optimized;
+}
