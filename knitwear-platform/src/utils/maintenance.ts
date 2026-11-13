@@ -1,6 +1,7 @@
 // Supabase 무료 플랜 전송량 초과로 DB/로그인/저장소가 막힌 기간의 점검 안내.
 // 이 시각이 지나면 배너와 결제 차단이 자동으로 사라진다. 일찍 복구되면 값을 과거로 바꿔 배포한다.
-export const MAINTENANCE_UNTIL = Date.parse('2026-11-14T00:00:00+09:00');
+// 2026-11-13 11:20(KST)에 Supabase가 복구되어 점검을 종료했다.
+export const MAINTENANCE_UNTIL = Date.parse('2026-11-13T11:20:00+09:00');
 
 export function isMaintenanceActive(now = Date.now()): boolean {
     return now < MAINTENANCE_UNTIL;
